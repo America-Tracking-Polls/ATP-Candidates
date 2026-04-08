@@ -337,7 +337,7 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 .journey-hdr{text-align:center;margin-bottom:70px}
 .journey-hdr h2{font-family:var(--display);font-size:clamp(40px,5vw,56px);letter-spacing:2px;color:var(--blue-dark);margin-bottom:16px}
 .journey-hdr p{font-size:15px;color:#5A5F6E;max-width:600px;margin:0 auto;line-height:1.6}
-.j-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;position:relative}
+.j-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
 .j-grid::before{content:'';position:absolute;top:40px;left:50px;right:50px;height:2px;background:rgba(0,0,0,0.05);z-index:0}
 .j-card{background:var(--off-white);border:1px solid rgba(0,0,0,0.05);border-radius:12px;padding:30px 20px;text-align:center;position:relative;z-index:1;box-shadow:0 10px 30px rgba(0,0,0,0.02);transition:all 0.3s}
 .j-card:hover{transform:translateY(-8px);box-shadow:0 15px 40px rgba(0,0,0,0.06);border-color:rgba(178,34,52,0.1)}
@@ -605,7 +605,7 @@ HTML,
 'desc'  => 'The fixed header with logo mark, brand name, nav links, and Get Started button.',
 'default' => <<<'HTML'
 <header class="hdr" id="hdr"><div class="wrap">
-  <div class="hdr-left"><div class="hdr-mark"><svg viewBox="0 0 100 100" width="32" height="32"><rect x="2" y="62" width="16" height="22" rx="1" fill="#CF2232"/><path d="M2,84 L2,88 L10,82" fill="#CF2232"/><rect x="26" y="42" width="16" height="42" rx="1" fill="#CF2232"/><rect x="50" y="26" width="16" height="58" rx="1" fill="#CF2232"/><rect x="74" y="10" width="16" height="74" rx="1" fill="#CF2232"/><path d="M74,84 Q82,78 90,84 L90,84" fill="none" stroke="#CF2232" stroke-width="0"/><path d="M0,86 Q45,76 90,86" fill="none" stroke="#CF2232" stroke-width="4" stroke-linecap="round"/></svg></div><div class="hdr-brand"><span class="w">AMERICA </span><span class="r">TRACKING </span><span class="w">POLLS</span></div></div>
+  <div class="hdr-left"><div class="hdr-mark"><img src="{ATP_PLUGIN_URL}assets/images/ATP-Logo-Red-White.png" alt="ATP" style="width:32px;height:auto"></div><div class="hdr-brand"><span class="w">AMERICA </span><span class="r">TRACKING </span><span class="w">POLLS</span></div></div>
   <nav class="hdr-nav">
     <a href="#about">About</a>
     <a href="#journey">The Path</a>
@@ -632,25 +632,22 @@ HTML,
   </div>
   <div class="hero-inner"><div class="wrap">
     <div class="hero-text">
-      <div class="h-tag">POLLING-POWERED CAMPAIGN MARKETING</div>
+      <div class="h-tag">SYNCHRONIZED MULTI-CHANNEL CAMPAIGN SOLUTIONS</div>
       <div class="h-line h-big">WIN YOUR ELECTION</div>
-      <div class="h-line h-big h-red">WITH DATA-DRIVEN</div>
-      <div class="h-line h-big">CAMPAIGN MARKETING.</div>
-      <p class="hero-sub">We poll your voters, learn what they care about, and distribute your message across every channel&mdash;<strong>digital ads</strong>, <strong>SMS</strong>, <strong>direct mail</strong>, <strong>voter websites</strong>, and <strong>AI-optimized content</strong>. Real insights. Real distribution. Real results.</p>
+      <div class="h-line h-big h-red">BEFORE ELECTION DAY</div>
+      <div class="h-line h-big">REACHING 95%</div>
+      <p class="hero-sub">What matters most to your voters? What earns their vote&mdash;and what moves the undecided?</p>
+      <p class="hero-sub" style="opacity:1;transform:none">Our MMS surveys deliver real voter insight in real time&mdash;so you know exactly what to say, who to target, and when it matters most.</p>
+      <p class="hero-sub" style="opacity:1;transform:none">Then we execute&mdash;persistently delivering the right message to the right voters through MMS, digital and social ads, Voter-Driven 10DLC-compliant websites, AI-optimized content, and QR-powered print.</p>
+      <p class="hero-sub" style="opacity:1;transform:none"><strong>Real Insights. Targeted Delivery. Winning Results.</strong></p>
       <div class="hero-btns">
         <a href="#intake" class="btn-p">SCHEDULE A STRATEGY CALL <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
         <a href="#" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> WATCH THE VIDEO</a>
       </div>
     </div>
-    <div class="hf">
-      <div class="hf-t">READY TO WIN?</div>
-      <div class="hf-s">Tell us about your race. We'll build a custom strategy built on data, not guesswork.</div>
-      <div class="hf-row"><input class="hf-i" placeholder="Your Name" required><input class="hf-i" placeholder="Office Sought" required></div>
-      <div class="hf-row"><input class="hf-i" placeholder="State / District" required><input class="hf-i" placeholder="Phone" type="tel" required></div>
-      <input class="hf-i full" placeholder="Email Address" type="email" required>
-      <textarea class="hf-ta" placeholder="Tell us about your campaign goals and timeline..." required></textarea>
-      <div class="hf-check"><input type="checkbox" id="tcpa" required><label for="tcpa">I consent to being contacted about campaign services via phone or email.</label></div>
-      <button class="hf-b">GET YOUR FREE STRATEGY SESSION</button>
+    <div class="hf" style="padding:0;border:none;background:transparent;backdrop-filter:none;box-shadow:none">
+      <div data-tf-live="nhPPYcJ8" style="width:100%;min-height:500px"></div>
+      <script src="//embed.typeform.com/next/embed.js"></script>
     </div>
   </div></div>
 </section>
@@ -665,15 +662,18 @@ HTML,
 <section class="about-atp" id="about"><div class="wrap"><div class="about-grid">
   <div class="about-text">
     <h2>WHY WORK WITH <span class="red">AMERICA TRACKING POLLS</span>?</h2>
-    <p>ATP is a <strong>Florida-based election research and campaign services firm</strong> providing voter engagement guidance, compliance resources, and data-driven best practices for local, statewide, and federal races.</p>
-    <p>Our formula is simple: <strong>Intelligence + Engagement + Persistence + Conversion = Victory.</strong> We don't just poll your voters&mdash;we use those insights to power every piece of your campaign, from your website to the way AI describes you.</p>
+    <p>ATP is a <strong>Florida-based election research and campaign strategy firm</strong> delivering voter engagement, compliance expertise, and data-driven best practices for local, statewide, and federal races.</p>
+    <p>Our formula is simple: <strong>Intelligence + Engagement + Persistence + Conversion = Victory</strong></p>
+    <p>We don&rsquo;t just poll voters&mdash;we turn insight into action. Every data point powers your campaign&mdash;from your website to how AI defines and presents you in search&mdash;giving you a decisive edge where it matters most.</p>
+    <p>And because every voter interaction is intentional, every engagement becomes an opportunity to build support&mdash;and drive fundraising.</p>
   </div>
   <div class="about-video">
-    <div class="video-placeholder">
-      <div class="video-play-btn">
-        <svg viewBox="0 0 24 24" width="56" height="56"><circle cx="12" cy="12" r="12" fill="var(--red)"/><path d="M9.5 7.5v9l7-4.5z" fill="var(--white)"/></svg>
+    <div style="width:100%;max-width:560px;margin:0 auto">
+      <div style="margin-bottom:16px;text-align:center"><img src="{ATP_PLUGIN_URL}assets/images/ATP-Logo-Red-White.png" alt="America Tracking Polls" style="width:120px;height:auto"></div>
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;box-shadow:0 20px 60px rgba(17,16,48,0.3)">
+        <iframe src="https://www.youtube.com/embed/hhw5CgypgQE" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>
       </div>
-      <p class="video-caption">See how ATP works for your campaign</p>
+      <p class="video-caption" style="text-align:center;margin-top:16px;font-family:var(--display);font-size:14px;letter-spacing:2px;color:var(--blue-dark)">Data Driven Websites</p>
     </div>
   </div>
 </div></div></section>
@@ -687,64 +687,39 @@ HTML,
 'default' => <<<'HTML'
 <section class="survey-sim" id="survey-sim"><div class="wrap">
   <div class="survey-hdr">
-    <h2>HOW WE GATHER <span style="color:var(--red)">INTELLIGENCE</span></h2>
-    <p>We reach your voters where they are, through authentic outreach that builds connection and gathers the data you need to win.</p>
+    <h2><span style="color:var(--red)">INTELLIGENCE</span> DRIVES RESULTS</h2>
+    <p>Reach voters where they are. Build real connections. Convert supporters into donors, volunteers, and votes&mdash;and consistently turn undecided voters into supporters.</p>
   </div>
   <div class="survey-container">
-    <div class="iphone" style="flex-shrink:0">
-      <div class="iphone-screen">
-        <div class="iphone-dynamic-island"></div>
-        <div class="iphone-statusbar"><span>9:41</span><div class="iphone-statusbar-icons"><svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="#000"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="#000"/><rect x="9" y="0" width="3" height="12" rx="0.5" fill="#000"/><rect x="13.5" y="1" width="3" height="11" rx="0.5" fill="#000" opacity="0.3"/></svg><svg width="22" height="12" viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" stroke="#000" stroke-width="1.2" fill="none"/><rect x="1.5" y="2.5" width="12" height="7" rx="1" fill="#000"/><rect x="19" y="4" width="2" height="4" rx="0.5" fill="#000"/></svg></div></div>
-        <div id="phone-sms-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
-          <div class="msg-header">
-            <a class="msg-back"><svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-            <div class="msg-avatar">SC</div>
-            <div style="display:flex;flex-direction:column"><div class="msg-contact-name">Sarah Chen Campaign</div><div class="msg-contact-label">SMS</div></div>
-          </div>
-          <div class="msg-thread">
-            <div class="msg-time">Today 2:14 PM</div>
-            <div class="msg-bubble msg-incoming">Hi! It's Sarah Chen's campaign. We want to best serve your needs. Please take 30 seconds to fill out this quick survey:</div>
-            <div class="msg-bubble msg-incoming" style="margin-top:2px"><a href="#" id="sms-link" style="color:var(--blue);text-decoration:underline;font-family:-apple-system,sans-serif;font-size:14px">https://form.run/sarahchen</a></div>
-            <div class="msg-delivered">Delivered</div>
-          </div>
-          <div class="msg-inputbar">
-            <div class="msg-inputbar-plus"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-            <div class="msg-inputbar-field">Text Message</div>
-            <div class="msg-inputbar-send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="var(--blue)"/></svg></div>
-          </div>
-          <div class="sms-tap-indicator"><svg viewBox="0 0 24 24" width="36" height="36"><path fill="rgba(0,0,0,0.6)" d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.04.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.21 0-.69-.39-1.32-1.02-1.53z"/></svg></div>
-        </div>
-        <div id="phone-form-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;background:#fff">
-          <div style="background:var(--blue-dark);padding:14px 16px;display:flex;align-items:center;gap:10px">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            <span style="font-family:-apple-system,sans-serif;font-size:15px;font-weight:600;color:#fff">Voter Insight Survey</span>
-          </div>
-          <div style="height:4px;background:#eee"><div class="tf-bar" style="height:100%;background:var(--red);width:0%;transition:width 0.4s"></div></div>
-          <div style="flex:1;position:relative;padding:20px;overflow:hidden">
-            <div id="tf-q1" class="tf-question active" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">1 &rarr;</div><div class="tf-text">What's your First Name?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-first"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
-            <div id="tf-q2" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">2 &rarr;</div><div class="tf-text">And your Last Name?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-last"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
-            <div id="tf-q3" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">3 &rarr;</div><div class="tf-text">What zip code do you live in?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-zip"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
-            <div id="tf-q4" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">4 &rarr;</div><div class="tf-text">What issues matter most?</div><div class="tf-options"><div class="tf-opt"><span class="tf-key">A</span> Economy &amp; Inflation</div><div class="tf-opt" id="tf-opt-b"><span class="tf-key">B</span> Healthcare &amp; Safety</div><div class="tf-opt"><span class="tf-key">C</span> Education &amp; Schools</div></div></div>
-            <div id="tf-q5" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">5 &rarr;</div><div class="tf-text">How likely are you to vote?</div><div class="tf-options"><div class="tf-opt" id="tf-opt-def"><span class="tf-key">A</span> Definitely voting</div><div class="tf-opt"><span class="tf-key">B</span> Probably voting</div><div class="tf-opt"><span class="tf-key">C</span> Not sure yet</div></div></div>
-            <div id="tf-done" class="tf-question" style="position:absolute;left:20px;right:20px;top:50%;transform:translateY(-50%)"><div class="tf-text" style="font-size:22px;text-align:center;color:var(--red);font-weight:700">Thanks!</div><p style="text-align:center;color:#888;font-size:12px;margin-top:6px">Your voice matters.</p></div>
-          </div>
-        </div>
+    <div style="flex-shrink:0;width:320px">
+      <div style="width:100%;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.25)">
+        <iframe src="https://atp.ameritrackpolls.com/BenchmarkWeb" style="width:100%;height:680px;border:0" loading="lazy"></iframe>
       </div>
     </div>
     <div class="survey-text">
-      <h3>REAL OUTREACH. REAL DATA. REAL INSIGHTS.</h3>
-      <p>It starts with a single text message. Your voter receives an SMS from your campaign with a link to a quick, mobile-optimized survey&mdash;built to feel personal, not political.</p>
-      <p>Within seconds, they're answering questions about what matters most to them: the economy, healthcare, education, infrastructure. Every response feeds directly into your campaign's intelligence engine.</p>
-      <h4>WHAT YOU LEARN</h4>
+      <h3>YOUR BENCHMARK SURVEY IS YOUR COMPETITIVE ADVANTAGE</h3>
+      <p>Most campaigns guess. You won&rsquo;t.</p>
+      <p>We deliver MMS surveys&mdash;like the one you see here&mdash;to registered voters across your district, linking to a fast, mobile-optimized survey with objective, unbiased questions.</p>
+      <p>Within seconds, voters tell you exactly what matters&mdash;economy, healthcare, education, infrastructure. At the same time, you&rsquo;re tracking Name ID and favorability persistently in real time&mdash;so you know not just what voters think, but how they see you.</p>
+      <p>And because your campaign isn&rsquo;t identified until the end, you get something your opponent doesn&rsquo;t: honest, unfiltered voter truth.</p>
+
+      <h4>WHAT YOUR OPPONENT DOESN&rsquo;T KNOW&mdash;YOU DO</h4>
       <ul>
-        <li>Which issues resonate most in your district</li>
-        <li>How likely voters are to show up on Election Day</li>
-        <li>Geographic patterns in voter priorities</li>
-        <li>Real sentiment data&mdash;not assumptions</li>
+        <li>Which issues actually move votes</li>
+        <li>Your true Name ID&mdash;and how fast it&rsquo;s growing</li>
+        <li>Who will show up&mdash;and who needs to be persuaded</li>
+        <li>Where support is strong&mdash;and where you&rsquo;re losing ground</li>
+        <li>Real sentiment data&mdash;not consultant assumptions</li>
       </ul>
-      <h4>HOW IT POWERS YOUR CAMPAIGN</h4>
-      <p>This isn't just polling for the sake of numbers. Every data point flows into ATP's strategy engine, automatically shaping your ads, your website, your mail pieces, and your AI presence. <strong>The data decides the message.</strong></p>
-      <p style="margin-top:20px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">ALL SMS OUTREACH IS TCPA &amp; 10DLC COMPLIANT</p>
+
+      <h4>THIS ISN&rsquo;T POLLING. IT&rsquo;S CONTROL.</h4>
+      <p>Every response immediately powers your campaign&mdash;shaping your messaging across MMS, digital, social, your website, print, and even how AI platforms define you.</p>
+      <p>While others react late, you adjust in real time.</p>
+      <p><strong>They guess. You know. They spend. You convert. They hope. You win.</strong></p>
+
+      <h4 style="margin-top:32px;color:var(--red)">BUILT TO PERFORM. BUILT TO PROTECT.</h4>
+      <p>All MMS outreach is fully TCPA and 10DLC compliant, so you can move fast, scale confidently, and stay protected.</p>
+      <p><strong>If you&rsquo;re not tracking Name ID persistently, you&rsquo;re losing voters you&rsquo;ll never see coming.</strong></p>
     </div>
   </div>
 </div></section>
@@ -757,14 +732,16 @@ HTML,
 'desc'  => 'The 5-step Your Strategic Path to Victory journey section.',
 'default' => <<<'HTML'
 <section class="journey" id="journey"><div class="wrap">
-  <div class="journey-hdr"><h2>YOUR STRATEGIC PATH TO VICTORY</h2><p>A proven, five-step process that aligns hard data with multi-channel marketing to dominate the narrative from day one to Election Day.</p></div>
+  <div class="journey-hdr"><h2>YOUR STRATEGIC PATH TO VICTORY</h2><p>A proven, six-step system that transforms real-time voter intelligence into engagement, persuasion, and continuous fundraising&mdash;from day one through Election Day.</p></div>
   <div class="j-grid">
-    <div class="j-card"><div class="j-num">1</div><h4>INTELLIGENCE</h4><p>We deploy synchronous surveys to collect identical data streams across multiple platforms, finding exactly what your voters care about.</p></div>
-    <div class="j-card"><div class="j-num">2</div><h4>AEO INTEGRATION</h4><p>We structure your biography and top issues into an AEO Kit, ensuring AI tools like ChatGPT cite your platform correctly.</p></div>
-    <div class="j-card"><div class="j-num">3</div><h4>ENGAGEMENT</h4><p>We build persistent voter contact through coordinated channels: Voter Sites, SMS, Digital Ads, and targeted mail.</p></div>
-    <div class="j-card"><div class="j-num">4</div><h4>ANALYSIS</h4><p>Real-time data feeds into our Synchronized Victory Dashboard, automatically generating crosstabs for data-driven decisions.</p></div>
-    <div class="j-card"><div class="j-num">5</div><h4>CONVERSION</h4><p>We focus messaging exclusively on what resonates with the data, converting undecided and independent voters at the ballot box.</p></div>
+    <div class="j-card"><div class="j-num">1</div><h4>INTELLIGENCE</h4><p>We deploy synchronized surveys across MMS, digital, and QR-driven channels&mdash;capturing real voter sentiment while tracking Name ID persistently so you always know where you stand.</p></div>
+    <div class="j-card"><div class="j-num">2</div><h4>AEO INTEGRATION</h4><p>We structure your biography, issues, and messaging for AI and search&mdash;ensuring platforms like ChatGPT and Google accurately define and amplify your campaign.</p></div>
+    <div class="j-card"><div class="j-num">3</div><h4>ENGAGEMENT</h4><p>We meet voters where they are&mdash;through coordinated MMS, digital ads, social media, and QR-coded print&mdash;building ongoing, meaningful connections at scale.</p></div>
+    <div class="j-card"><div class="j-num">4</div><h4>ANALYSIS</h4><p>Every interaction feeds your real-time dashboard&mdash;delivering instant insights, cross-tabs, and trends that drive smarter decisions.</p></div>
+    <div class="j-card"><div class="j-num">5</div><h4>CONVERSION</h4><p>We refine messaging continuously&mdash;moving undecided voters to your side and turning support into donations and votes.</p></div>
+    <div class="j-card"><div class="j-num">6</div><h4>FUNDING THE WIN</h4><p>Every engagement becomes an opportunity. As supporters are identified, they are seamlessly guided to contribute&mdash;creating persistent, scalable fundraising that powers your campaign every day.</p></div>
   </div>
+  <p style="text-align:center;font-family:var(--display);font-size:24px;letter-spacing:2px;color:var(--blue-dark);margin-top:40px"><strong>Engage. Persuade. Fund. Win.</strong></p>
 </div></section>
 HTML,
 ],
@@ -776,7 +753,7 @@ HTML,
 'default' => <<<'HTML'
 <section class="pipe-sec" id="pipeline"><div class="wrap pipe-wrap">
   <div class="pipe-text">
-    <h2>FROM RAW DATA TO<br>VOTER ACTION</h2>
+    <h2>FROM PERSISTENT FEEDBACK TO<br>VOTER ACTION</h2>
     <p>Every campaign output starts with real voter data. We survey your district, extract what matters most, and feed it directly into our strategy engine.</p>
     <p>That engine automatically powers every channel&mdash;your website, ads, mailers, texts, and AI presence all pivot based on the same intelligence. <strong>When the data shifts, your messaging shifts with it.</strong></p>
     <p>No more disconnected vendors. No more guessing. One source of truth, powering everything.</p>
@@ -864,9 +841,9 @@ HTML,
     <h2>GET STARTED WITH ATP</h2>
     <p class="intake-sub">Whether you're launching a campaign, exploring a run, or building your public brand before Election Day&mdash;we'll create a custom strategy powered by real voter data. Fill out the form below and our team will reach out within 24 hours.</p>
     <p class="intake-sub" style="margin-bottom:40px;font-size:12px;opacity:0.6">Free consultation. No obligation. We serve local, statewide, and federal races.</p>
-    <div class="intake-embed">
-      <!-- Typeform or intake form embed goes here -->
-      Your Typeform embed will be placed here. Use an iframe or Typeform embed script to insert your intake form.
+    <div class="intake-embed" style="background:transparent;border:none;display:block;padding:0">
+      <div data-tf-live="nhPPYcJ8" style="width:100%;min-height:500px"></div>
+      <script src="//embed.typeform.com/next/embed.js"></script>
     </div>
   </div>
 </div></section>
