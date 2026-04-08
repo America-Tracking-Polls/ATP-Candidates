@@ -494,26 +494,58 @@ gsap.from('.trust-card',{scrollTrigger:{trigger:'.trust-sec',start:'top 70%'},y:
 
 /* ═══ SURVEY SIMULATION ═══ */
 function runSurveySim(){
-  const tl=gsap.timeline({repeat:-1,repeatDelay:6});
-  const smsView=document.getElementById('phone-sms-view');
-  const formView=document.getElementById('phone-form-view');
-  const statusBar=document.querySelector('.iphone-statusbar');
-  // Reset to SMS view
-  tl.set('.sms-tap-indicator',{opacity:0,scale:1.5})
-    .call(()=>{smsView.style.display='flex';smsView.style.transform='';smsView.style.opacity='1';formView.style.display='none';if(statusBar){statusBar.classList.remove('inverted');statusBar.closest('.iphone-screen').classList.remove('dark-mode')}});
-  // Show tap indicator after pause
-  tl.to('.sms-tap-indicator',{opacity:1,scale:1,duration:0.5,ease:'back.out',delay:2})
-    .to('.sms-tap-indicator',{scale:0.85,duration:0.1,yoyo:true,repeat:1},'+=0.3')
-    .to('#sms-link',{color:'var(--red)',duration:0.2})
-  // Transition to web view (BenchmarkWeb iframe)
-    .call(()=>{formView.style.display='flex';if(statusBar){statusBar.classList.add('inverted');statusBar.closest('.iphone-screen').classList.add('dark-mode')}})
-    .to(smsView,{x:'-100%',opacity:0,duration:0.4,ease:'power2.in',onComplete:()=>{smsView.style.display='none'}})
-    .from(formView,{x:'100%',opacity:0,duration:0.4,ease:'power2.out'})
-  // Hold on the survey view for 8 seconds
-    .to({},{duration:8});
-  return tl;
+  var surveyTl=null;
+  var inactivityTimer=null;
+
+  function resetToSMS(){
+    var smsView=document.getElementById('phone-sms-view');
+    var formView=document.getElementById('phone-form-view');
+    var statusBar=document.querySelector('.iphone-statusbar');
+    if(formView)formView.style.display='none';
+    if(smsView){smsView.style.display='flex';smsView.style.transform='';smsView.style.opacity='1'}
+    if(statusBar){statusBar.classList.remove('inverted');var screen=statusBar.closest('.iphone-screen');if(screen)screen.classList.remove('dark-mode')}
+    var link=document.getElementById('sms-link');if(link)link.style.color='var(--blue)';
+    gsap.set('.sms-tap-indicator',{opacity:0,scale:1.5});
+  }
+
+  function startInactivityTimer(){
+    clearTimeout(inactivityTimer);
+    inactivityTimer=setTimeout(function(){
+      resetToSMS();
+      playAnimation();
+    },10000);
+  }
+
+  function playAnimation(){
+    if(surveyTl){surveyTl.kill()}
+    var smsView=document.getElementById('phone-sms-view');
+    var formView=document.getElementById('phone-form-view');
+    var statusBar=document.querySelector('.iphone-statusbar');
+    if(!smsView||!formView)return;
+
+    resetToSMS();
+
+    surveyTl=gsap.timeline({
+      onComplete:function(){startInactivityTimer()}
+    });
+
+    // Pause on SMS, then show tap indicator
+    surveyTl.to('.sms-tap-indicator',{opacity:1,scale:1,duration:0.5,ease:'back.out',delay:2})
+      .to('.sms-tap-indicator',{scale:0.85,duration:0.1,yoyo:true,repeat:1},'+=0.4')
+      .to('#sms-link',{color:'var(--red)',duration:0.2})
+    // Slide SMS out, slide web view in
+      .call(function(){
+        formView.style.display='flex';
+        if(statusBar){statusBar.classList.add('inverted');var screen=statusBar.closest('.iphone-screen');if(screen)screen.classList.add('dark-mode')}
+      })
+      .to(smsView,{x:'-100%',opacity:0,duration:0.4,ease:'power2.in',onComplete:function(){smsView.style.display='none'}})
+      .from(formView,{x:'100%',opacity:0,duration:0.4,ease:'power2.out'});
+    // Timeline ends here — inactivity timer (10s) starts via onComplete
+  }
+
+  playAnimation();
 }
-ScrollTrigger.create({trigger:'.survey-sim',start:'top 60%',onEnter:()=>runSurveySim()});
+ScrollTrigger.create({trigger:'.survey-sim',start:'top 60%',once:true,onEnter:function(){runSurveySim()}});
 
 /* ═══ JOURNEY ═══ */
 gsap.set('.j-card',{y:40,opacity:0});
