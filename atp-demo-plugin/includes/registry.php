@@ -638,17 +638,16 @@ HTML,
       <div class="h-line h-big">WIN YOUR ELECTION</div>
       <div class="h-line h-big h-red">BEFORE ELECTION DAY</div>
       <div class="h-line h-big">REACHING 95%</div>
-      <p class="hero-sub">What matters most to your voters? What earns their vote&mdash;and what moves the undecided?</p>
-      <p class="hero-sub" style="opacity:1;transform:none">Our MMS surveys deliver real voter insight in real time&mdash;so you know exactly what to say, who to target, and when it matters most.</p>
-      <p class="hero-sub" style="opacity:1;transform:none">Then we execute&mdash;persistently delivering the right message to the right voters through MMS, digital and social ads, Voter-Driven 10DLC-compliant websites, AI-optimized content, and QR-powered print.</p>
+      <p class="hero-sub">Real voter insight in real time&mdash;so you know exactly what to say, who to target, and when it matters most.</p>
       <p class="hero-sub" style="opacity:1;transform:none"><strong>Real Insights. Targeted Delivery. Winning Results.</strong></p>
       <div class="hero-btns">
-        <a href="#intake" class="btn-p">SCHEDULE A STRATEGY CALL <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
-        <a href="#" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> WATCH THE VIDEO</a>
+        <a href="#about" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> SEE HOW WE HELP YOU WIN</a>
       </div>
     </div>
-    <div class="hf" style="padding:0;border:none;background:transparent;backdrop-filter:none;box-shadow:none;opacity:1;transform:none">
-      <iframe src="https://atp.ameritrackpolls.com/to/nhPPYcJ8" style="width:100%;min-height:500px;border:0;border-radius:14px" loading="lazy"></iframe>
+    <div class="hf" style="padding:24px 24px 0;border:none;background:rgba(17,16,48,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,0.5);border-radius:14px;border-top:4px solid var(--red);opacity:1;transform:none">
+      <p style="font-family:var(--display);font-size:18px;letter-spacing:2px;color:var(--white);text-align:center;margin-bottom:4px">REQUEST YOUR PROPOSAL</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:16px;line-height:1.4">Fill out the form below and our team will build a custom strategy for your race.</p>
+      <iframe src="https://atp.ameritrackpolls.com/to/nhPPYcJ8" style="width:100%;min-height:580px;border:0;border-radius:8px" loading="lazy"></iframe>
     </div>
   </div></div>
 </section>
@@ -664,9 +663,7 @@ HTML,
   <div class="about-text">
     <h2>WHY WORK WITH <span class="red">AMERICA TRACKING POLLS</span>?</h2>
     <p>ATP is a <strong>Florida-based election research and campaign strategy firm</strong> delivering voter engagement, compliance expertise, and data-driven best practices for local, statewide, and federal races.</p>
-    <p>Our formula is simple: <strong>Intelligence + Engagement + Persistence + Conversion = Victory</strong></p>
-    <p>We don&rsquo;t just poll voters&mdash;we turn insight into action. Every data point powers your campaign&mdash;from your website to how AI defines and presents you in search&mdash;giving you a decisive edge where it matters most.</p>
-    <p>And because every voter interaction is intentional, every engagement becomes an opportunity to build support&mdash;and drive fundraising.</p>
+    <p>Our formula is simple: <strong>Intelligence + Engagement + Persistence + Conversion = Victory.</strong> We turn real voter insight into action&mdash;powering every piece of your campaign from your website to how AI defines you.</p>
   </div>
   <div class="about-video">
     <div style="width:100%;max-width:560px;margin:0 auto">
@@ -724,18 +721,21 @@ HTML,
       </div>
     </div>
     <div class="survey-text">
-      <h3>YOUR BENCHMARK SURVEY</h3>
-      <p>We deliver MMS surveys to registered voters across your district&mdash;linking to a fast, mobile-optimized survey. You track Name ID and favorability in real time.</p>
-      <h4>WHAT YOUR OPPONENT DOESN&rsquo;T KNOW</h4>
+      <h3>YOUR BENCHMARK SURVEY IS YOUR COMPETITIVE ADVANTAGE</h3>
+      <p>Most campaigns guess. You won&rsquo;t. We deliver MMS surveys to registered voters across your district&mdash;linking to a fast, mobile-optimized survey with objective, unbiased questions.</p>
+      <p>Within seconds, voters tell you exactly what matters. At the same time, you&rsquo;re tracking Name ID and favorability in real time&mdash;so you know not just what voters think, but how they see you.</p>
+      <h4>WHAT YOUR OPPONENT DOESN&rsquo;T KNOW&mdash;YOU DO</h4>
       <ul>
         <li>Which issues actually move votes</li>
         <li>Your true Name ID&mdash;and how fast it&rsquo;s growing</li>
-        <li>Who needs to be persuaded</li>
-        <li>Where support is strong&mdash;and where you&rsquo;re losing</li>
-        <li>Real sentiment&mdash;not consultant assumptions</li>
+        <li>Who will show up&mdash;and who needs to be persuaded</li>
+        <li>Where support is strong&mdash;and where you&rsquo;re losing ground</li>
+        <li>Real sentiment data&mdash;not consultant assumptions</li>
       </ul>
+      <h4>THIS ISN&rsquo;T POLLING. IT&rsquo;S CONTROL.</h4>
+      <p>Every response immediately powers your campaign&mdash;shaping your messaging across MMS, digital, social, your website, print, and even how AI platforms define you.</p>
       <p><strong>They guess. You know. They spend. You convert. They hope. You win.</strong></p>
-      <p style="margin-top:16px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">TCPA &amp; 10DLC COMPLIANT</p>
+      <p style="margin-top:16px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">FULLY TCPA &amp; 10DLC COMPLIANT</p>
     </div>
   </div>
 </div></section>
