@@ -83,6 +83,24 @@ function atp_importer_page_sets() {
             'focus_kw'    => 'candidate intake form',
             'meta_desc'   => 'Complete the candidate intake form to get started with America Tracking Polls campaign services.',
         ],
+        'candidate-page' => [
+            'title'       => 'Candidate Landing Page',
+            'desc'        => 'Reusable campaign landing page template. All content uses {{placeholder}} tokens mapped to intake form data. Edit with AI or manually.',
+            'color'       => '#0B1C33',
+            'shortcodes'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_hero]',
+                '[atp_cand_about]',
+                '[atp_cand_issues]',
+                '[atp_cand_endorsements]',
+                '[atp_cand_donate]',
+                '[atp_cand_social]',
+                '[atp_cand_footer]',
+            ],
+            'focus_kw'    => 'campaign website candidate',
+            'meta_desc'   => 'Official campaign website — learn about the candidate, key issues, endorsements, and how to support the campaign.',
+        ],
     ];
 }
 

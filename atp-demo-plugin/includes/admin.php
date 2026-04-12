@@ -89,10 +89,25 @@ function atp_demo_admin_page() {
             ],
         ],
         'Candidate Intake Form' => [
-            'desc'  => 'The ATP candidate onboarding form. Saves to the Candidates admin, sends email notifications, supports 18 question sections.',
+            'desc'  => 'The ATP candidate onboarding form. 16-step intake with three-condition branching (A/B/C). Saves to Candidates admin.',
             'color' => '#2E2D5A',
             'tags'  => [
                 '[atp_intake]',
+            ],
+        ],
+        'Candidate Landing Page' => [
+            'desc'  => 'Reusable campaign website template. All content driven by intake form data via {{placeholder}} tokens. Edit with AI or manually.',
+            'color' => '#0B1C33',
+            'tags'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_hero]',
+                '[atp_cand_about]',
+                '[atp_cand_issues]',
+                '[atp_cand_endorsements]',
+                '[atp_cand_donate]',
+                '[atp_cand_social]',
+                '[atp_cand_footer]',
             ],
         ],
     ];
@@ -216,7 +231,7 @@ function atp_demo_admin_page() {
                         <span class="atp-sc-label">ATP Candidate Intake Form</span>
                     </div>
                     <p class="atp-sc-desc">
-                        Multi-step candidate onboarding form with 18 sections. Saves submissions as CPT posts, sends email notifications.
+                        16-step candidate onboarding form with three-condition branching. Saves submissions as CPT posts, sends email notifications.
                         Configure at <strong>ATP Candidates → Settings</strong>.
                     </p>
                     <div class="atp-sc-tag-row">

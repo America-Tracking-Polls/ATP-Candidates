@@ -1593,5 +1593,358 @@ HTML,
 ]], // end Brand Guide Sections
 
 
+/* ══════════════════════════════════════════════════════════════
+   CANDIDATE PAGE TEMPLATE
+   Reusable campaign landing page driven by intake form data.
+   Shortcode tags: atp_cand_*
+   All content uses {{placeholder}} tokens that map to intake
+   field IDs — replace them with real candidate data or let
+   generative AI populate from the intake JSON.
+══════════════════════════════════════════════════════════════ */
+[
+'group' => 'Candidate Page',
+'shortcodes' => [
+
+[
+'tag'   => 'atp_cand_styles',
+'label' => 'Candidate Page — Styles',
+'desc'  => 'CSS foundation for the candidate landing page. Uses the ATP campaign design system with CSS custom properties for easy theming per candidate.',
+'default' => <<<'HTML'
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Candidate Page — CSS Reset & Variables ── */
+.cand-page,.cand-page *,.cand-page *::before,.cand-page *::after{box-sizing:border-box;margin:0;padding:0}
+.cand-page{
+  --navy:#0B1C33;--red:#E60000;--cream:#F9F9F7;--white:#FFFFFF;
+  --text:#111111;--text-light:#555555;--border:#e0e0e0;
+  --primary:var(--navy);--accent:var(--red);
+  --font-head:'Merriweather',serif;--font-body:'Inter',sans-serif;
+  --container:1100px;--nav-h:72px;
+  font-family:var(--font-body);color:var(--text);background:var(--cream);
+  -webkit-font-smoothing:antialiased;line-height:1.6;
+}
+.cand-page a{color:inherit;text-decoration:none}
+.cand-container{max-width:var(--container);margin:0 auto;padding:0 24px}
+
+/* ── Nav ── */
+.cand-nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:4px solid var(--accent)}
+.cand-nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);gap:24px}
+.cand-nav-brand{display:flex;align-items:center;gap:12px}
+.cand-nav-name{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--white);letter-spacing:-.01em}
+.cand-nav-badge{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:rgba(230,0,0,.12);padding:3px 10px;border-radius:2px}
+.cand-nav-links{display:flex;align-items:center;gap:24px}
+.cand-nav-link{font-size:13px;font-weight:500;color:rgba(255,255,255,.75);letter-spacing:.02em;transition:color .2s}
+.cand-nav-link:hover{color:var(--white)}
+.cand-nav-cta{font-size:13px;font-weight:700;color:var(--white);background:var(--accent);padding:10px 22px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;transition:background .2s}
+.cand-nav-cta:hover{background:#cc0000}
+.cand-nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.cand-nav-toggle svg{width:28px;height:28px;stroke:var(--white);stroke-width:2;fill:none}
+
+/* ── Hero ── */
+.cand-hero{background:var(--navy);padding:80px 0 64px;position:relative;overflow:hidden}
+.cand-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--accent) 33%,var(--white) 33% 66%,var(--navy) 66%)}
+.cand-hero-grid{display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:center}
+.cand-hero-label{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.cand-hero-title{font-family:var(--font-head);font-size:42px;font-weight:900;line-height:1.15;color:var(--white);margin-bottom:16px}
+.cand-hero-intro{font-size:17px;line-height:1.7;color:rgba(255,255,255,.8);margin-bottom:28px;max-width:560px}
+.cand-hero-cta{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--white);background:var(--accent);padding:14px 28px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;transition:background .2s;border:none;cursor:pointer}
+.cand-hero-cta:hover{background:#cc0000}
+.cand-hero-photo{width:100%;border-radius:4px;border:4px solid rgba(255,255,255,.12);aspect-ratio:3/4;object-fit:cover;display:block}
+
+/* ── Section foundations ── */
+.cand-section{padding:72px 0}
+.cand-section-light{background:var(--white)}
+.cand-section-cream{background:var(--cream)}
+.cand-section-dark{background:var(--navy);color:var(--white)}
+.cand-section-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.cand-section-title{font-family:var(--font-head);font-size:32px;font-weight:700;line-height:1.2;color:var(--navy);margin-bottom:16px}
+.cand-section-dark .cand-section-title{color:var(--white)}
+.cand-section-subtitle{font-size:16px;color:var(--text-light);max-width:640px;margin-bottom:36px;line-height:1.7}
+
+/* ── Bio / About ── */
+.cand-about-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.cand-about-text{font-size:16px;line-height:1.8;color:var(--text)}
+.cand-about-text p+p{margin-top:16px}
+.cand-credentials{display:flex;flex-direction:column;gap:12px}
+.cand-credential{background:var(--cream);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 4px 4px 0}
+.cand-credential-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.cand-credential-value{font-size:14px;font-weight:500;color:var(--navy)}
+
+/* ── Issues ── */
+.cand-issues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.cand-issue-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--navy);border-radius:0 0 4px 4px;padding:28px 24px;transition:box-shadow .2s}
+.cand-issue-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.cand-issue-tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.cand-issue-name{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.cand-issue-desc{font-size:14px;line-height:1.7;color:var(--text-light)}
+
+/* ── Endorsements ── */
+.cand-endorsements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.cand-endorsement{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:24px;position:relative}
+.cand-endorsement::before{content:'\201C';font-family:var(--font-head);font-size:48px;color:var(--accent);opacity:.3;position:absolute;top:8px;left:16px;line-height:1}
+.cand-endorsement-quote{font-size:15px;font-style:italic;line-height:1.7;color:var(--text);margin-bottom:12px;padding-left:24px}
+.cand-endorsement-name{font-size:13px;font-weight:700;color:var(--navy);padding-left:24px}
+.cand-endorsement-role{font-size:12px;color:var(--text-light);padding-left:24px}
+
+/* ── Donate / CTA ── */
+.cand-donate{text-align:center;padding:80px 0}
+.cand-donate-title{font-family:var(--font-head);font-size:36px;font-weight:900;margin-bottom:12px}
+.cand-donate-sub{font-size:17px;color:rgba(255,255,255,.75);margin-bottom:32px;max-width:520px;margin-left:auto;margin-right:auto}
+.cand-donate-btn{display:inline-flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--navy);background:var(--white);padding:16px 40px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;transition:all .2s;border:none;cursor:pointer}
+.cand-donate-btn:hover{background:var(--cream);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+
+/* ── Social ── */
+.cand-social{display:flex;gap:12px;flex-wrap:wrap}
+.cand-social-link{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--navy);background:var(--white);border:1px solid var(--border);padding:10px 18px;border-radius:4px;transition:all .15s}
+.cand-social-link:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Footer ── */
+.cand-footer{background:var(--navy);padding:40px 0;text-align:center;border-top:4px solid var(--accent)}
+.cand-footer-disclaimer{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;line-height:1.6}
+.cand-footer-legal{font-size:11px;color:rgba(255,255,255,.35);line-height:1.5}
+.cand-footer-legal a{color:rgba(255,255,255,.5);text-decoration:underline}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .cand-hero-grid{grid-template-columns:1fr;text-align:center}
+  .cand-hero-title{font-size:30px}
+  .cand-hero-intro{margin-left:auto;margin-right:auto}
+  .cand-hero-photo{max-width:280px;margin:0 auto}
+  .cand-about-grid{grid-template-columns:1fr}
+  .cand-issues-grid{grid-template-columns:1fr}
+  .cand-endorsements-grid{grid-template-columns:1fr}
+  .cand-nav-links{display:none}
+  .cand-nav-toggle{display:block}
+  .cand-section{padding:48px 0}
+}
+</style>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_nav',
+'label' => 'Candidate Page — Navigation',
+'desc'  => 'Sticky top navigation with candidate name, office badge, page links, and donate CTA. Replace placeholder text with candidate data.',
+'default' => <<<'HTML'
+<div class="cand-page">
+<nav class="cand-nav">
+  <div class="cand-container cand-nav-inner">
+    <div class="cand-nav-brand">
+      <span class="cand-nav-name">{{display_name}}</span>
+      <span class="cand-nav-badge">{{office}}</span>
+    </div>
+    <div class="cand-nav-links">
+      <a href="#about" class="cand-nav-link">About</a>
+      <a href="#issues" class="cand-nav-link">Issues</a>
+      <a href="#endorsements" class="cand-nav-link">Endorsements</a>
+      <a href="#donate" class="cand-nav-cta">Donate</a>
+    </div>
+    <button class="cand-nav-toggle" aria-label="Menu" onclick="this.nextElementSibling.classList.toggle('open')">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_hero',
+'label' => 'Candidate Page — Hero',
+'desc'  => 'Hero section with candidate name, tagline, intro paragraph, CTA button, and headshot photo. The primary above-the-fold section.',
+'default' => <<<'HTML'
+<section class="cand-hero">
+  <div class="cand-container cand-hero-grid">
+    <div>
+      <div class="cand-hero-label">{{party}} for {{office}} &bull; {{district}}, {{state}}</div>
+      <h1 class="cand-hero-title">{{tagline}}</h1>
+      <p class="cand-hero-intro">{{homepage_intro}}</p>
+      <a href="#donate" class="cand-hero-cta">Support This Campaign &rarr;</a>
+    </div>
+    <div>
+      <img src="{{headshot}}" alt="{{display_name}}" class="cand-hero-photo">
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_about',
+'label' => 'Candidate Page — About',
+'desc'  => 'Bio section with full candidate story and credentials sidebar (profession, education, military). Maps to intake Steps 3 and 5.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light" id="about">
+  <div class="cand-container">
+    <div class="cand-section-label">About the Candidate</div>
+    <h2 class="cand-section-title">Meet {{display_name}}</h2>
+    <div class="cand-about-grid">
+      <div class="cand-about-text">
+        <p>{{bio_full}}</p>
+        <p>{{why_running}}</p>
+      </div>
+      <div class="cand-credentials">
+        <div class="cand-credential">
+          <div class="cand-credential-label">Profession</div>
+          <div class="cand-credential-value">{{profession}}</div>
+        </div>
+        <div class="cand-credential">
+          <div class="cand-credential-label">Education</div>
+          <div class="cand-credential-value">{{education_1}}</div>
+        </div>
+        <div class="cand-credential">
+          <div class="cand-credential-label">Running As</div>
+          <div class="cand-credential-value">{{position}} &mdash; {{election_type}} {{election_year}}</div>
+        </div>
+        <div class="cand-credential">
+          <div class="cand-credential-label">Military Service</div>
+          <div class="cand-credential-value">{{military_branch}} ({{military_years}})</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_issues',
+'label' => 'Candidate Page — Issues',
+'desc'  => 'Policy positions displayed as cards. Replace the example cards with the candidate\'s actual issue_categories and issue_positions from the intake.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-cream" id="issues">
+  <div class="cand-container">
+    <div class="cand-section-label">Where I Stand</div>
+    <h2 class="cand-section-title">Key Issues</h2>
+    <p class="cand-section-subtitle">{{differentiator}}</p>
+    <div class="cand-issues-grid">
+
+      <div class="cand-issue-card">
+        <div class="cand-issue-tag">Priority Issue</div>
+        <h3 class="cand-issue-name">Economy &amp; Jobs</h3>
+        <p class="cand-issue-desc">Replace this with the candidate's position on economy and jobs from the intake form issue_positions field.</p>
+      </div>
+
+      <div class="cand-issue-card">
+        <div class="cand-issue-tag">Priority Issue</div>
+        <h3 class="cand-issue-name">Public Safety</h3>
+        <p class="cand-issue-desc">Replace this with the candidate's position on public safety from the intake form.</p>
+      </div>
+
+      <div class="cand-issue-card">
+        <div class="cand-issue-tag">Priority Issue</div>
+        <h3 class="cand-issue-name">Education</h3>
+        <p class="cand-issue-desc">Replace this with the candidate's position on education from the intake form.</p>
+      </div>
+
+      <div class="cand-issue-card">
+        <div class="cand-issue-tag">Priority Issue</div>
+        <h3 class="cand-issue-name">Infrastructure</h3>
+        <p class="cand-issue-desc">Replace this with the candidate's position on infrastructure from the intake form.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_endorsements',
+'label' => 'Candidate Page — Endorsements',
+'desc'  => 'Endorsement quotes grid. Conditional — only include if endorsements page was selected in intake Step 13.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light" id="endorsements">
+  <div class="cand-container">
+    <div class="cand-section-label">Endorsements</div>
+    <h2 class="cand-section-title">Trusted by Leaders</h2>
+    <div class="cand-endorsements-grid">
+
+      <div class="cand-endorsement">
+        <p class="cand-endorsement-quote">Replace with endorsement quote from intake form.</p>
+        <div class="cand-endorsement-name">Endorser Name</div>
+        <div class="cand-endorsement-role">Title / Organization</div>
+      </div>
+
+      <div class="cand-endorsement">
+        <p class="cand-endorsement-quote">Replace with endorsement quote from intake form.</p>
+        <div class="cand-endorsement-name">Endorser Name</div>
+        <div class="cand-endorsement-role">Title / Organization</div>
+      </div>
+
+      <div class="cand-endorsement">
+        <p class="cand-endorsement-quote">Replace with endorsement quote from intake form.</p>
+        <div class="cand-endorsement-name">Endorser Name</div>
+        <div class="cand-endorsement-role">Title / Organization</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_donate',
+'label' => 'Candidate Page — Donate CTA',
+'desc'  => 'Full-width donation call-to-action section. Links to the candidate\'s donation platform (ActBlue, WinRed, Anedot, etc.) from intake Step 12.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-dark cand-donate" id="donate">
+  <div class="cand-container">
+    <div class="cand-section-label" style="color:rgba(255,255,255,.5)">Support the Campaign</div>
+    <h2 class="cand-donate-title" style="color:var(--white)">Help {{display_name}} Win</h2>
+    <p class="cand-donate-sub">Every dollar fuels a data-driven campaign that listens to voters. Your support makes the difference.</p>
+    <a href="{{donation_url}}" class="cand-donate-btn" target="_blank" rel="noopener">{{donation_button_label}}</a>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_social',
+'label' => 'Candidate Page — Social & Connect',
+'desc'  => 'Social media links and contact section. Pulls from intake Step 7 social media fields.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-cream" id="connect">
+  <div class="cand-container">
+    <div class="cand-section-label">Stay Connected</div>
+    <h2 class="cand-section-title">Follow the Campaign</h2>
+    <p class="cand-section-subtitle">Stay up to date on events, policy updates, and ways to get involved.</p>
+    <div class="cand-social">
+      <a href="{{facebook}}" class="cand-social-link" target="_blank" rel="noopener">Facebook</a>
+      <a href="{{twitter_x}}" class="cand-social-link" target="_blank" rel="noopener">X / Twitter</a>
+      <a href="{{instagram}}" class="cand-social-link" target="_blank" rel="noopener">Instagram</a>
+      <a href="{{youtube}}" class="cand-social-link" target="_blank" rel="noopener">YouTube</a>
+      <a href="{{tiktok}}" class="cand-social-link" target="_blank" rel="noopener">TikTok</a>
+      <a href="{{linkedin}}" class="cand-social-link" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_footer',
+'label' => 'Candidate Page — Footer',
+'desc'  => 'Campaign footer with paid-for-by disclaimer, privacy/cookie/SMS terms links, and committee info. Auto-populated from intake Step 11 compliance fields.',
+'default' => <<<'HTML'
+<footer class="cand-footer">
+  <div class="cand-container">
+    <div class="cand-footer-disclaimer">{{paidfor_text}}</div>
+    <div class="cand-footer-legal">
+      {{committee_name}} &bull; {{committee_address}}<br>
+      <a href="/privacy-policy">Privacy Policy</a> &bull;
+      <a href="/cookie-policy">Cookie Policy</a> &bull;
+      <a href="/sms-terms">SMS Terms</a> &bull;
+      <a href="mailto:{{privacy_contact_email}}">Contact</a>
+    </div>
+  </div>
+</footer>
+</div><!-- .cand-page -->
+HTML,
+],
+
+]], // end Candidate Page
+
+
     ]; // end registry return
 } // end function
