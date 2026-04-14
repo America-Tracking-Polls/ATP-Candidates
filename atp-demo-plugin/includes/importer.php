@@ -132,6 +132,32 @@ function atp_importer_page_sets() {
             'focus_kw'    => 'privacy policy campaign',
             'meta_desc'   => 'Privacy policy for John Stacy for Rockwall County Commissioner Precinct 4.',
         ],
+        'candidate-donate' => [
+            'title'       => 'Donate',
+            'desc'        => 'Donation page with embedded Anedot/ActBlue/WinRed form and mail-in info.',
+            'color'       => '#E60000',
+            'shortcodes'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_donate_page]',
+                '[atp_cand_footer]',
+            ],
+            'focus_kw'    => 'donate john stacy commissioner',
+            'meta_desc'   => 'Support John Stacy for Rockwall County Commissioner Precinct 4. Donate online securely.',
+        ],
+        'candidate-contact' => [
+            'title'       => 'Contact',
+            'desc'        => 'Contact page with phone, email, office address, Calendly scheduling, and social links.',
+            'color'       => '#0B1C33',
+            'shortcodes'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_contact]',
+                '[atp_cand_footer]',
+            ],
+            'focus_kw'    => 'contact commissioner john stacy rockwall',
+            'meta_desc'   => 'Contact Commissioner John Stacy — phone, email, office address, or book a meeting via Calendly.',
+        ],
         'candidate-cookies' => [
             'title'       => 'Cookie & TCPA Policy',
             'desc'        => 'Cookie, tracking, DLC10 and TCPA compliance policy.',

@@ -1757,6 +1757,31 @@ html{scroll-behavior:smooth}
 .cand-donate-btn{display:inline-flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--navy)!important;background:#fff;padding:18px 48px;border-radius:2px;letter-spacing:.05em;text-transform:uppercase;transition:all .2s;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .cand-donate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
 
+/* ── Donate Page ── */
+.cand-donate-page{background:var(--white);padding:80px 0 60px}
+.cand-donate-page-inner{max-width:760px;margin:0 auto;text-align:center}
+.cand-donate-page-intro{font-size:16px;line-height:1.75;color:var(--text-light);max-width:580px;margin:0 auto 32px}
+.cand-donate-embed{max-width:640px;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.08);border:1px solid var(--border)}
+.cand-donate-embed iframe{width:100%;height:600px;border:none;display:block}
+.cand-donate-alt{margin-top:32px;padding:24px;background:var(--cream);border-radius:6px;max-width:640px;margin-left:auto;margin-right:auto}
+.cand-donate-alt-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.cand-donate-alt-text{font-size:13px;color:var(--text-light);line-height:1.6}
+.cand-donate-alt a{color:var(--red);font-weight:600;text-decoration:underline}
+
+/* ── Contact Page ── */
+.cand-contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.cand-contact-info{display:flex;flex-direction:column;gap:16px}
+.cand-contact-card{display:flex;gap:16px;align-items:flex-start;padding:20px;background:var(--cream);border-radius:4px;border-left:3px solid var(--red)}
+.cand-contact-card-icon{width:40px;height:40px;background:rgba(230,0,0,.08);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cand-contact-card-icon svg{width:18px;height:18px;stroke:var(--red);stroke-width:2;fill:none}
+.cand-contact-card-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:2px}
+.cand-contact-card-value{font-size:15px;color:var(--navy);line-height:1.5}
+.cand-contact-card-value a{color:var(--navy);text-decoration:underline}
+.cand-contact-card-value a:hover{color:var(--red)}
+.cand-contact-embed{border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.06);border:1px solid var(--border)}
+.cand-contact-embed iframe{width:100%;height:580px;border:none;display:block}
+@media(max-width:768px){.cand-contact-grid{grid-template-columns:1fr}}
+
 /* ── Legal / Policy Pages ── */
 .cand-legal{background:var(--white);padding:80px 0 60px}
 .cand-legal-container{max-width:760px;margin:0 auto;padding:0 24px}
@@ -2450,6 +2475,112 @@ HTML,
       Email: <a href="mailto:info@commissionerjohnstacy.com">info@commissionerjohnstacy.com</a><br>
       Phone: <a href="tel:+14699392067">(469) 939-2067</a>
     </p>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_donate_page',
+'label' => 'Candidate Page — Donate (Full Page)',
+'desc'  => 'Standalone donation page with embedded donation link/iframe. Edit the iframe src to point to the candidate\'s Anedot, ActBlue, WinRed, or other donation platform.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-dark" style="padding:48px 0">
+  <div class="cand-container" style="text-align:center">
+    <div class="cand-section-label" style="color:rgba(255,255,255,.4)">Support the Campaign</div>
+    <h1 class="cand-section-title" style="color:#fff;font-size:38px;margin-bottom:6px">Donate to John Stacy</h1>
+    <p style="font-size:16px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto;line-height:1.7">Every dollar fuels a campaign that puts Rockwall County taxpayers first.</p>
+  </div>
+</section>
+<section class="cand-donate-page">
+  <div class="cand-donate-page-inner">
+    <p class="cand-donate-page-intro">Your contribution helps us keep roads funded, taxes stable, and development accountable. Commissioner Stacy is running for a second term to keep Rockwall County moving forward.</p>
+
+    <div class="cand-donate-embed">
+      <!-- Replace this iframe src with the candidate's donation platform embed URL -->
+      <iframe src="https://secure.anedot.com/stacy-for-commissioner/donate" loading="lazy"></iframe>
+    </div>
+
+    <div class="cand-donate-alt">
+      <div class="cand-donate-alt-title">Prefer to donate another way?</div>
+      <div class="cand-donate-alt-text">
+        Mail a check to: John Stacy for Commissioner, Fate, TX 75132<br>
+        Or donate online at <a href="https://secure.anedot.com/stacy-for-commissioner/donate" target="_blank" rel="noopener">secure.anedot.com</a>
+      </div>
+    </div>
+
+    <p style="margin-top:24px;font-size:12px;color:#888;line-height:1.5">Political advertising paid for by John Stacy for Rockwall County Commissioner Precinct 4. Contributions are not tax deductible.</p>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_contact',
+'label' => 'Candidate Page — Contact',
+'desc'  => 'Contact page with info cards (phone, email, office, Calendly) and an embedded scheduling tool.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light">
+  <div class="cand-container">
+    <div class="cand-section-label">Get in Touch</div>
+    <h2 class="cand-section-title">Contact Commissioner Stacy</h2>
+    <p class="cand-section-subtitle">Have a question, concern, or idea for Precinct 4? Commissioner Stacy maintains an open-door policy and welcomes direct communication from every constituent.</p>
+
+    <div class="cand-contact-grid">
+      <div class="cand-contact-info">
+
+        <div class="cand-contact-card">
+          <div class="cand-contact-card-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div>
+            <div class="cand-contact-card-label">Phone</div>
+            <div class="cand-contact-card-value"><a href="tel:+14699392067">(469) 939-2067</a></div>
+          </div>
+        </div>
+
+        <div class="cand-contact-card">
+          <div class="cand-contact-card-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div>
+            <div class="cand-contact-card-label">Email</div>
+            <div class="cand-contact-card-value"><a href="mailto:info@commissionerjohnstacy.com">info@commissionerjohnstacy.com</a></div>
+          </div>
+        </div>
+
+        <div class="cand-contact-card">
+          <div class="cand-contact-card-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div>
+            <div class="cand-contact-card-label">Office</div>
+            <div class="cand-contact-card-value">101 East Rusk St., Suite 202<br>Rockwall, TX 75087</div>
+          </div>
+        </div>
+
+        <div class="cand-contact-card">
+          <div class="cand-contact-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div>
+            <div class="cand-contact-card-label">Schedule a Meeting</div>
+            <div class="cand-contact-card-value"><a href="https://calendly.com/commissionerjohnstacy" target="_blank" rel="noopener">Book via Calendly</a></div>
+          </div>
+        </div>
+
+        <div class="cand-contact-card">
+          <div class="cand-contact-card-icon"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+          <div>
+            <div class="cand-contact-card-label">Social Media</div>
+            <div class="cand-contact-card-value">
+              <a href="https://facebook.com/johnstacy4rockwallcounty" target="_blank" rel="noopener">Facebook</a> &bull;
+              <a href="https://x.com/JohnStacyTX" target="_blank" rel="noopener">X / Twitter</a> &bull;
+              <a href="https://instagram.com/stacyforcommissioner" target="_blank" rel="noopener">Instagram</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cand-contact-embed">
+        <!-- Calendly inline embed — replace URL for different candidate -->
+        <iframe src="https://calendly.com/commissionerjohnstacy" loading="lazy"></iframe>
+      </div>
+    </div>
+
   </div>
 </section>
 HTML,
