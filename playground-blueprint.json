@@ -33,8 +33,12 @@
       }
     },
     {
-      "step": "runPHP",
-      "code": "<?php $theme_dir = get_theme_root() . '/' . get_stylesheet(); $canvas = $theme_dir . '/page-canvas.php'; if (!file_exists($canvas)) { file_put_contents($canvas, '<?php /* Template Name: Canvas */ while (have_posts()) : the_post(); the_content(); endwhile;'); } ?>"
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/themes/twentytwentyfive/page-canvas.php",
+      "data": {
+        "resource": "literal",
+        "contents": "<?php\n/* Template Name: Canvas */\nwhile ( have_posts() ) : the_post();\n\tthe_content();\nendwhile;\n"
+      }
     },
     {
       "step": "runPHP",
