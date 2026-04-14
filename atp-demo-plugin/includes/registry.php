@@ -1733,6 +1733,16 @@ html{scroll-behavior:smooth}
 .cand-involve-btn{font-size:12px;font-weight:700;color:var(--navy);border:2px solid var(--navy);padding:8px 20px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;transition:all .2s;display:inline-block}
 .cand-involve-btn:hover{background:var(--navy);color:#fff!important}
 
+/* ── Survey / Typeform ── */
+.cand-survey{text-align:center}
+.cand-survey-embed{max-width:720px;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.08);border:1px solid var(--border)}
+.cand-survey-embed iframe{width:100%;height:500px;border:none;display:block}
+.cand-survey-placeholder{background:var(--white);padding:48px 32px;text-align:center}
+.cand-survey-placeholder-title{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.cand-survey-placeholder-text{font-size:14px;color:var(--text-light);margin-bottom:20px}
+.cand-survey-placeholder-btn{display:inline-block;font-size:13px;font-weight:700;color:#fff!important;background:var(--red);padding:12px 28px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;transition:background .2s}
+.cand-survey-placeholder-btn:hover{background:var(--red-dark)}
+
 /* ── Donate ── */
 .cand-donate{text-align:center;padding:88px 0}
 .cand-donate-title{font-family:var(--font-head);font-size:38px;font-weight:900;margin-bottom:14px;color:#fff}
@@ -1825,8 +1835,8 @@ HTML,
   <div class="cand-container cand-hero-grid">
     <div>
       <div class="cand-hero-label">Republican for County Commissioner &bull; Precinct 4, Rockwall County, Texas</div>
-      <h1 class="cand-hero-title">Proven Leadership.<br>Real Results.</h1>
-      <p class="cand-hero-intro">John Stacy is a lifelong Rockwall County resident, Army veteran, and small business owner running to bring fiscal accountability and common-sense leadership to the Commissioner&rsquo;s Court.</p>
+      <h1 class="cand-hero-title">The Choice<br>for the People.</h1>
+      <p class="cand-hero-intro">A 6th generation Texan, 16-year Fate resident, and local business owner &mdash; Commissioner John Stacy has spent three years stabilizing county taxes, advancing long-delayed road projects, and standing firm for responsible growth. Now he&rsquo;s running for a second term to keep Rockwall County moving forward.</p>
       <div class="cand-hero-ctas">
         <a href="#issues" class="cand-hero-cta">See Where I Stand &darr;</a>
         <a href="https://secure.anedot.com/stacy-for-commissioner/donate" class="cand-hero-cta-alt" target="_blank" rel="noopener">Donate Now</a>
@@ -1849,20 +1859,20 @@ HTML,
   <div class="cand-container">
     <div class="cand-stats-grid">
       <div class="cand-stat">
-        <div class="cand-stat-number">15 Years</div>
-        <div class="cand-stat-label">Building Rockwall County</div>
+        <div class="cand-stat-number">16 Years</div>
+        <div class="cand-stat-label">Fate Resident</div>
       </div>
       <div class="cand-stat">
-        <div class="cand-stat-number">200+</div>
-        <div class="cand-stat-label">Local Jobs Created</div>
+        <div class="cand-stat-number">$50M</div>
+        <div class="cand-stat-label">Road Bonds Unlocked</div>
       </div>
       <div class="cand-stat">
-        <div class="cand-stat-number">$2.3M</div>
-        <div class="cand-stat-label">Saved for Taxpayers</div>
+        <div class="cand-stat-number">6th Gen</div>
+        <div class="cand-stat-label">Texan</div>
       </div>
       <div class="cand-stat">
-        <div class="cand-stat-number">2 Tours</div>
-        <div class="cand-stat-label">U.S. Army Service</div>
+        <div class="cand-stat-number">3 Years</div>
+        <div class="cand-stat-label">Taxes Stabilized</div>
       </div>
     </div>
   </div>
@@ -1881,30 +1891,30 @@ HTML,
     <h2 class="cand-section-title">Meet John Stacy</h2>
     <div class="cand-about-grid">
       <div class="cand-about-text">
-        <p>John Stacy grew up on a family ranch in eastern Rockwall County. After graduating from Rockwall High School, he enlisted in the U.S. Army and served two tours overseas. He earned his degree in Public Administration from Texas A&amp;M and returned home to build Stacy Construction, which has employed over 200 local workers in the last 15 years.</p>
-        <p>As a father of three and active member of First Baptist Church, John has served on the Rockwall ISD facilities committee, coached Little League for 8 years, and chaired the county&rsquo;s infrastructure advisory board. He believes government should be run like a well-managed business &mdash; transparent budgets, measurable outcomes, and respect for taxpayers.</p>
-        <p>Rockwall County is one of the fastest-growing counties in Texas, but our infrastructure hasn&rsquo;t kept pace. Roads are crumbling, development fees aren&rsquo;t covering the true cost of growth, and the current commissioner hasn&rsquo;t held a public town hall in three years. John is running because taxpayers deserve a commissioner who shows up, listens, and gets results.</p>
+        <p>John Stacy is a 6th generation Texan and 16-year resident of Fate, Texas. He graduated from TCU with a B.S. in Chemistry and built a successful insurance agency in his hometown &mdash; John Stacy Insurance Services. He and his wife Amie have been married for over 23 years and are raising three sons in Rockwall County.</p>
+        <p>Before running for Commissioner, John served on the Fate City Council, the Economic Development Corporation, and the Planning &amp; Zoning Committee &mdash; building deep experience in the growth and infrastructure challenges facing one of Texas&rsquo;s fastest-growing counties.</p>
+        <p>Since taking office, Commissioner Stacy has stabilized county taxes, ended the diversion of voter-approved road funds, and moved the Trip 21 bond program forward &mdash; including unanimous approval to sell $50 million in road bonds to unlock major congestion-relief projects. He&rsquo;s running for a second term to keep Rockwall County on track.</p>
       </div>
       <div class="cand-credentials">
         <div class="cand-credential">
           <div class="cand-credential-label">Profession</div>
-          <div class="cand-credential-value">President, Stacy Construction LLC</div>
+          <div class="cand-credential-value">Owner, John Stacy Insurance Services &mdash; Fate, TX</div>
         </div>
         <div class="cand-credential">
           <div class="cand-credential-label">Education</div>
-          <div class="cand-credential-value">Texas A&amp;M University, B.S. Public Administration, 2012</div>
+          <div class="cand-credential-value">Texas Christian University (TCU), B.S. Chemistry</div>
         </div>
         <div class="cand-credential">
-          <div class="cand-credential-label">Military Service</div>
-          <div class="cand-credential-value">U.S. Army, 2003&ndash;2009 (2 tours overseas)</div>
+          <div class="cand-credential-label">Community Service</div>
+          <div class="cand-credential-value">Fate City Council, EDC, Planning &amp; Zoning, Scoutmaster Troop 163</div>
         </div>
         <div class="cand-credential">
-          <div class="cand-credential-label">Community</div>
-          <div class="cand-credential-value">Rockwall ISD Facilities Chair, Infrastructure Advisory Board, Little League Coach (8 seasons)</div>
+          <div class="cand-credential-label">Family</div>
+          <div class="cand-credential-value">Married to Amie (23 years), three sons, Ridgeview Church member since 2009</div>
         </div>
         <div class="cand-credential">
-          <div class="cand-credential-label">Running As</div>
-          <div class="cand-credential-value">Challenger &mdash; General Election 2026</div>
+          <div class="cand-credential-label">Running For</div>
+          <div class="cand-credential-value">Incumbent &mdash; Republican Primary, March 3, 2026</div>
         </div>
       </div>
     </div>
@@ -1920,23 +1930,23 @@ HTML,
 'default' => <<<'HTML'
 <section class="cand-section cand-section-cream">
   <div class="cand-container">
-    <div class="cand-section-label">Why I&rsquo;m Running</div>
-    <h2 class="cand-section-title">Three Commitments to Rockwall County</h2>
+    <div class="cand-section-label">What I&rsquo;ve Delivered &mdash; And What&rsquo;s Next</div>
+    <h2 class="cand-section-title">A Four-Year Plan for Rockwall County</h2>
     <div class="cand-messages-grid">
       <div class="cand-message">
         <div class="cand-message-num">01</div>
-        <h3 class="cand-message-title">Fix Our Roads Without Raising Taxes</h3>
-        <p class="cand-message-text">Rockwall County&rsquo;s roads and infrastructure can&rsquo;t keep up with growth. I have a plan to prioritize the FM 552 corridor, the Horizon Road interchange, and a county-wide road assessment &mdash; funded by impact fees on new development, not property tax increases.</p>
+        <h3 class="cand-message-title">Finish the Roads We Voted For</h3>
+        <p class="cand-message-text">I ended the diversion of voter-approved road bond funds and secured unanimous approval to sell $50 million in Trip 21 road bonds. In my second term, I&rsquo;ll see these congestion-relief projects through to completion &mdash; on time and on budget.</p>
       </div>
       <div class="cand-message">
         <div class="cand-message-num">02</div>
-        <h3 class="cand-message-title">Manage Budgets Like a Business</h3>
-        <p class="cand-message-text">As a veteran and business owner, I know how to manage budgets and deliver results on time. I&rsquo;ll publish a quarterly budget dashboard, audit every county contract, and eliminate redundant spending so taxpayers see exactly where their money goes.</p>
+        <h3 class="cand-message-title">Keep Taxes Stable While We Grow</h3>
+        <p class="cand-message-text">In three years, I helped stabilize county taxes while managing one of the fastest-growing counties in Texas. Growth should pay for itself through impact fees and responsible development &mdash; not by raising property taxes on existing residents.</p>
       </div>
       <div class="cand-message">
         <div class="cand-message-num">03</div>
-        <h3 class="cand-message-title">Monthly Town Halls for Every Resident</h3>
-        <p class="cand-message-text">I&rsquo;ll hold monthly town halls so every resident has a voice in how their tax dollars are spent. The current commissioner hasn&rsquo;t held a public meeting in three years. That changes on day one.</p>
+        <h3 class="cand-message-title">Stand Firm Against Outside Developer Interests</h3>
+        <p class="cand-message-text">Rockwall County&rsquo;s future should be decided by its residents, not outside developers. I&rsquo;ll continue to fight for responsible growth that protects our quality of life, our agricultural land, and our community character.</p>
       </div>
     </div>
   </div>
@@ -1953,37 +1963,37 @@ HTML,
   <div class="cand-container">
     <div class="cand-section-label">Where I Stand</div>
     <h2 class="cand-section-title">Key Issues</h2>
-    <p class="cand-section-subtitle">John is the only candidate with both military discipline and construction industry expertise &mdash; he knows how to manage budgets, build infrastructure, and lead teams under pressure.</p>
+    <p class="cand-section-subtitle">A full-time commissioner focused on the issues that matter most to Rockwall County families &mdash; roads, taxes, responsible growth, and transparent government.</p>
     <div class="cand-issues-grid">
 
       <div class="cand-issue-card">
-        <div class="cand-issue-tag">Priority Issue</div>
-        <h3 class="cand-issue-name">Infrastructure &amp; Transportation</h3>
-        <p class="cand-issue-desc">Rockwall County has added 18,000 residents in 5 years but hasn&rsquo;t expanded a single major road. I&rsquo;ll prioritize the FM 552 corridor widening, the Horizon Road interchange, and a county-wide road condition assessment in my first 90 days. We&rsquo;ll use impact fees from new development to fund improvements &mdash; growth should pay for itself.</p>
+        <div class="cand-issue-tag">Roads &amp; Infrastructure</div>
+        <h3 class="cand-issue-name">Trip 21 Road Bond Program</h3>
+        <p class="cand-issue-desc">Voters approved road bonds &mdash; and I made sure those funds went where they were promised. I secured unanimous approval to sell $50 million in bonds to unlock major congestion-relief projects across the county. In my second term, these projects get built.</p>
       </div>
 
       <div class="cand-issue-card">
-        <div class="cand-issue-tag">Priority Issue</div>
-        <h3 class="cand-issue-name">Taxes &amp; Government Spending</h3>
-        <p class="cand-issue-desc">I&rsquo;ll publish a quarterly budget dashboard so every taxpayer can see where their money goes. I oppose a property tax increase and will find savings through competitive bidding, contract audits, and eliminating redundant county positions.</p>
+        <div class="cand-issue-tag">Fiscal Responsibility</div>
+        <h3 class="cand-issue-name">Tax Stabilization</h3>
+        <p class="cand-issue-desc">In three years on the court, I helped stabilize county taxes while managing explosive growth. I believe new development should pay its fair share through impact fees &mdash; not shift the burden onto existing homeowners through property tax increases.</p>
       </div>
 
       <div class="cand-issue-card">
-        <div class="cand-issue-tag">Priority Issue</div>
-        <h3 class="cand-issue-name">Public Safety &amp; Crime</h3>
-        <p class="cand-issue-desc">Our sheriff&rsquo;s department is understaffed for a county our size. I&rsquo;ll support hiring 12 additional deputies and expanding the mental health crisis response team. Safe communities attract businesses and keep property values strong.</p>
+        <div class="cand-issue-tag">Growth Management</div>
+        <h3 class="cand-issue-name">Responsible Development</h3>
+        <p class="cand-issue-desc">Rockwall County is one of the fastest-growing counties in Texas. I&rsquo;m standing firm against outside developer interests that want to build without paying for roads, schools, and public safety. Growth is welcome &mdash; but it must be managed responsibly.</p>
       </div>
 
       <div class="cand-issue-card">
-        <div class="cand-issue-tag">Priority Issue</div>
-        <h3 class="cand-issue-name">Veterans &amp; Military</h3>
-        <p class="cand-issue-desc">Rockwall County has over 4,000 veterans but no dedicated county veteran services coordinator. I&rsquo;ll create that position and partner with the VA North Texas system to bring mobile health clinics to our community.</p>
+        <div class="cand-issue-tag">Transportation</div>
+        <h3 class="cand-issue-name">Regional Transportation Planning</h3>
+        <p class="cand-issue-desc">I&rsquo;m working to ensure Rockwall County has a strong voice in regional transportation decisions. Our residents deserve real solutions for congestion, not top-down plans that don&rsquo;t reflect local priorities.</p>
       </div>
 
       <div class="cand-issue-card">
-        <div class="cand-issue-tag">Priority Issue</div>
-        <h3 class="cand-issue-name">Housing &amp; Development</h3>
-        <p class="cand-issue-desc">Growth is good &mdash; but only if it&rsquo;s managed. I&rsquo;ll update the county&rsquo;s land use plan for the first time in 12 years, require developers to fund infrastructure concurrent with construction, and protect agricultural land from unchecked sprawl.</p>
+        <div class="cand-issue-tag">Transparency</div>
+        <h3 class="cand-issue-name">Full-Time, Accountable Leadership</h3>
+        <p class="cand-issue-desc">I ran on a promise to be a full-time commissioner &mdash; and I&rsquo;ve kept it. Monthly video newsletters, open-door policy, and a Calendly link so any constituent can book time with me directly. That&rsquo;s how government should work.</p>
       </div>
 
     </div>
@@ -2096,9 +2106,31 @@ HTML,
 ],
 
 [
+'tag'   => 'atp_cand_survey',
+'label' => 'Candidate Page — Voter Survey',
+'desc'  => 'Typeform or survey embed section. Shows a placeholder with CTA when no embed code is set, or an iframe when a Typeform/survey URL is provided.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light" id="survey">
+  <div class="cand-container" style="text-align:center">
+    <div class="cand-section-label">Your Voice Matters</div>
+    <h2 class="cand-section-title" style="margin-left:auto;margin-right:auto">Voter Priorities Survey</h2>
+    <p class="cand-section-subtitle" style="margin-left:auto;margin-right:auto;text-align:center">Take 2 minutes to share what issues matter most to you and your family in Rockwall County. Your input directly shapes our campaign priorities.</p>
+    <div class="cand-survey-embed">
+      <div class="cand-survey-placeholder">
+        <div class="cand-survey-placeholder-title">Share Your Priorities</div>
+        <div class="cand-survey-placeholder-text">Help us understand what matters most to Precinct 4 residents. Your responses are anonymous and take less than 2 minutes.</div>
+        <a href="#" class="cand-survey-placeholder-btn">Take the Survey</a>
+      </div>
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
 'tag'   => 'atp_cand_donate',
 'label' => 'Candidate Page — Donate CTA',
-'desc'  => 'Full-width donation call-to-action with Anedot link.',
+'desc'  => 'Full-width donation call-to-action.',
 'default' => <<<'HTML'
 <section class="cand-section cand-section-dark cand-donate" id="donate">
   <div class="cand-container">
@@ -2139,9 +2171,9 @@ HTML,
 'default' => <<<'HTML'
 <footer class="cand-footer">
   <div class="cand-container">
-    <div class="cand-footer-disclaimer">Paid for by John Stacy for County Commissioner. David Stacy, Treasurer.</div>
+    <div class="cand-footer-disclaimer">Political advertising paid for by John Stacy for Rockwall County Commissioner Precinct 4.</div>
     <div class="cand-footer-legal">
-      John Stacy for County Commissioner &bull; PO Box 4421, Rockwall, TX 75087<br>
+      John Stacy for Commissioner &bull; Fate, TX 75132<br>
       <a href="/privacy-policy">Privacy Policy</a> &bull;
       <a href="/cookie-policy">Cookie Policy</a> &bull;
       <a href="/sms-terms">SMS Terms</a> &bull;

@@ -98,6 +98,7 @@ function atp_importer_page_sets() {
                 '[atp_cand_endorsements]',
                 '[atp_cand_video]',
                 '[atp_cand_volunteer]',
+                '[atp_cand_survey]',
                 '[atp_cand_donate]',
                 '[atp_cand_social]',
                 '[atp_cand_footer]',

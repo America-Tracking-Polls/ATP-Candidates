@@ -37,7 +37,7 @@
     },
     {
       "step": "runPHP",
-      "code": "<?php require '/wordpress/wp-load.php'; $content = \"[atp_cand_styles]\\n[atp_cand_nav]\\n[atp_cand_hero]\\n[atp_cand_stats]\\n[atp_cand_about]\\n[atp_cand_messages]\\n[atp_cand_issues]\\n[atp_cand_endorsements]\\n[atp_cand_video]\\n[atp_cand_volunteer]\\n[atp_cand_donate]\\n[atp_cand_social]\\n[atp_cand_footer]\"; $page_id = wp_insert_post(array('post_title' => 'Candidate Landing Page', 'post_content' => $content, 'post_status' => 'publish', 'post_type' => 'page')); ?>"
+      "code": "<?php require '/wordpress/wp-load.php'; $content = \"[atp_cand_styles]\\n[atp_cand_nav]\\n[atp_cand_hero]\\n[atp_cand_stats]\\n[atp_cand_about]\\n[atp_cand_messages]\\n[atp_cand_issues]\\n[atp_cand_endorsements]\\n[atp_cand_video]\\n[atp_cand_volunteer]\\n[atp_cand_survey]\\n[atp_cand_donate]\\n[atp_cand_social]\\n[atp_cand_footer]\"; $page_id = wp_insert_post(array('post_title' => 'Candidate Landing Page', 'post_content' => $content, 'post_status' => 'publish', 'post_type' => 'page')); ?>"
     }
   ]
 }

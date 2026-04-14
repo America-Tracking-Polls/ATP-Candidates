@@ -96,7 +96,7 @@ function atp_demo_admin_page() {
             ],
         ],
         'Candidate Landing Page' => [
-            'desc'  => 'Full campaign website template with example content. 12 sections: nav, hero, stats, about, messages, issues, endorsements, video, volunteer, donate, social, footer.',
+            'desc'  => 'Full campaign website with real John Stacy content. 13 sections including voter survey embed.',
             'color' => '#0B1C33',
             'tags'  => [
                 '[atp_cand_styles]',
@@ -109,6 +109,7 @@ function atp_demo_admin_page() {
                 '[atp_cand_endorsements]',
                 '[atp_cand_video]',
                 '[atp_cand_volunteer]',
+                '[atp_cand_survey]',
                 '[atp_cand_donate]',
                 '[atp_cand_social]',
                 '[atp_cand_footer]',
