@@ -1718,9 +1718,9 @@ html{scroll-behavior:smooth}
 
 /* ── Video ── */
 .cand-video-wrap{position:relative;width:100%;max-width:800px;margin:0 auto;border-radius:6px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.3)}
-.cand-video-wrap img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
-.cand-video-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(11,28,51,.4);transition:background .2s;cursor:pointer}
-.cand-video-play:hover{background:rgba(11,28,51,.25)}
+.cand-video-wrap video{width:100%;display:block;border-radius:6px}
+.cand-video-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(11,28,51,.4);transition:opacity .4s,background .2s;cursor:pointer;border-radius:6px}
+.cand-video-play:hover{background:rgba(11,28,51,.2)}
 .cand-video-play svg{width:72px;height:72px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
 .cand-video-caption{text-align:center;margin-top:16px;font-size:13px;color:rgba(255,255,255,.5);font-style:italic}
 
@@ -2065,12 +2065,14 @@ HTML,
     <div class="cand-section-label" style="color:rgba(255,255,255,.4)">Campaign Video</div>
     <h2 class="cand-section-title" style="color:#fff;margin-bottom:32px">Watch: My Vision for Rockwall County</h2>
     <div class="cand-video-wrap">
-      <img src="https://placehold.co/1280x720/0B1C33/1a2f4d?text=Campaign+Video" alt="Campaign Video">
-      <div class="cand-video-play">
+      <video id="cand-video-player" playsinline preload="metadata" poster="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;border-radius:6px">
+        <source src="https://commissionerjohnstacy.com/wp-content/uploads/2025/12/Stacy-Staircase-Survey-Video-FINAL.mp4" type="video/mp4">
+      </video>
+      <div class="cand-video-play" id="cand-video-play-btn" onclick="var v=document.getElementById('cand-video-player');var b=document.getElementById('cand-video-play-btn');if(v.paused){v.play();b.style.opacity='0';b.style.pointerEvents='none';}else{v.pause();b.style.opacity='1';b.style.pointerEvents='auto';}">
         <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" fill="rgba(230,0,0,.9)" stroke="white" stroke-width="2"/><polygon points="32,24 32,56 58,40" fill="white"/></svg>
       </div>
     </div>
-    <p class="cand-video-caption">Where I Stand on the Issues &mdash; 3:42</p>
+    <p class="cand-video-caption">Commissioner Stacy &mdash; Voter Survey Update</p>
   </div>
 </section>
 HTML,
@@ -2194,6 +2196,13 @@ HTML,
 (function(){
   // Scroll progress bar
   window.addEventListener('scroll',function(){var d=document.documentElement;var p=(d.scrollTop/(d.scrollHeight-d.clientHeight))*100;var bar=document.getElementById('cand-scroll-progress');if(bar)bar.style.width=p+'%';});
+  // Video: show play button again when paused or ended
+  var vp=document.getElementById('cand-video-player');
+  var vb=document.getElementById('cand-video-play-btn');
+  if(vp&&vb){
+    vp.addEventListener('ended',function(){vb.style.opacity='1';vb.style.pointerEvents='auto';});
+    vp.addEventListener('click',function(){if(!vp.paused){vp.pause();vb.style.opacity='1';vb.style.pointerEvents='auto';}});
+  }
   // Stats count-up animation
   var statsObserved=false;
   var statsObs=new IntersectionObserver(function(entries){
