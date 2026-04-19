@@ -211,5 +211,113 @@ Creates 7 pages with Canvas template, sets homepage, logs in as admin.
 
 ---
 
+## Quick Start — New Client Site
+
+### Step 1: Get the intake JSON
+
+The candidate (or their campaign manager) fills out the 16-step intake form. When they click "Generate Profile," the form outputs a V3 JSON file. Download it or copy it from the admin.
+
+### Step 2: Generate the Page JSON
+
+Take the intake JSON and run it through this prompt in Claude, ChatGPT, or any AI:
+
+```
+You are a political campaign web designer. I'm giving you a candidate's
+intake form data as JSON. Generate a Page JSON that contains the final
+rendered HTML for each shortcode section of their campaign website.
+
+Rules:
+1. Output valid JSON with these keys: atp_cand_nav, atp_cand_hero,
+   atp_cand_stats, atp_cand_about, atp_cand_messages, atp_cand_issues,
+   atp_cand_endorsements, atp_cand_video, atp_cand_volunteer,
+   atp_cand_survey, atp_cand_donate, atp_cand_social, atp_cand_footer
+2. You MAY omit keys for sections that don't apply
+3. Each value is a string of HTML using the CSS classes from atp_cand_styles
+4. Include _candidate and _generated metadata fields
+5. HTML should be production-ready with real content, no placeholders
+6. Generate the right number of issue cards from platform_issues
+7. Generate endorsement cards from bio_messaging.endorsements_list
+8. Only include social links that have URLs
+9. Footer MUST include the exact legal_compliance.paid_for_by text
+10. Use identity fields for the nav bar (display_name, office_sought)
+11. Use bio_messaging.homepage_intro for the hero intro paragraph
+12. Use bio_messaging.tagline for the hero H1
+
+Candidate Intake JSON:
+
+{PASTE THE V3 JSON HERE}
+```
+
+The AI reads the structured data and writes production HTML for each section.
+
+### Step 3: Generate the legal pages
+
+Run a second prompt for the privacy and cookie policies:
+
+```
+I need you to populate two legal page templates with this candidate's data.
+Use the legal_compliance section of the JSON to fill in all [bracketed]
+variables. Output two separate HTML blocks.
+
+Template 1: Privacy Policy — use the atp_cand_privacy shortcode template
+Template 2: Cookie, Tracking & SMS Compliance Policy — use the atp_cand_cookies template
+
+Variables to replace:
+- [Candidate Committee Name] = legal_compliance.committee_name
+- [Website URL] = domain_setup.preferred_domain
+- [Mailing Address] = legal_compliance.committee_mailing_address
+- [Campaign Email Address] = legal_compliance.campaign_email_legal
+- [Campaign Phone Number] = legal_compliance.campaign_phone_legal
+- [Month Day, Year] = today's date
+- [Candidate Name] = identity.display_name
+- [Office] = identity.office_sought
+
+Candidate JSON:
+
+{PASTE THE V3 JSON HERE}
+```
+
+### Step 4: Import into WordPress
+
+1. Go to **WP Admin → ATP Shortcodes → Candidate Page**
+2. Paste the Page JSON from Step 2
+3. Click **Import Page JSON**
+4. Go to **ATP Shortcodes** → find `atp_cand_privacy` and `atp_cand_cookies`
+5. Paste the legal page HTML from Step 3 into each shortcode editor
+6. Click Save on each
+
+### Step 5: Create the pages
+
+Go to **ATP Shortcodes → Import Pages** and import all 7 pages. Or run the Setup Wizard.
+
+### Step 6: Review and launch
+
+- Preview each page on the front end
+- Edit any shortcode in the admin if something needs tweaking
+- Set up the domain (DNS, SSL)
+- Go live
+
+### How edits work after launch
+
+The shortcode system has two layers:
+
+1. **Registry defaults** — the template HTML hardcoded in the plugin
+2. **Database edits** — any changes made in the shortcode editor
+
+Database edits always win. So when you import Page JSON or edit a shortcode manually, that content is stored in the WordPress database and renders on the front end. Plugin updates only change the registry defaults (the fallback), never the database content.
+
+To update content:
+- **Quick edit**: Go to ATP Shortcodes, find the section, edit the HTML directly
+- **AI-assisted edit**: Copy the HTML, paste into AI with instructions ("make the hero title bigger", "add a new issue card"), paste back, save
+- **Full regeneration**: Run the Page JSON prompt again with updated intake data, re-import
+
+To add a new section:
+- Add a new shortcode entry in the registry (or just edit the WordPress page content to include a custom HTML block)
+
+To remove a section:
+- Edit the WordPress page and remove that shortcode tag
+
+---
+
 *ATP Campaign Site Plugin v3.0.0*
 *Built by Mirror Factory / ROI Amplified for America Tracking Polls*
