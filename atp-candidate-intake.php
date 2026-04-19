@@ -3,7 +3,7 @@
  * Plugin Name:  ATP Candidate Intake
  * Plugin URI:   https://americatrackingpolls.com
  * Description:  America Tracking Polls — candidate intake form with settings, question editor, branding, email notifications, and admin backend.
- * Version:      2.0.1
+ * Version:      3.0.0
  * Author:       Mirror Factory / ROI Amplified
  * Text Domain:  atp-intake
  */
@@ -51,6 +51,7 @@ function atp_default_questions(){return[
     ['id'=>'manager_phone','label'=>'Campaign manager phone','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>true],
     ['id'=>'treasurer_name','label'=>'Treasurer name','type'=>'text','placeholder'=>'Treasurer full name (for legal disclaimer)','optional'=>false],
     ['id'=>'treasurer_email','label'=>'Treasurer email','type'=>'email','placeholder'=>'treasurer@email.com','optional'=>true],
+    ['id'=>'treasurer_phone','label'=>'Treasurer phone','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>true],
     ['id'=>'treasurer_address','label'=>'Treasurer mailing address','type'=>'text','placeholder'=>'Treasurer address','optional'=>true],
 ]],
 /* ── Step 3 — Bio & Messaging ── */
@@ -63,6 +64,7 @@ function atp_default_questions(){return[
     ['id'=>'differentiator','label'=>'What makes this candidate different?','type'=>'textarea','placeholder'=>'1–2 sentences...','optional'=>false],
     ['id'=>'key_messages','label'=>'Three key campaign messages','type'=>'textarea','placeholder'=>"Message 1: ...\nMessage 2: ...\nMessage 3: ...",'optional'=>false],
     ['id'=>'policy_passions','label'=>'Policy passions — issues the candidate cares most about','type'=>'textarea','placeholder'=>'What policy areas drive this candidate...','optional'=>true],
+    ['id'=>'endorsements_about','label'=>'Endorsements for About page','type'=>'textarea','placeholder'=>"Names, titles, and quotes — e.g.\nSheriff Mike Brown — 'John has my full support'\nRockwall County Republican Party",'optional'=>true],
 ]],
 /* ── Step 4 — Platform & Issues ── */
 ['id'=>'q4','section'=>'04 — Platform & Issues','question'=>'Policy positions and issue priorities','subtitle'=>'Select the issue categories that matter most, then describe positions below.','fields'=>[
@@ -109,76 +111,84 @@ function atp_default_questions(){return[
     ['id'=>'video_other','label'=>'Other video assets','type'=>'textarea','placeholder'=>'Ads, testimonials, event clips. Include links.','optional'=>true],
 ]],
 /* ── Step 9 — Survey Page ── */
-['id'=>'q9','section'=>'09 — Survey Page','question'=>'Would you like a survey page on your website?','subtitle'=>'This adds a voter survey page to your campaign site. Survey design and delivery are handled separately.','fields'=>[
-    ['id'=>'survey_page_wanted','label'=>'','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes — include a survey page','No — skip for now']],
-    ['id'=>'survey_tier','label'=>'Which survey tier?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Tier 1 — Benchmark: Name ID + favorability baseline. One survey.','Tier 2 — Benchmark + Tracking: Baseline + approval improvement. Two surveys.','Tier 3 — Full Sequence: Benchmark → approval → undecided targeting + phone outreach.','Recommend for me']],
+['id'=>'q9','section'=>'09 — Survey Page','question'=>'Set up your website survey','subtitle'=>'This adds a voter engagement survey to your campaign site. ATP handles survey design and delivery.','fields'=>[
+    ['id'=>'survey_page_wanted','label'=>'Include a survey page on your website?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes — include a survey page','No — skip for now']],
+    ['id'=>'primary_survey_focus','label'=>'Primary survey focus','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Overall candidate impression','Issue priorities & positions','Messaging & communications feedback','Likelihood to vote & support','Volunteer & grassroots feedback','Website & digital experience']],
     ['id'=>'survey_page_label','label'=>'What should the page be called?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Survey','Share Feedback','Voter Priorities','Community Input','Custom (enter below)']],
     ['id'=>'survey_page_label_custom','label'=>'Custom page label','type'=>'text','placeholder'=>'Enter custom page name...','optional'=>true],
-    ['id'=>'survey_intro_text','label'=>'Survey page intro text','type'=>'textarea','placeholder'=>'Brief intro that appears above the survey on your website...','optional'=>true],
-]],
-/* ── Step 10 — Survey Embed Setup ── */
-['id'=>'q10','section'=>'10 — Survey Embed Setup','question'=>'How should the survey appear on your site?','subtitle'=>'Configure how the survey is embedded and displayed on your website.','fields'=>[
     ['id'=>'survey_display','label'=>'Survey placement','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Dedicated page only','Homepage section only','Both dedicated page and homepage section']],
-    ['id'=>'survey_embed_code','label'=>'Existing survey link or embed code','type'=>'textarea','placeholder'=>'Paste survey URL or embed code if you already have one...','optional'=>true],
-    ['id'=>'survey_collects_phone','label'=>'Will the survey collect phone numbers?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
-    ['id'=>'sms_optin_language','label'=>'SMS opt-in checkbox language','type'=>'text','placeholder'=>'e.g. I agree to receive text updates from this campaign','optional'=>true],
-    ['id'=>'sms_message_types','label'=>'What types of messages will subscribers receive?','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Campaign updates','Fundraising appeals','Event invitations','Survey follow-ups','Get-out-the-vote reminders']],
-    ['id'=>'survey_goal','label'=>'Primary survey goal','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Name ID / awareness','Favorability measurement','Issue priority ranking','Voter sentiment','Opposition research','Other']],
+    ['id'=>'survey_intro_text','label'=>'Survey page intro text','type'=>'textarea','placeholder'=>'Brief intro that appears above the survey on your website...','optional'=>true],
+    ['id'=>'existing_survey_link','label'=>'Already have a survey?','type'=>'url','placeholder'=>'Paste link or embed code if you already have one — otherwise leave blank','optional'=>true],
 ]],
-/* ── Step 11 — Legal & Compliance ── */
-['id'=>'q11','section'=>'11 — Legal & Compliance','question'=>'Legal details and compliance information','subtitle'=>'These fields generate your Privacy Policy, Cookie Policy, SMS Terms, and paid-for-by disclaimer automatically.','fields'=>[
+/* ── Step 10 — Legal & Compliance ── */
+['id'=>'q10','section'=>'10 — Legal & Compliance','question'=>'Legal details and compliance information','subtitle'=>'These fields generate your Privacy Policy, Cookie-Tracking-SMS Compliance Policy, and paid-for-by disclaimer automatically.','fields'=>[
     ['id'=>'committee_name','label'=>'Committee name','type'=>'text','placeholder'=>'e.g. John Stacy for Commissioner','optional'=>false],
     ['id'=>'paidfor_text','label'=>'Paid-for-by disclaimer text','type'=>'text','placeholder'=>'e.g. Paid for by John Stacy for Commissioner','optional'=>false],
     ['id'=>'filing_level','label'=>'Filing level','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Federal (FEC)','State','County / Local']],
     ['id'=>'committee_id','label'=>'Committee / campaign finance ID','type'=>'text','placeholder'=>'FEC ID or state campaign finance ID','optional'=>true],
-    ['id'=>'committee_address','label'=>'Committee mailing address','type'=>'text','placeholder'=>'Official committee address','optional'=>true],
-    ['id'=>'campaign_phone','label'=>'Campaign phone (for legal pages)','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>true],
+    ['id'=>'committee_address','label'=>'Committee mailing address','type'=>'text','placeholder'=>'Official committee address','optional'=>false],
+    ['id'=>'campaign_phone','label'=>'Campaign phone (for legal pages)','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>false],
     ['id'=>'campaign_email','label'=>'Campaign email (for legal pages)','type'=>'email','placeholder'=>'info@campaign.com','optional'=>true],
     ['id'=>'privacy_contact_email','label'=>'Privacy policy contact email','type'=>'email','placeholder'=>'privacy@campaign.com — often different from campaign email','optional'=>false],
     ['id'=>'privacy_contact_phone','label'=>'Privacy policy contact phone','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>true],
-    ['id'=>'privacy_contact_address','label'=>'Privacy policy contact address','type'=>'text','placeholder'=>'Address for privacy-related inquiries','optional'=>true],
-    ['id'=>'will_send_texts','label'=>'Will the campaign send text messages?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes','No','Not sure yet']],
-    ['id'=>'text_types','label'=>'What kinds of texts?','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Campaign updates','Fundraising','Event reminders','Survey invitations','Get-out-the-vote']],
-    ['id'=>'donations_by_text','label'=>'Will you accept donations by text?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
-    ['id'=>'data_sharing','label'=>'Will campaign data be shared with service providers?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
+    ['id'=>'privacy_contact_address','label'=>'Privacy policy contact address','type'=>'text','placeholder'=>'Address for privacy-related inquiries','optional'=>false],
+    ['id'=>'uses_cookies','label'=>'Does the campaign use cookies or analytics tracking?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes','No','Not sure yet']],
+    ['id'=>'will_send_texts','label'=>'Will this campaign send political text messages?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes','No','Not sure yet']],
+    ['id'=>'sms_categories','label'=>'SMS messaging categories','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Campaign updates','Fundraising','Event reminders','Survey follow-ups','Get-out-the-vote','Volunteer recruitment','Polling','Other']],
+    ['id'=>'sms_optin_language','label'=>'SMS opt-in checkbox language','type'=>'text','placeholder'=>'e.g. I agree to receive text updates from this campaign','optional'=>true],
+    ['id'=>'survey_follow_up','label'=>'Does the survey collect email or phone for follow-up?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
+    ['id'=>'donations_by_text','label'=>'Will donations be solicited by text message?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
+    ['id'=>'third_party_analytics','label'=>'Does the campaign use third-party analytics tools (e.g. Google Analytics)?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
+    ['id'=>'shares_data','label'=>'Does the campaign share data with third-party vendors?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Not sure']],
     ['id'=>'service_providers','label'=>'Service provider names (for privacy policy)','type'=>'textarea','placeholder'=>'List any vendors who will access campaign data (e.g. ATP, Anedot, Mailchimp)...','optional'=>true],
 ]],
-/* ── Step 12 — Fundraising ── */
-['id'=>'q12','section'=>'12 — Fundraising','question'=>'Donation and fundraising setup','subtitle'=>'','fields'=>[
+/* ── Step 11 — Fundraising ── */
+['id'=>'q11','section'=>'11 — Fundraising','question'=>'Donation and fundraising setup','subtitle'=>'','fields'=>[
     ['id'=>'donation_needed','label'=>'Do you need a donation page?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Yes — build one','No','Already have one — just link it']],
-    ['id'=>'donation_platform','label'=>'Fundraising platform','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['ActBlue','WinRed','Anedot','Revv','NGP VAN','PayPal','Other','Not using one']],
-    ['id'=>'donation_url','label'=>'Donation URL or embed code','type'=>'url','placeholder'=>'https://actblue.com/... or paste embed code','optional'=>true],
-    ['id'=>'donation_button_label','label'=>'Donation button label','type'=>'text','placeholder'=>'e.g. Donate Now, Chip In, Support the Campaign','optional'=>true],
-    ['id'=>'donation_sms_optin','label'=>'Will the donation page include SMS opt-in?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No']],
-    ['id'=>'donation_sms_description','label'=>'What are donation-page SMS subscribers opting into?','type'=>'text','placeholder'=>'e.g. Campaign updates and fundraising alerts via text','optional'=>true],
+    ['id'=>'donation_platform','label'=>'Fundraising platform','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['ActBlue','WinRed','Anedot','Revv','NGP VAN','PayPal','Other','Haven\'t chosen yet','Not using one']],
+    ['id'=>'fundraising_platform_status','label'=>'Fundraising platform status','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Live and accepting donations','Set up but not yet live','In progress — EIN and bank account established','Haven\'t started yet']],
+    ['id'=>'donation_url','label'=>'Donation page URL','type'=>'url','placeholder'=>'e.g. https://secure.anedot.com/campaign/donate','optional'=>true],
+    ['id'=>'donation_embed_code','label'=>'Fundraising page embed code','type'=>'textarea','placeholder'=>'Paste the embed code from your fundraising platform if available','optional'=>true],
+    ['id'=>'donation_button_label','label'=>'Donation button label','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Donate','Contribute','Chip In','Support the Campaign','Custom (enter below)']],
+    ['id'=>'donation_button_custom','label'=>'Custom donation button label','type'=>'text','placeholder'=>'Enter your preferred button text','optional'=>true],
+    ['id'=>'accept_text_donations','label'=>'Will you accept donations by text message?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No']],
     ['id'=>'text_donation_processor','label'=>'Text-to-donate processor','type'=>'text','placeholder'=>'If accepting donations by text, which processor?','optional'=>true],
     ['id'=>'text_donation_accreditation','label'=>'Text-to-donate accreditation','type'=>'text','placeholder'=>'Accreditation or compliance info for text donations','optional'=>true],
 ]],
-/* ── Step 13 — Site Pages & Domain ── */
-['id'=>'q13','section'=>'13 — Site Pages & Domain','question'=>'Website pages and domain setup','subtitle'=>'Home, About, Issues, Privacy Policy, Cookie Policy, and SMS Terms are included automatically. Select any additional pages.','fields'=>[
-    ['id'=>'pages_optional','label'=>'Additional pages','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Endorsements','Volunteer Sign-Up','Events / Appearances Calendar','Press / News / Blog','Contact Page','Media / Press Kit','Survey Page']],
-    ['id'=>'domain_status','label'=>'Do you have a domain?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Yes — I own it already','No — need one purchased','Not sure']],
+/* ── Step 12 — Domain Setup ── */
+['id'=>'q12','section'=>'12 — Domain Setup','question'=>'Domain setup','subtitle'=>'Your Tier 1 website includes: Home, About, Issues, Sign-Up, Donate, Contact, Privacy Policy, Cookie-Tracking-SMS Compliance Policy, and Survey (if selected).','fields'=>[
+    ['id'=>'domain_status','label'=>'Do you have a domain?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Yes — I own it and will manage DNS myself','Yes — I own it and want ATP to manage it','I have an existing website to replace or rebuild','No — I need a domain purchased','Not sure']],
     ['id'=>'domain_preferred','label'=>'Preferred domain name','type'=>'text','placeholder'=>'e.g. johnstacyforcommissioner.com','optional'=>true],
     ['id'=>'domain_primary','label'=>'Primary domain (if different from preferred)','type'=>'text','placeholder'=>'The main domain that will be used','optional'=>true],
     ['id'=>'domain_redirects','label'=>'Redirect domains','type'=>'text','placeholder'=>'Other domains that should redirect to the primary site','optional'=>true],
     ['id'=>'domain_registrar','label'=>'Domain registrar','type'=>'text','placeholder'=>'e.g. GoDaddy, Namecheap, Google Domains','optional'=>true],
-    ['id'=>'web_optin_url','label'=>'Web opt-in URL','type'=>'url','placeholder'=>'If using a web-based opt-in, provide the URL','optional'=>true],
-    ['id'=>'web_optin_placement','label'=>'Web opt-in placement','type'=>'text','placeholder'=>'Where should the web opt-in appear on the site?','optional'=>true],
+    ['id'=>'hosting_provider','label'=>'Current hosting provider','type'=>'text','placeholder'=>'e.g. SiteGround, Wix, Squarespace, GoDaddy','optional'=>true],
+    ['id'=>'domain_credentials','label'=>'Do you have login credentials to share?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Need help recovering access']],
+    ['id'=>'campaign_email_needed','label'=>'Do you need a campaign email address on this domain?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Yes — set one up for me','Already have one (e.g., Google Workspace)','No']],
 ]],
-/* ── Step 14 — Endorsements ── */
-['id'=>'q14','section'=>'14 — Endorsements','question'=>'Any endorsements to feature?','subtitle'=>'Only needed if you selected the Endorsements page above. Names, titles, organizations — include quotes if available.','fields'=>[
-    ['id'=>'endorsements','label'=>'Endorsements list','type'=>'textarea','placeholder'=>"e.g.\nSheriff Mike Brown — 'John has my full support'\nRockwall County Republican Party",'optional'=>true],
-    ['id'=>'endorsement_links','label'=>'Endorsement links','type'=>'textarea','placeholder'=>'URLs to endorsement articles, press releases, or social media posts...','optional'=>true],
-]],
-/* ── Step 15 — Approval & Timeline ── */
-['id'=>'q15','section'=>'15 — Approval & Timeline','question'=>'Final details and launch timeline','subtitle'=>'','fields'=>[
+/* ── Step 13 — Approval & Timeline ── */
+['id'=>'q13','section'=>'13 — Approval & Timeline','question'=>'Final details and launch timeline','subtitle'=>'','fields'=>[
+    ['id'=>'approver_same','label'=>'Is the content approver the same as the primary contact?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes','No']],
     ['id'=>'approver_name','label'=>'Content approver name','type'=>'text','placeholder'=>'Who provides final content approval?','optional'=>false],
     ['id'=>'approver_email','label'=>'Content approver email','type'=>'email','placeholder'=>'approver@email.com','optional'=>false],
     ['id'=>'copy_help','label'=>'Will you provide copy or need writing help?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['We will provide all copy','We need help writing some copy','We need full content writing assistance']],
     ['id'=>'launch_timeline','label'=>'Target launch timeline','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['ASAP','2–4 weeks','1–3 months','Planning ahead — no rush']],
+    ['id'=>'launch_date','label'=>'Target launch date','type'=>'date','placeholder'=>'','optional'=>true],
     ['id'=>'comm_pref','label'=>'Preferred communication method','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Email','Phone','Text','All of the above']],
-    ['id'=>'referral_source','label'=>'How did you hear about ATP?','type'=>'text','placeholder'=>'Referral, search, social media, event...','optional'=>true],
+    ['id'=>'referral_source','label'=>'How did you hear about ATP?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Referral from another campaign or consultant','Web search (Google, Bing, etc.)','Social media (Facebook, X, LinkedIn, etc.)','Event or conference','Ballotpedia','News article or press coverage','Party committee or PAC recommendation','Other']],
+    ['id'=>'referral_source_other','label'=>'How did you hear about ATP? (specify)','type'=>'text','placeholder'=>'Please describe...','optional'=>true],
     ['id'=>'open_notes','label'=>'Anything else we should know?','type'=>'textarea','placeholder'=>'Final notes, questions, context...','optional'=>true],
+]],
+/* ── Step 14 — Additional Services & Upgrades ── */
+['id'=>'q14','section'=>'14 — Additional Services & Upgrades','question'=>'Beyond your website — what else does your campaign need?','subtitle'=>'These are not included in your Tier 1 website package. Check anything you\'d like to learn more about — no commitment required.','fields'=>[
+    ['id'=>'additional_services','label'=>'Additional campaign services','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Voter file / contact list acquisition','Political text messaging (MMS/SMS)','Polling & survey design','Digital advertising (Google, YouTube)','Social media advertising (Meta/Facebook, Instagram)','Email marketing & mass email','Google Workspace (campaign email, calendar, Drive)','Google Drive campaign asset storage','HubSpot CRM setup','Ballotpedia profile setup','Knowledge graph / discoverability package']],
+    ['id'=>'tier2_pages','label'=>'Website Tier 2 page upgrades','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Media / Press Kit','Endorsements (dedicated page)','Events / Appearances Calendar','Press / News / Blog','Polling Locator','FAQ']],
+    ['id'=>'additional_survey_focuses','label'=>'Additional survey focuses','type'=>'checkbox','placeholder'=>'','optional'=>true,'options'=>['Overall candidate impression','Issue priorities & positions','Messaging & communications feedback','Likelihood to vote & support','Volunteer & grassroots feedback','Website & digital experience']],
+]],
+/* ── Step 15 — Summary & Acknowledgment ── */
+['id'=>'q15','section'=>'15 — Summary & Acknowledgment','question'=>'Review and submit','subtitle'=>'Review the details below, confirm your package, and generate your candidate profile.','fields'=>[
+    ['id'=>'scope_acknowledgment','label'=>'I understand the above represents my Tier 1 website package. Additional pages and services will be discussed separately.','type'=>'checkbox','placeholder'=>'','optional'=>false,'options'=>['I acknowledge']],
+    ['id'=>'compliance_acknowledgment','label'=>'I have reviewed the compliance guide for my filing jurisdiction.','type'=>'checkbox','placeholder'=>'','optional'=>false,'options'=>['I acknowledge']],
 ]],
 ];}
 
@@ -239,7 +249,7 @@ function atp_admin_single($id){
     $name=$data['display_name']??$data['legal_name']??'Candidate';
     $back=admin_url('admin.php?page=atp-candidates');
     $exp=wp_nonce_url(admin_url('admin-ajax.php?action=atp_export_single&id='.$id),'atp_export','nonce');
-    $groups=['Source & Gateway'=>['filler_name','filler_email','filler_phone','filler_role','filing_url','ballotpedia_url','existing_website'],'Identity & Race'=>['org_type','legal_name','display_name','ballot_name','office','district','seat_number','state','party','election_year','election_date','election_type','position'],'Campaign Contact'=>['contact_name','contact_role','contact_email','contact_phone','contact_address','manager_name','manager_email','manager_phone','treasurer_name','treasurer_email','treasurer_address'],'Bio & Messaging'=>['ballotpedia_status','homepage_intro','bio_full','why_running','tagline','differentiator','key_messages','policy_passions'],'Platform & Issues'=>['issue_categories','issue_positions','opponents_missing_issue','changed_position'],'Background & Credentials'=>['profession','current_role','previous_experience','education_1','education_2','education_3','military_branch','military_years'],'Visual Branding'=>['headshot','logo','additional_photos','color_primary','color_secondary','color_accent','visual_style','design_notes'],'Social Media'=>['facebook','twitter_x','instagram','youtube','tiktok','linkedin','social_other'],'Video'=>['video_main','video_other'],'Survey Page'=>['survey_page_wanted','survey_tier','survey_page_label','survey_page_label_custom','survey_intro_text'],'Survey Embed'=>['survey_display','survey_embed_code','survey_collects_phone','sms_optin_language','sms_message_types','survey_goal'],'Legal & Compliance'=>['committee_name','paidfor_text','filing_level','committee_id','committee_address','campaign_phone','campaign_email','privacy_contact_email','privacy_contact_phone','privacy_contact_address','will_send_texts','text_types','donations_by_text','data_sharing','service_providers'],'Fundraising'=>['donation_needed','donation_platform','donation_url','donation_button_label','donation_sms_optin','donation_sms_description','text_donation_processor','text_donation_accreditation'],'Site Pages & Domain'=>['pages_standard','pages_optional','domain_status','domain_preferred','domain_primary','domain_redirects','domain_registrar','web_optin_url','web_optin_placement'],'Endorsements'=>['endorsements','endorsement_links'],'Approval & Timeline'=>['approver_name','approver_email','copy_help','launch_timeline','comm_pref','referral_source','open_notes']];
+    $groups=['Source & Gateway'=>['filler_name','filler_email','filler_phone','filler_role','filing_url','ballotpedia_url','existing_website'],'Identity & Race'=>['org_type','legal_name','display_name','ballot_name','office','district','seat_number','state','party','election_year','election_date','election_type','position'],'Campaign Contact'=>['contact_name','contact_role','contact_email','contact_phone','contact_address','manager_name','manager_email','manager_phone','treasurer_name','treasurer_email','treasurer_phone','treasurer_address'],'Bio & Messaging'=>['ballotpedia_status','homepage_intro','bio_full','why_running','tagline','differentiator','key_messages','policy_passions','endorsements_about'],'Platform & Issues'=>['issue_categories','issue_positions','opponents_missing_issue','changed_position'],'Background & Credentials'=>['profession','current_role','previous_experience','education_1','education_2','education_3','military_branch','military_years'],'Visual Branding'=>['headshot','logo','additional_photos','color_primary','color_secondary','color_accent','visual_style','design_notes'],'Social Media'=>['facebook','twitter_x','instagram','youtube','tiktok','linkedin','social_other'],'Video'=>['video_main','video_other'],'Survey Page'=>['survey_page_wanted','primary_survey_focus','survey_page_label','survey_page_label_custom','survey_display','survey_intro_text','existing_survey_link'],'Legal & Compliance'=>['committee_name','paidfor_text','filing_level','committee_id','committee_address','campaign_phone','campaign_email','privacy_contact_email','privacy_contact_phone','privacy_contact_address','uses_cookies','will_send_texts','sms_categories','sms_optin_language','survey_follow_up','donations_by_text','third_party_analytics','shares_data','service_providers'],'Fundraising'=>['donation_needed','donation_platform','fundraising_platform_status','donation_url','donation_embed_code','donation_button_label','donation_button_custom','accept_text_donations','text_donation_processor','text_donation_accreditation'],'Domain Setup'=>['domain_status','domain_preferred','domain_primary','domain_redirects','domain_registrar','hosting_provider','domain_credentials','campaign_email_needed'],'Approval & Timeline'=>['approver_same','approver_name','approver_email','copy_help','launch_timeline','launch_date','comm_pref','referral_source','referral_source_other','open_notes'],'Additional Services'=>['additional_services','tier2_pages','additional_survey_focuses'],'Summary'=>['scope_acknowledgment','compliance_acknowledgment']];
     echo '<div class="wrap"><h1>'.esc_html($name).' <a href="'.esc_url($back).'" class="button" style="margin-left:16px;font-size:12px">← All</a> <a href="'.esc_url($exp).'" class="button button-primary" style="margin-left:8px">Download JSON</a></h1>';
     foreach($groups as $g=>$fields){
         $rows='';foreach($fields as $f){$v=$data[$f]??null;if(!$v)continue;if(is_array($v))$v=implode(', ',$v);$l=ucwords(str_replace('_',' ',$f));$rows.='<tr><th style="width:200px;text-align:left;padding:8px 12px;color:#666;font-weight:500">'.esc_html($l).'</th><td style="padding:8px 12px">'.nl2br(esc_html($v)).'</td></tr>';}
@@ -454,7 +464,7 @@ function atp_send_notifications($data,$pid){
     $office=$data['office']??'—';$state=$data['state']??'—';
     $subj=str_replace(['{candidate_name}','{office}','{state}'],[$name,$office,$state],$s['notify_subject']??'New ATP Intake: {candidate_name}');
     $view=admin_url('admin.php?page=atp-candidates&view='.$pid);
-    $pairs=[['Candidate',$name],['Office',$office],['State',$state],['Party',$data['party']??'—'],['Election',($data['election_type']??'').($data['election_date']?' — '.$data['election_date']:'')],['Filing URL',$data['filing_url']??'—'],['Committee',$data['committee_name']??'—'],['Survey Page',$data['survey_page_wanted']??'—'],['Contact Email',$data['contact_email']??$data['filler_email']??'—'],['Launch Timeline',$data['launch_timeline']??'—'],['Disclaimer',$data['paidfor_text']??'—']];
+    $pairs=[['Candidate',$name],['Office',$office],['State',$state],['Party',$data['party']??'—'],['Election',($data['election_type']??'').($data['election_date']?' — '.$data['election_date']:'')],['Filing URL',$data['filing_url']??'—'],['Committee',$data['committee_name']??'—'],['Survey Focus',$data['primary_survey_focus']??'—'],['Platform Status',$data['fundraising_platform_status']??'—'],['Contact Email',$data['contact_email']??$data['filler_email']??'—'],['Launch Timeline',$data['launch_timeline']??'—'],['Disclaimer',$data['paidfor_text']??'—']];
     $rows='';foreach($pairs as[$l,$v]){if(!$v||$v==='—')continue;$rows.='<tr><td style="padding:8px 12px;border:1px solid #eee;background:#fff;color:#666;width:140px;font-size:13px">'.esc_html($l).'</td><td style="padding:8px 12px;border:1px solid #eee;font-size:13px;font-weight:600">'.esc_html($v).'</td></tr>';}
     $body='<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px">';
     $body.='<div style="background:#0e1235;padding:16px 24px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:12px">';
@@ -745,7 +755,7 @@ window.AK=function(el){
 };
 
 window.AF=function(){
-  ca();D.pages_standard=['Home','About','Issues','Privacy Policy','Cookie Policy','SMS Terms'];
+  ca();D.pages_standard=['Home','About','Issues','Sign-Up','Donate','Contact','Privacy Policy','Cookie-Tracking-SMS Compliance Policy'];
   document.getElementById('atpF').style.width='100%';
   document.getElementById('atpSt').textContent='Complete';
   document.getElementById('atpSc').textContent='';
@@ -766,7 +776,7 @@ function RS(){
     {t:'Branding',r:[['Headshot',D.headshot],['Logo',D.logo],['Primary Color',D.color_primary],['Style',D.visual_style]]},
     {t:'Compliance',r:[['Committee',D.committee_name],['Disclaimer',D.paidfor_text],['Privacy Email',D.privacy_contact_email]]},
     {t:'Fundraising',r:[['Donation',D.donation_needed],['Platform',D.donation_platform],['URL',D.donation_url]]},
-    {t:'Survey',r:[['Survey Page',D.survey_page_wanted],['Tier',D.survey_tier]]},
+    {t:'Survey',r:[['Survey Page',D.survey_page_wanted],['Focus',D.primary_survey_focus]]},
     {t:'Domain',r:[['Status',D.domain_status],['Preferred',D.domain_preferred]]},
     {t:'Timeline',r:[['Launch',D.launch_timeline],['Comms',D.comm_pref],['Approver',D.approver_name]]},
   ];
