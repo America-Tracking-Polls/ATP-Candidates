@@ -451,6 +451,8 @@ function atp_ajax_save(){
     $pid=wp_insert_post(['post_title'=>$name,'post_type'=>'atp_candidate','post_status'=>'publish']);
     if(is_wp_error($pid))wp_send_json_error($pid->get_error_message());
     foreach($raw as $k=>$v){$k=sanitize_key($k);is_array($v)?update_post_meta($pid,$k,array_map('sanitize_textarea_field',$v)):update_post_meta($pid,$k,sanitize_textarea_field((string)$v));}
+    $v3=json_decode(wp_unslash($_POST['v3_json']??''),true);
+    if($v3)update_post_meta($pid,'_v3_json',wp_slash(json_encode($v3,JSON_UNESCAPED_UNICODE)));
     atp_send_notifications($raw,$pid);
     wp_send_json_success(['post_id'=>$pid,'name'=>$name]);
 }
@@ -754,8 +756,33 @@ window.AK=function(el){
   else{CK[gid]=CK[gid].filter(i=>i!==t);}sv();
 };
 
+function buildV3(){
+  var ps=['Home','About','Issues','Sign-Up','Donate','Contact','Privacy Policy','Cookie-Tracking-SMS Compliance Policy'];
+  if(D.survey_page_wanted&&D.survey_page_wanted.indexOf('Yes')===0)ps.push('Survey');
+  return {
+    meta:{form_version:'3.0',candidate_id:0,submitted_at:new Date().toISOString(),status:'new'},
+    source_check:{submitter_name:D.filler_name||'',submitter_email:D.filler_email||'',submitter_phone:D.filler_phone||'',submitter_role:D.filler_role||'',filing_url:D.filing_url||'',ballotpedia_url:D.ballotpedia_url||'',existing_website:D.existing_website||''},
+    identity:{organization_type:D.org_type||'',legal_name:D.legal_name||'',display_name:D.display_name||'',ballot_name:D.ballot_name||'',office_sought:D.office||'',district:D.district||'',seat_number:D.seat_number||'',state:D.state||'',party:D.party||'',election_year:D.election_year||'',election_date:D.election_date||'',election_type:D.election_type||'',race_status:D.position||''},
+    contacts:{primary_contact_name:D.contact_name||'',primary_contact_role:D.contact_role||'',primary_contact_email:D.contact_email||'',primary_contact_phone:D.contact_phone||'',campaign_mailing_address:D.contact_address||'',campaign_manager_name:D.manager_name||'',campaign_manager_email:D.manager_email||'',campaign_manager_phone:D.manager_phone||'',treasurer_name:D.treasurer_name||'',treasurer_email:D.treasurer_email||'',treasurer_phone:D.treasurer_phone||'',treasurer_mailing_address:D.treasurer_address||''},
+    bio_messaging:{ballotpedia_survey_status:D.ballotpedia_status||'',homepage_intro:D.homepage_intro||'',full_bio:D.bio_full||'',why_running:D.why_running||'',tagline:D.tagline||'',differentiator:D.differentiator||'',key_messages:D.key_messages||'',policy_passions:D.policy_passions||'',endorsements_list:D.endorsements_about||''},
+    platform_issues:{issue_categories:Array.isArray(D.issue_categories)?D.issue_categories:[],positions:D.issue_positions||'',opponents_missing_issue:D.opponents_missing_issue||'',evolved_position:D.changed_position||''},
+    background:{current_profession:D.profession||'',current_role_title:D.current_role||'',previous_experience:D.previous_experience||'',education_1:D.education_1||'',education_2:D.education_2||'',education_3:D.education_3||'',military_branch:D.military_branch||'',military_years:D.military_years||''},
+    visual_branding:{headshot_link:D.headshot||'',logo_link:D.logo||'',additional_photos_link:D.additional_photos||'',primary_color:D.color_primary||'',secondary_color:D.color_secondary||'',accent_color:D.color_accent||'',visual_style:D.visual_style||'',design_notes:D.design_notes||''},
+    social_media:{facebook:D.facebook||'',x_twitter:D.twitter_x||'',instagram:D.instagram||'',youtube:D.youtube||'',tiktok:D.tiktok||'',linkedin:D.linkedin||'',other_platform:D.social_other||''},
+    video:{main_video_url:D.video_main||'',other_video_assets:D.video_other||''},
+    survey:{include_survey_page:D.survey_page_wanted||'',primary_focus:D.primary_survey_focus||'',page_name:D.survey_page_label||'',custom_page_label:D.survey_page_label_custom||'',placement:D.survey_display||'',intro_text:D.survey_intro_text||'',existing_survey_link:D.existing_survey_link||''},
+    legal_compliance:{committee_name:D.committee_name||'',paid_for_by:D.paidfor_text||'',filing_level:D.filing_level||'',committee_finance_id:D.committee_id||'',committee_mailing_address:D.committee_address||'',campaign_phone_legal:D.campaign_phone||'',campaign_email_legal:D.campaign_email||'',privacy_contact_email:D.privacy_contact_email||'',privacy_contact_phone:D.privacy_contact_phone||'',privacy_contact_address:D.privacy_contact_address||'',uses_cookies_analytics:D.uses_cookies||'',will_send_texts:D.will_send_texts||'',sms_message_types:Array.isArray(D.sms_categories)?D.sms_categories:[],sms_optin_language:D.sms_optin_language||'',survey_collects_contact:D.survey_follow_up||'',donations_solicited_by_text:D.donations_by_text||'',uses_third_party_analytics:D.third_party_analytics||'',shares_data_with_vendors:D.shares_data||'',service_provider_names:D.service_providers||''},
+    fundraising:{needs_donation_page:D.donation_needed||'',platform:D.donation_platform||'',platform_status:D.fundraising_platform_status||'',donation_page_url:D.donation_url||'',embed_code:D.donation_embed_code||'',button_label:D.donation_button_label||'',custom_button_label:D.donation_button_custom||'',accepts_text_donations:D.accept_text_donations||'',text_donate_processor:D.text_donation_processor||'',text_donate_accreditation:D.text_donation_accreditation||''},
+    domain_setup:{domain_status:D.domain_status||'',preferred_domain:D.domain_preferred||'',primary_domain:D.domain_primary||'',redirect_domains:D.domain_redirects||'',registrar:D.domain_registrar||'',current_hosting_provider:D.hosting_provider||'',has_login_credentials:D.domain_credentials||'',needs_campaign_email:D.campaign_email_needed||''},
+    approval_timeline:{approver_same_as_primary:D.approver_same||'',approver_name:D.approver_name||'',approver_email:D.approver_email||'',copy_help_needed:D.copy_help||'',launch_timeline:D.launch_timeline||'',launch_date:D.launch_date||'',preferred_communication:D.comm_pref||'',referral_source:D.referral_source||'',referral_source_other:D.referral_source_other||'',additional_notes:D.open_notes||''},
+    additional_services:{services_interest:Array.isArray(D.additional_services)?D.additional_services:[],tier2_pages_interest:Array.isArray(D.tier2_pages)?D.tier2_pages:[],additional_surveys_interest:Array.isArray(D.additional_survey_focuses)?D.additional_survey_focuses:[]},
+    acknowledgment:{scope_acknowledged:!!(D.scope_acknowledgment&&D.scope_acknowledgment.length),compliance_acknowledged:!!(D.compliance_acknowledgment&&D.compliance_acknowledgment.length)},
+    pages_standard:ps
+  };
+}
+
 window.AF=function(){
-  ca();D.pages_standard=['Home','About','Issues','Sign-Up','Donate','Contact','Privacy Policy','Cookie-Tracking-SMS Compliance Policy'];
+  ca();
   document.getElementById('atpF').style.width='100%';
   document.getElementById('atpSt').textContent='Complete';
   document.getElementById('atpSc').textContent='';
@@ -784,12 +811,13 @@ function RS(){
     const rows=s.r.filter(([,v])=>v&&String(v).trim());if(!rows.length)return'';
     return`<div class="ass"><div class="ast2">${s.t}</div><div class="asg">${rows.map(([l,v])=>`<div class="asi"><div class="asl">${l}</div><div class="asv">${v}</div></div>`).join('')}</div></div>`;
   }).join('');
-  document.getElementById('atpJ').textContent=JSON.stringify(D,null,2);
+  document.getElementById('atpJ').textContent=JSON.stringify(buildV3(),null,2);
 }
 
 function SW(){
   const st=document.getElementById('atpSS');st.textContent='Saving...';
-  const fd=new FormData();fd.append('action','atp_save');fd.append('nonce',NC);fd.append('data',JSON.stringify(D));
+  const v3=buildV3();
+  const fd=new FormData();fd.append('action','atp_save');fd.append('nonce',NC);fd.append('data',JSON.stringify(D));fd.append('v3_json',JSON.stringify(v3));
   fetch(AJ,{method:'POST',body:fd}).then(r=>r.json()).then(r=>{
     st.textContent=r.success?'Saved — '+r.data.name+' (ID '+r.data.post_id+')':'Error: '+(r.data||'?');
     if(r.success)localStorage.removeItem(LS);
@@ -797,12 +825,14 @@ function SW(){
 }
 
 window.AD=function(){
+  const v3=buildV3();
   const n=(D.display_name||D.legal_name||'candidate').toLowerCase().replace(/\s+/g,'-');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));
-  a.download=n+'-atp-intake.json';a.click();URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(v3,null,2)],{type:'application/json'}));
+  a.download=n+'-atp-intake-v3.json';a.click();URL.revokeObjectURL(a.href);
 };
 window.AC=function(){
-  navigator.clipboard.writeText(JSON.stringify(D,null,2)).then(()=>{
+  const v3=buildV3();
+  navigator.clipboard.writeText(JSON.stringify(v3,null,2)).then(()=>{
     const b=document.getElementById('atpCB');b.textContent='Copied';setTimeout(()=>b.textContent='Copy JSON',2500);
   });
 };
