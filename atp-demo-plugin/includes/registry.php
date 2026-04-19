@@ -840,65 +840,105 @@ HTML,
 [
 'tag'   => 'atp_cand_privacy',
 'label' => 'Candidate Page — Privacy Policy',
-'desc'  => 'Full privacy policy page. Edit the candidate name, committee name, contact email, phone, and address fields to customize for each candidate.',
+'desc'  => 'Comprehensive privacy policy with SMS/10DLC/TCPA disclosures. Edit [bracketed] fields: committee name, website URL, email, phone, address.',
 'default' => <<<'HTML'
 <section class="cand-legal">
   <div class="cand-legal-container">
     <h1>Privacy Policy</h1>
     <div class="cand-legal-meta">
-      Effective Date: December 9, 2025<br>
-      Authorized by: John Stacy for Rockwall County Commissioner Precinct 4
+      Effective Date: [Month Day, Year]<br>
+      Last Updated: [Month Day, Year]
     </div>
 
-    <h2>1. Introduction</h2>
-    <p>John Stacy for Rockwall County Commissioner Precinct 4 respects your privacy. This Policy explains how we collect, use, and protect your information when you visit our website, sign up for updates, donate, volunteer, or receive text messages from us.</p>
+    <p><strong>[Candidate Committee Name]</strong> (&ldquo;Campaign,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to respecting and protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and protect information when you visit our website at <strong>[Website URL]</strong>, submit forms, make contributions, sign up to volunteer, or participate in our email and text messaging programs.</p>
+    <p>By accessing or using this website, submitting your information, or opting in to our text messaging program, you acknowledge that you have read and understand this Privacy Policy.</p>
 
-    <h2>2. Information We Collect</h2>
-    <ul>
-      <li><strong>Contact Information:</strong> name, email address, phone number, mailing address.</li>
-      <li><strong>Automatically Collected Data:</strong> IP address, device and browser information, pages visited, referral URLs, and general location (via analytics/cookies).</li>
-      <li><strong>Survey/Engagement Data:</strong> responses to campaign surveys, event RSVPs, volunteer interests.</li>
-      <li><strong>Donation Data:</strong> amount, date, and payment method details processed by our payment processor (we do not store full payment card numbers).</li>
-    </ul>
+    <h2>1. Information We Collect</h2>
+    <p>We may collect the following categories of information, depending on how you interact with us:</p>
+    <h3>Identifiers and contact information</h3>
+    <ul><li>Name</li><li>Postal address</li><li>Email address</li><li>Mobile or other phone numbers</li><li>Social media handle or username (if you interact with us via social platforms)</li></ul>
+    <h3>Donation and payment-related information</h3>
+    <ul><li>Contribution amounts and dates</li><li>Payment card or bank details (processed by our payment or fundraising vendors and not stored by us in full)</li><li>Employer and occupation information, as required by campaign finance law</li></ul>
+    <h3>Campaign and engagement information</h3>
+    <ul><li>Event registrations and RSVPs</li><li>Volunteer interests and availability</li><li>Issue interests or preferences you choose to share</li><li>Records of your communications and interactions with the Campaign</li></ul>
+    <h3>Device, internet, and usage information</h3>
+    <ul><li>IP address, browser type, and device identifiers</li><li>Pages viewed, links clicked, and time spent on our site</li><li>Referring URLs and approximate location based on IP address</li><li>Information collected through cookies, pixels, and similar technologies</li></ul>
+    <h3>Text messaging information</h3>
+    <ul><li>Mobile phone number</li><li>Time, date, and content of messages you send or receive</li><li>Your opt-in or consent status, opt-out requests, and related metadata</li></ul>
+    <p>We may combine information you provide directly with information we obtain from publicly available sources or commercially available data, consistent with applicable law, to help us better understand and engage with supporters and voters.</p>
+
+    <h2>2. How We Collect Information</h2>
+    <p>We collect information in several ways:</p>
+    <p><strong>Directly from you</strong> when you fill out a form on our website, make a contribution, sign up to receive email or text messages, register for or attend an event, volunteer or communicate with the Campaign by email, phone, mail, or social media.</p>
+    <p><strong>Automatically</strong> through your use of our website, using cookies, pixels, and similar technologies that log device and usage information as described below.</p>
+    <p><strong>From third parties</strong> such as fundraising and payment processors, email/SMS/telephony providers, analytics and advertising partners, and public voter files or commercially available data, where permitted by law.</p>
 
     <h2>3. How We Use Information</h2>
     <ul>
-      <li>Provide updates, alerts, event information, and volunteer opportunities.</li>
-      <li>Respond to questions and support requests.</li>
-      <li>Improve our website and communications.</li>
-      <li>Comply with applicable campaign finance and other legal requirements.</li>
+      <li>Operating, managing, and improving our website, digital tools, and outreach programs</li>
+      <li>Communicating with you about campaign news, events, policy issues, volunteer opportunities, and fundraising</li>
+      <li>Processing and reporting contributions in compliance with campaign finance laws</li>
+      <li>Managing our email and text messaging programs, including opt-ins and opt-outs</li>
+      <li>Personalizing communications based on your interests and interactions, where permitted by law</li>
+      <li>Conducting analytics and measuring the effectiveness of our communications and advertising</li>
+      <li>Detecting, preventing, and addressing security incidents, fraud, or misuse</li>
+      <li>Complying with legal obligations and enforcing our Terms of Service</li>
     </ul>
-    <p>We do not sell, rent, or trade your personal information.</p>
 
-    <h2>4. Text Messaging (SMS/MMS)</h2>
-    <p>By providing your mobile number, you consent to receive recurring campaign messages, updates, and notifications via SMS/MMS. Message frequency may vary. Message and data rates may apply.</p>
+    <h2>4. Text Messaging (SMS/MMS) Privacy and 10DLC Disclosures</h2>
+    <p>If you choose to opt in to receive text messages from the Campaign, the following additional terms apply.</p>
+    <p>By providing your mobile phone number and affirmatively opting in, you consent to receive SMS or MMS messages relating to campaign updates, events, volunteer opportunities, voter outreach, and fundraising from <strong>[Candidate Committee Name]</strong>.</p>
+    <p>Message frequency may vary. Message and data rates may apply.</p>
+    <p>You can opt out of text messages at any time by replying <strong>STOP</strong> to any message we send. You may also text <strong>HELP</strong> for help.</p>
+    <h3>Mobile information and non-sharing for marketing</h3>
+    <p>Your mobile information, including your phone number, text message history with the Campaign, and SMS opt-in or consent status, will not be sold, rented, or shared with third parties for their own marketing or promotional purposes.</p>
+    <h3>Limited sharing to provide messaging services (10DLC/TCR-aligned language)</h3>
+    <p>We may share your personal data, including your mobile phone number and SMS opt-in or consent status, with third-party service providers that help us deliver our messaging program, such as messaging platforms, phone carriers, and other vendors that support the transmission of text messages.</p>
+    <p>We will not share your opt-in to an SMS campaign with any third party for purposes unrelated to providing you with the services of that campaign.</p>
+    <p><strong>If your broader policy mentions sharing data:</strong> All of the above categories exclude text messaging originator opt-in data and consent; this information will not be shared with any third parties for non-service-related purposes.</p>
+
+    <h2>5. Cookies, Pixels, and Analytics</h2>
+    <p>We and our service providers may use cookies, pixels, web beacons, and similar technologies to recognize your browser or device, remember your preferences, understand how you use our website, and measure the effectiveness of our communications and advertising.</p>
+    <p>We may also use third-party analytics services such as Google Analytics and advertising or social media pixels (for example, from Meta, Google, or other platforms) to deliver and measure ads.</p>
+    <p>You can usually set your browser to refuse cookies or alert you when cookies are being sent, though some features of the site may not function properly if you disable cookies.</p>
+
+    <h2>6. How We Share Information</h2>
+    <p>We may share the information we collect as follows:</p>
     <ul>
-      <li><strong>Opt Out:</strong> Reply STOP to end all texts.</li>
-      <li><strong>Help:</strong> Reply HELP or contact us at info@commissionerjohnstacy.com or (469) 939-2067.</li>
-      <li><strong>Consent Not Required:</strong> You do not need to consent to receive texts to donate or volunteer.</li>
-      <li><strong>Data Use:</strong> Your number is used only for campaign communications and is not shared with unauthorized third parties.</li>
+      <li><strong>With service providers and vendors</strong> that perform services on our behalf, such as website hosting, data analytics, email and SMS delivery, telephony services, payment and fundraising processing, compliance and reporting, data management, and security.</li>
+      <li><strong>With consultants and campaign personnel</strong> who support the Campaign&rsquo;s operations, strategy, outreach, and compliance, subject to appropriate confidentiality or contractual obligations.</li>
+      <li><strong>As required by law or legal process,</strong> such as to comply with campaign finance disclosure requirements, subpoenas, court orders, or other legal obligations, or to protect the rights, safety, and security of the Campaign, our supporters, or the public.</li>
+      <li><strong>In connection with organizational changes,</strong> for example if the Campaign transitions to a successor committee or authorized political organization, as permitted by law.</li>
     </ul>
-    <p>By enrolling, you confirm you are the account holder or have permission to enroll the number provided.</p>
+    <p>We do not sell or rent your personal information to third parties. We do not sell, rent, or share your mobile phone number or SMS opt-in data with third parties for their own marketing or promotional purposes.</p>
 
-    <h2>5. Cookies and Tracking</h2>
-    <p>We use cookies and analytics tools to operate the site, personalize content, and measure engagement. You can adjust cookie settings in your browser; disabling cookies may affect site functionality.</p>
+    <h2>7. Links to Other Websites and Platforms</h2>
+    <p>Our website, emails, or text messages may contain links to third-party sites or services. This Privacy Policy applies only to information collected by the Campaign. We encourage you to review the privacy policies of any third-party sites or services you use.</p>
 
-    <h2>6. Data Security</h2>
-    <p>We use industry-standard safeguards to protect your information. However, no method of transmission or storage is 100% secure, and we cannot guarantee absolute security.</p>
+    <h2>8. Data Retention</h2>
+    <p>We retain personal information for as long as reasonably necessary to accomplish the purposes described in this Privacy Policy. We may retain SMS consent and messaging logs for a period consistent with applicable statutes of limitation and best practices for documenting consent.</p>
 
-    <h2>7. Children&rsquo;s Privacy</h2>
-    <p>Our website and text services are not intended for children under 13, and we do not knowingly collect data from children under 13.</p>
+    <h2>9. Security</h2>
+    <p>We implement reasonable administrative, technical, and organizational measures designed to protect personal information from unauthorized access, use, alteration, or disclosure. However, no website, internet transmission, or data storage system can be guaranteed to be 100% secure.</p>
 
-    <h2>8. Policy Updates</h2>
-    <p>We may update this Policy from time to time. The latest version will be posted here with the effective date above.</p>
+    <h2>10. Children&rsquo;s Privacy</h2>
+    <p>Our website and communications, including our text messaging program, are not directed to children under 13 years of age, and we do not knowingly collect personal information from children under 13.</p>
 
-    <h2>9. Contact Us</h2>
+    <h2>11. Your Choices and Rights</h2>
+    <p><strong>Email and SMS communications:</strong> You may unsubscribe from campaign emails by clicking the &ldquo;unsubscribe&rdquo; link. You may opt out of text messages at any time by replying STOP.</p>
+    <p><strong>Cookies:</strong> You may manage cookies through your browser settings or through any cookie consent tools we make available.</p>
+    <p><strong>State privacy rights:</strong> Depending on where you live, you may have certain rights under state privacy laws (for example, in California, Colorado, Connecticut, Florida, Oregon, Texas, Utah, Virginia, or other jurisdictions). These rights may include the right to know, access, correct, delete, and opt out of certain data processing. To exercise any applicable privacy rights, contact us below.</p>
+
+    <h2>12. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we make changes, we will revise the &ldquo;Last Updated&rdquo; date at the top of this page.</p>
+
+    <h2>13. Contact Us</h2>
     <p>
-      John Stacy for Rockwall County Commissioner Precinct 4<br>
-      101 East Rusk St.<br>
-      Rockwall, TX 75087<br>
-      Email: <a href="mailto:info@commissionerjohnstacy.com">info@commissionerjohnstacy.com</a><br>
-      Phone: <a href="tel:+14699392067">(469) 939-2067</a>
+      <strong>[Candidate Committee Name]</strong><br>
+      [Mailing Address]<br>
+      <a href="mailto:[Campaign Email Address]">[Campaign Email Address]</a><br>
+      <a href="tel:[Campaign Phone Number]">[Campaign Phone Number]</a><br>
+      [Website URL]
     </p>
   </div>
 </section>
@@ -907,81 +947,81 @@ HTML,
 
 [
 'tag'   => 'atp_cand_cookies',
-'label' => 'Candidate Page — Cookie, Tracking & TCPA Policy',
-'desc'  => 'Full cookie/tracking/DLC10/TCPA policy page. Edit candidate name, committee, contact info to customize.',
+'label' => 'Candidate Page — Cookie, Tracking & SMS Compliance Policy',
+'desc'  => 'Comprehensive cookie/tracking/TCPA/10DLC policy. Edit [bracketed] fields: candidate name, office, committee, email, phone, address, website URL.',
 'default' => <<<'HTML'
 <section class="cand-legal">
   <div class="cand-legal-container">
-    <h1>Cookie, Tracking, and DLC10 / TCPA Policy</h1>
+    <h1>Cookie, Tracking, and SMS Compliance Policy</h1>
     <div class="cand-legal-meta">
-      For Commissioner John Stacy | Rockwall County, Texas<br>
-      Effective Date: 12/09/2025 &bull; Last Updated: 12/09/2025
+      For [Candidate Name] for [Office]<br>
+      Effective Date: [Month Day, Year] &bull; Last Updated: [Month Day, Year]
     </div>
 
-    <p>Commissioner John Stacy (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to transparency regarding how this website collects, uses, and stores information. This Cookie &amp; Tracking Policy explains how cookies, pixels, analytics tools, and communication technologies&mdash;including SMS/MMS systems covered under the Telephone Consumer Protection Act (TCPA) and 10DLC (DLC10) standards&mdash;operate when you visit or interact with this website.</p>
-    <p>By using this website, you consent to the use of cookies and tracking technologies as described in this Policy.</p>
+    <p><strong>[Candidate Committee Name]</strong> (&ldquo;Campaign,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to transparency regarding how this website collects, uses, and stores information.</p>
+    <p>This Cookie, Tracking, and SMS Compliance Policy explains how cookies, pixels, analytics tools, and communication technologies&mdash;including SMS/MMS systems governed by the Telephone Consumer Protection Act (TCPA) and 10DLC standards&mdash;operate when you visit or interact with this website.</p>
+    <p>By using this website, you consent to the use of cookies and tracking technologies as described in this Policy, subject to any choices you make through your browser settings or our cookie settings tools where available.</p>
 
-    <h2>1. What Are Cookies?</h2>
-    <p>Cookies are small text files placed on your computer or mobile device to store information about your browsing activity. Cookies may be:</p>
-    <ul>
-      <li><strong>Session cookies,</strong> which are deleted when you close your browser;</li>
-      <li><strong>Persistent cookies,</strong> which remain until you delete them or they expire;</li>
-      <li><strong>First-party cookies,</strong> which are placed by this website;</li>
-      <li><strong>Third-party cookies,</strong> which are placed by service providers such as analytics or advertising platforms.</li>
-    </ul>
-    <p>We use cookies to improve website performance, deliver relevant content, enhance security, and understand how visitors interact with our pages.</p>
+    <h2>1. What Are Cookies and Similar Technologies?</h2>
+    <p>Cookies are small text files stored on your computer or device when you visit a website. They are read by your browser and allow the site to recognize your device and remember information over time.</p>
+    <p>We and our service providers may also use related technologies such as pixels, web beacons, local storage, and software development kits (SDKs) to collect information about your interactions with this website, our emails, and our digital ads.</p>
 
     <h2>2. Types of Cookies We Use</h2>
-    <h3>A. Strictly Necessary Cookies</h3>
-    <p>These cookies are required for the site to function properly and cannot be disabled. They are used for security, authentication, load balancing, form submissions, and basic navigation.</p>
-    <h3>B. Performance and Analytics Cookies</h3>
-    <p>These cookies help us measure traffic and improve user experience. They may be provided by tools such as Google Analytics, Meta Pixel, or similar services. Information collected may include IP address, browser type, device type, referring URLs, pages visited, and date/time of visits. This data is generally aggregated and used for statistical purposes.</p>
-    <h3>C. Functionality Cookies</h3>
-    <p>These cookies enhance your experience by remembering your preferences, language settings, form values, or returning visitor recognition.</p>
-    <h3>D. Advertising and Retargeting Cookies</h3>
-    <p>If advertising, retargeting, or social media integrations are enabled, these cookies may measure engagement with campaign content, track visits after clicking advertisements, and understand which messages or pages are most effective.</p>
+    <h3>Session vs. persistent cookies</h3>
+    <p><strong>Session cookies</strong> are temporary and are deleted when you close your browser. <strong>Persistent cookies</strong> remain on your device for a longer period or until you delete them. They help us recognize you when you return to our site.</p>
+    <h3>First-party vs. third-party cookies</h3>
+    <p><strong>First-party cookies</strong> are set by this website&rsquo;s domain and used directly by the Campaign. <strong>Third-party cookies</strong> are set by other domains (for example, analytics or advertising partners) to provide services or features on our site.</p>
+    <h3>Strictly necessary cookies</h3>
+    <p>These cookies are essential for the website to function and cannot be switched off in our systems. They are usually set only in response to actions you take, such as filling out forms, setting preferences, or accessing secure areas.</p>
+    <h3>Performance and analytics cookies</h3>
+    <p>These cookies help us understand how visitors use the site. We may use tools such as Google Analytics or similar services to collect aggregated information about site usage, page views, referral sources, and technical performance.</p>
+    <h3>Functionality cookies</h3>
+    <p>These cookies allow the site to remember your choices and provide enhanced features, such as remembering form entries, language preferences, or display settings.</p>
+    <h3>Advertising, retargeting, and social media cookies</h3>
+    <p>These cookies may be set by us or by our advertising and social media partners to help us reach people who may be interested in the Campaign and to measure our advertising performance. They may track your browsing across multiple websites and build an interest profile.</p>
 
-    <h2>3. DLC10 and TCPA Compliance for SMS/MMS Communications</h2>
-    <p>Although cookies primarily relate to web browsing, this website may also collect and store information in connection with SMS/MMS communications sent via registered 10DLC routes. We comply with the Telephone Consumer Protection Act (TCPA), Federal Communications Commission (FCC) rules, CTIA guidelines, and 10DLC (DLC10) registration and vetting requirements.</p>
-    <p>We only send SMS/MMS messages when:</p>
+    <h2>3. How Cookies and Tracking Relate to SMS/MMS (TCPA and 10DLC)</h2>
+    <p>Although cookies primarily relate to web browsing, this website may also collect and store information connected to SMS/MMS communications sent via registered 10DLC routes and other compliant channels.</p>
+    <p>We comply with the Telephone Consumer Protection Act (TCPA), Federal Communications Commission (FCC) rules, CTIA guidelines and carrier content standards, and 10DLC registration and vetting requirements.</p>
+    <p>If you provide your mobile phone number through our website forms, surveys, QR codes, or other digital tools, we may use cookies and tracking technologies to:</p>
     <ul>
-      <li>You have provided express written consent to receive messages, and</li>
-      <li>You understand that messaging and data rates may apply, and</li>
-      <li>You may opt out at any time by replying &ldquo;STOP&rdquo; or using another designated opt-out method, and</li>
-      <li>Your consent is not a condition of receiving county services or assistance.</li>
+      <li>Record that you provided your number and affirmatively opted in to receive SMS/MMS messages from the Campaign, where applicable.</li>
+      <li>Store the date, time, and source of your consent for TCPA, carrier, and 10DLC compliance purposes.</li>
+      <li>Measure whether links in our text messages are opened or clicked, and whether visits originated from a text message.</li>
+      <li>Improve the timing, content, and relevance of our text message communications, consistent with your choices and applicable law.</li>
     </ul>
-    <p>If you provide your phone number through forms, surveys, QR codes, or other digital tools on this website, we may use cookies and tracking technologies to record your opt-in and consent status, store date/time of consent for compliance purposes, measure engagement with links shared via SMS/MMS, and improve the relevance and timing of messages.</p>
-    <p>We do not sell or share your telephone number with third parties for their own marketing purposes.</p>
+    <h3>Mobile information and non-sharing for marketing</h3>
+    <p>We do not sell or share your telephone number or SMS opt-in and consent data with third parties for their own marketing or promotional purposes.</p>
+    <p>We may share your phone number and SMS consent status only with service providers that help us send and manage text messages&mdash;such as messaging platforms, carriers, and compliance vendors&mdash;and only for purposes related to our messaging program.</p>
 
-    <h2>4. Additional Technologies Used</h2>
-    <h3>A. Tracking Pixels and Event Tags</h3>
-    <p>We may use tracking pixels, tags, or scripts from providers such as Google, Meta, or other platforms to measure page views, engagement, traffic sources, referral paths, and conversions related to campaign goals.</p>
-    <h3>B. Server Log Data</h3>
-    <p>Our servers may automatically collect limited technical information including IP address, browser type, device type, date and time of access, pages viewed, and error codes.</p>
-    <h3>C. Third-Party Integrations</h3>
-    <p>Our website may integrate with third-party services such as survey/form tools, email/SMS delivery services, security providers, and embedded video or social media analytics. Each third party maintains its own privacy and cookie policies.</p>
+    <h2>4. Third-Party Tools and Integrations</h2>
+    <p>This website may include forms, widgets, or embedded content that rely on third-party tools. These may include survey or form tools, email or SMS delivery services, security and anti-spam services (such as CAPTCHA), and embedded video players, social media posts, or QR-code tracking and analytics.</p>
+    <p>These third parties may set their own cookies or use their own tracking technologies according to their own privacy and cookie policies.</p>
 
-    <h2>5. How You Can Control Cookies</h2>
-    <p>You can manage cookies through your browser settings. Most browsers allow you to delete existing cookies, block some or all cookies, enable tracking protection or &ldquo;Do Not Track&rdquo; settings, receive alerts when a site tries to place a cookie, and use private or incognito browsing modes. Disabling certain cookies may affect the functionality and performance of this website.</p>
+    <h2>5. Regional Consent Models and Cookie Banner</h2>
+    <h3>European Union / UK and similar jurisdictions (opt-in)</h3>
+    <p>Where laws like the EU General Data Protection Regulation (GDPR) apply, we seek your explicit consent before placing non-essential cookies on your device. You may see a banner or settings panel that allows you to accept or reject different categories of cookies.</p>
+    <h3>United States and similar jurisdictions (notice and opt-out)</h3>
+    <p>In jurisdictions that follow an opt-out model, such as under the California Consumer Privacy Act (CCPA/CPRA) and similar state laws, we provide clear notice about our use of cookies and tracking technologies and offer mechanisms to opt out of certain types of data &ldquo;sale&rdquo; or &ldquo;sharing,&rdquo; where required.</p>
 
-    <h2>6. Data Retention</h2>
-    <p>We retain cookie and tracking data only for as long as necessary to fulfill operational, analytical, or legal requirements. SMS/MMS opt-in records required by TCPA, carrier rules, or DLC10 standards are retained for the periods needed to demonstrate compliance.</p>
+    <h2>6. How You Can Control Cookies and Tracking</h2>
+    <p><strong>Browser settings:</strong> Most browsers allow you to delete existing cookies, block all cookies, block cookies from specific sites, receive alerts before cookies are stored, use tracking protection or &ldquo;do not track&rdquo; features, and use private or incognito browsing modes. Blocking or deleting cookies may affect the functionality of this and other websites.</p>
+    <p><strong>Cookie banner or preference tools:</strong> Where available, you can use our cookie banner or settings center to accept or reject different categories of non-essential cookies.</p>
+    <p><strong>Global Privacy Controls and &ldquo;Do Not Track&rdquo;:</strong> Your browser or device may support Global Privacy Control (GPC) or &ldquo;Do Not Track&rdquo; signals. Our response to these signals may vary depending on legal requirements and technical capabilities.</p>
 
-    <h2>7. How We Protect Your Information</h2>
-    <p>We use reasonable administrative, technical, and physical safeguards to help protect information collected through this website, including SSL encryption, access controls, secure hosting, regular system updates, and vendor review with contractual safeguards. We do not sell personal data to third parties.</p>
+    <h2>7. Relationship to Privacy and SMS Policies</h2>
+    <p>This Cookie, Tracking, and SMS Compliance Policy works together with our Privacy Policy and any SMS Terms that may apply. Where there is any inconsistency between this Policy and the Privacy Policy regarding cookies or tracking, this Policy will govern the use of cookies and similar technologies; otherwise, the documents should be read together.</p>
 
-    <h2>8. Your Rights</h2>
-    <p>Depending on your location, you may have the right to request access to the information we hold about you, request correction or deletion of certain information, opt out of certain cookies or tracking technologies, and withdraw consent to receive SMS, MMS, or email communications.</p>
+    <h2>8. Changes to This Policy</h2>
+    <p>We may update this Cookie, Tracking, and SMS Compliance Policy from time to time to reflect changes in our practices, technology, or legal requirements. When we make changes, we will update the &ldquo;Last Updated&rdquo; date at the top of this page.</p>
 
-    <h2>9. Updates to This Policy</h2>
-    <p>We may update this Cookie, Tracking, and DLC10 / TCPA Policy periodically to reflect changes in technology, law, or our practices. When we do, we will revise the &ldquo;Effective Date&rdquo; at the top of this page.</p>
-
-    <h2>10. Contact Information</h2>
+    <h2>9. Contact Us</h2>
     <p>
-      Commissioner John Stacy<br>
-      Rockwall County, Texas<br>
-      Email: <a href="mailto:info@commissionerjohnstacy.com">info@commissionerjohnstacy.com</a><br>
-      Phone: <a href="tel:+14699392067">(469) 939-2067</a>
+      <strong>[Candidate Committee Name]</strong><br>
+      [Mailing Address]<br>
+      <a href="mailto:[Campaign Email Address]">[Campaign Email Address]</a><br>
+      <a href="tel:[Campaign Phone Number]">[Campaign Phone Number]</a><br>
+      [Website URL]
     </p>
   </div>
 </section>
