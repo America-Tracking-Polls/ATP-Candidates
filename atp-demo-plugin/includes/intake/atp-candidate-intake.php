@@ -113,12 +113,12 @@ function atp_default_questions(){return[
 /* ── Step 9 — Survey Page ── */
 ['id'=>'q9','section'=>'09 — Survey Page','question'=>'Set up your website survey','subtitle'=>'This adds a voter engagement survey to your campaign site. ATP handles survey design and delivery.','fields'=>[
     ['id'=>'survey_page_wanted','label'=>'Include a survey page on your website?','type'=>'radio','placeholder'=>'','optional'=>false,'options'=>['Yes — include a survey page','No — skip for now']],
-    ['id'=>'primary_survey_focus','label'=>'Primary survey focus','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Overall candidate impression','Issue priorities & positions','Messaging & communications feedback','Likelihood to vote & support','Volunteer & grassroots feedback','Website & digital experience']],
-    ['id'=>'survey_page_label','label'=>'What should the page be called?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Survey','Share Feedback','Voter Priorities','Community Input','Custom (enter below)']],
-    ['id'=>'survey_page_label_custom','label'=>'Custom page label','type'=>'text','placeholder'=>'Enter custom page name...','optional'=>true],
-    ['id'=>'survey_display','label'=>'Survey placement','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Dedicated page only','Homepage section only','Both dedicated page and homepage section']],
-    ['id'=>'survey_intro_text','label'=>'Survey page intro text','type'=>'textarea','placeholder'=>'Brief intro that appears above the survey on your website...','optional'=>true],
-    ['id'=>'existing_survey_link','label'=>'Already have a survey?','type'=>'url','placeholder'=>'Paste link or embed code if you already have one — otherwise leave blank','optional'=>true],
+    ['id'=>'primary_survey_focus','label'=>'Primary survey focus','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Overall candidate impression','Issue priorities & positions','Messaging & communications feedback','Likelihood to vote & support','Volunteer & grassroots feedback','Website & digital experience'],'cond'=>'cond-survey'],
+    ['id'=>'survey_page_label','label'=>'What should the page be called?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Survey','Share Feedback','Voter Priorities','Community Input','Custom (enter below)'],'cond'=>'cond-survey'],
+    ['id'=>'survey_page_label_custom','label'=>'Custom page label','type'=>'text','placeholder'=>'Enter custom page name...','optional'=>true,'cond'=>'cond-survey'],
+    ['id'=>'survey_display','label'=>'Survey placement','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Dedicated page only','Homepage section only','Both dedicated page and homepage section'],'cond'=>'cond-survey'],
+    ['id'=>'survey_intro_text','label'=>'Survey page intro text','type'=>'textarea','placeholder'=>'Brief intro that appears above the survey on your website...','optional'=>true,'cond'=>'cond-survey'],
+    ['id'=>'existing_survey_link','label'=>'Already have a survey?','type'=>'url','placeholder'=>'Paste link or embed code if you already have one — otherwise leave blank','optional'=>true,'cond'=>'cond-survey'],
 ]],
 /* ── Step 10 — Legal & Compliance ── */
 ['id'=>'q10','section'=>'10 — Legal & Compliance','question'=>'Legal details and compliance information','subtitle'=>'These fields generate your Privacy Policy, Cookie-Tracking-SMS Compliance Policy, and paid-for-by disclaimer automatically.','fields'=>[
@@ -152,8 +152,8 @@ function atp_default_questions(){return[
     ['id'=>'donation_button_label','label'=>'Donation button label','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Donate','Contribute','Chip In','Support the Campaign','Custom (enter below)']],
     ['id'=>'donation_button_custom','label'=>'Custom donation button label','type'=>'text','placeholder'=>'Enter your preferred button text','optional'=>true],
     ['id'=>'accept_text_donations','label'=>'Will you accept donations by text message?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No']],
-    ['id'=>'text_donation_processor','label'=>'Text-to-donate processor','type'=>'text','placeholder'=>'If accepting donations by text, which processor?','optional'=>true],
-    ['id'=>'text_donation_accreditation','label'=>'Text-to-donate accreditation','type'=>'text','placeholder'=>'Accreditation or compliance info for text donations','optional'=>true],
+    ['id'=>'text_donation_processor','label'=>'Text-to-donate processor','type'=>'text','placeholder'=>'If accepting donations by text, which processor?','optional'=>true,'cond'=>'cond-text-donate'],
+    ['id'=>'text_donation_accreditation','label'=>'Text-to-donate accreditation','type'=>'text','placeholder'=>'Accreditation or compliance info for text donations','optional'=>true,'cond'=>'cond-text-donate'],
 ]],
 /* ── Step 12 — Domain Setup ── */
 ['id'=>'q12','section'=>'12 — Domain Setup','question'=>'Domain setup','subtitle'=>'Your Standard website includes: Home, About, Issues, Sign-Up, Donate, Contact, Privacy Policy, Cookie-Tracking-SMS Compliance Policy, and Survey (if selected).','fields'=>[
@@ -162,8 +162,8 @@ function atp_default_questions(){return[
     ['id'=>'domain_primary','label'=>'Primary domain (if different from preferred)','type'=>'text','placeholder'=>'The main domain that will be used','optional'=>true],
     ['id'=>'domain_redirects','label'=>'Redirect domains','type'=>'text','placeholder'=>'Other domains that should redirect to the primary site','optional'=>true],
     ['id'=>'domain_registrar','label'=>'Domain registrar','type'=>'text','placeholder'=>'e.g. GoDaddy, Namecheap, Google Domains','optional'=>true],
-    ['id'=>'hosting_provider','label'=>'Current hosting provider','type'=>'text','placeholder'=>'e.g. SiteGround, Wix, Squarespace, GoDaddy','optional'=>true],
-    ['id'=>'domain_credentials','label'=>'Do you have login credentials to share?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Need help recovering access']],
+    ['id'=>'hosting_provider','label'=>'Current hosting provider','type'=>'text','placeholder'=>'e.g. SiteGround, Wix, Squarespace, GoDaddy','optional'=>true,'cond'=>'cond-rebuild'],
+    ['id'=>'domain_credentials','label'=>'Do you have login credentials to share?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Yes','No','Need help recovering access'],'cond'=>'cond-rebuild'],
     ['id'=>'campaign_email_needed','label'=>'Do you need a campaign email address on this domain?','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Yes — set one up for me','Already have one (e.g., Google Workspace)','No']],
 ]],
 /* ── Step 13 — Approval & Timeline ── */
@@ -176,7 +176,7 @@ function atp_default_questions(){return[
     ['id'=>'launch_date','label'=>'Target launch date','type'=>'date','placeholder'=>'','optional'=>true],
     ['id'=>'comm_pref','label'=>'Preferred communication method','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Email','Phone','Text','All of the above']],
     ['id'=>'referral_source','label'=>'How did you hear about ATP?','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Referral from another campaign or consultant','Web search (Google, Bing, etc.)','Social media (Facebook, X, LinkedIn, etc.)','Event or conference','Ballotpedia','News article or press coverage','Party committee or PAC recommendation','Other']],
-    ['id'=>'referral_source_other','label'=>'How did you hear about ATP? (specify)','type'=>'text','placeholder'=>'Please describe...','optional'=>true],
+    ['id'=>'referral_source_other','label'=>'How did you hear about ATP? (specify)','type'=>'text','placeholder'=>'Please describe...','optional'=>true,'cond'=>'cond-referral-other'],
     ['id'=>'open_notes','label'=>'Anything else we should know?','type'=>'textarea','placeholder'=>'Final notes, questions, context...','optional'=>true],
 ]],
 /* ── Step 14 — Grow Beyond Your Website ── */
@@ -648,8 +648,10 @@ body.admin-bar .apg{top:89px}
     <?php
     $fields=$q['fields'];$fi=0;
     while($fi<count($fields)):
-        $f=$fields[$fi];$tp=$f['type'];$fid=esc_attr($f['id']);$lbl=esc_html($f['label']);$ph=esc_attr($f['placeholder']??'');$opt=!empty($f['optional']);$opts=$f['options']??[];
+        $f=$fields[$fi];$tp=$f['type'];$fid=esc_attr($f['id']);$lbl=esc_html($f['label']);$ph=esc_attr($f['placeholder']??'');$opt=!empty($f['optional']);$opts=$f['options']??[];$cond=$f['cond']??'';
+        if($cond):?><div class="<?=esc_attr($cond)?>" id="afc_<?=$fid?>" style="display:none"><?php endif;
         if($tp==='radio'):?>
+      <?php if($lbl):?><label class="afl" style="margin-bottom:8px;display:block"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
       <div class="ach" id="ac_<?=$fid?>">
         <?php foreach($opts as $oi=>$o):$pts=explode(':',$o,2);?>
         <div class="ac" onclick="AP('<?=$fid?>','<?=esc_js(trim($pts[0]))?>',this)">
@@ -659,6 +661,7 @@ body.admin-bar .apg{top:89px}
         <?php endforeach;?>
       </div>
     <?php elseif($tp==='checkbox'):?>
+      <?php if($lbl):?><label class="afl" style="margin-bottom:8px;display:block"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
       <div class="akg" id="ak_<?=$fid?>">
         <?php foreach($opts as $o):?>
         <div class="aki" onclick="AK(this)"><div class="akb"><svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.5"/></svg></div><div class="acl"><?=esc_html($o)?></div></div>
@@ -682,7 +685,7 @@ body.admin-bar .apg{top:89px}
       </div>
       <?php $fi++;else:?>
       <div class="afc"><?php if($lbl):?><label class="afl" for="<?=$fid?>"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?><input type="<?=$tp?>" id="<?=$fid?>" placeholder="<?=$ph?>"></div>
-      <?php endif;endif;$fi++;endwhile;?>
+      <?php endif;endif;if($cond):?></div><?php endif;$fi++;endwhile;?>
     </div>
     <div class="acta">
       <?php if(!$first):?><button class="abk" onclick="AG(<?=$sn-1?>)">← Back</button><?php endif;?>
@@ -747,8 +750,31 @@ window.AG=function(n){ca();cur=n;
 
 window.AP=function(k,v,el){
   const g=el.closest('.ach');g.querySelectorAll('.ac').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');D[k]=v;sv();
+  el.classList.add('sel');D[k]=v;sv();CV();
 };
+
+function CV(){
+  function sh(id,show){var e=document.getElementById(id);if(e)e.style.display=show?'':'none';}
+  function shAll(cls,show){document.querySelectorAll('.'+cls).forEach(function(e){e.style.display=show?'':'none';});}
+  var yes=function(k){return D[k]&&D[k].indexOf('Yes')===0;};
+  var eq=function(k,v){return D[k]===v;};
+  // Step 10: survey fields only if Yes
+  shAll('cond-survey',yes('survey_page_wanted'));
+  // Step 10: custom label only if Custom selected
+  sh('afc_survey_page_label_custom',eq('survey_page_label','Custom (enter below)'));
+  // Step 12: custom button label
+  sh('afc_donation_button_custom',eq('donation_button_label','Custom (enter below)'));
+  // Step 12: text-to-donate fields
+  shAll('cond-text-donate',yes('accept_text_donations'));
+  // Step 13: hosting/credentials only if replace/rebuild
+  shAll('cond-rebuild',eq('domain_status','I have an existing website to replace or rebuild'));
+  // Step 14: referral specify
+  shAll('cond-referral-other',eq('referral_source','Other'));
+  // Step 15: Section C only if survey page wanted
+  sh('cond-survey-focuses',yes('survey_page_wanted'));
+}
+document.addEventListener('change',function(e){if(e.target.tagName==='SELECT')CV();});
+CV();
 
 window.AK=function(el){
   el.classList.toggle('chk');
