@@ -124,7 +124,7 @@ function atp_default_questions(){return[
 ['id'=>'q10','section'=>'10 — Legal & Compliance','question'=>'Legal details and compliance information','subtitle'=>'These fields generate your Privacy Policy, Cookie-Tracking-SMS Compliance Policy, and paid-for-by disclaimer automatically.','fields'=>[
     ['id'=>'committee_name','label'=>'Committee name','type'=>'text','placeholder'=>'e.g. John Stacy for Commissioner','optional'=>false],
     ['id'=>'paidfor_text','label'=>'Paid-for-by disclaimer text','type'=>'text','placeholder'=>'e.g. Paid for by John Stacy for Commissioner','optional'=>false],
-    ['id'=>'filing_level','label'=>'Filing level','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Federal (FEC)','State','County / Local']],
+    ['id'=>'filing_level','label'=>'Filing level','type'=>'select','placeholder'=>'','optional'=>false,'options'=>['Federal (FEC)','State','County','Municipal','Special District']],
     ['id'=>'committee_id','label'=>'Committee / campaign finance ID','type'=>'text','placeholder'=>'FEC ID or state campaign finance ID','optional'=>true],
     ['id'=>'committee_address','label'=>'Committee mailing address','type'=>'text','placeholder'=>'Official committee address','optional'=>false],
     ['id'=>'campaign_phone','label'=>'Campaign phone (for legal pages)','type'=>'tel','placeholder'=>'(000) 000-0000','optional'=>false],
@@ -725,9 +725,11 @@ let cur=1;const D={},CK={};
 }catch(e){}})();
 
 function sv(){try{localStorage.setItem(LS,JSON.stringify({d:D,c:CK}));}catch(e){}}
+document.querySelectorAll('#atpr input[type=date]').forEach(function(e){e.addEventListener('change',function(){e.dataset.touched='1';});});
 function vl(id){const e=document.getElementById(id);return e?e.value.trim():'';}
 function ca(){
-  document.querySelectorAll('#atpr input[type=text],#atpr input[type=email],#atpr input[type=date],#atpr input[type=url],#atpr input[type=tel],#atpr textarea,#atpr select').forEach(e=>{if(e.id&&e.value.trim())D[e.id]=e.value.trim();});
+  document.querySelectorAll('#atpr input[type=text],#atpr input[type=email],#atpr input[type=url],#atpr input[type=tel],#atpr textarea,#atpr select').forEach(e=>{if(e.id&&e.value.trim())D[e.id]=e.value.trim();});
+  document.querySelectorAll('#atpr input[type=date]').forEach(e=>{if(e.id&&e.dataset.touched)D[e.id]=e.value;});
   document.querySelectorAll('#atpr .akg').forEach(g=>{const k=g.id.replace('ak_','');D[k]=CK[g.id]||[];});
   sv();
 }
