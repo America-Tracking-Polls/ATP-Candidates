@@ -182,11 +182,11 @@ function atp_default_questions(){return[
 /* ── Step 14 — Grow Beyond Your Website ── */
 ['id'=>'q14','section'=>'14 — Grow Beyond Your Website','question'=>'What else does your campaign need?','subtitle'=>'These are not included in your Standard website package. Check anything you\'d like to learn more about — your ATP team will follow up separately. No commitment required.','fields'=>[
     ['id'=>'additional_services','label'=>'Campaign Services','type'=>'checkbox','placeholder'=>'Which of these services are you interested in learning more about?','optional'=>true,'options'=>['Voter file / contact list acquisition','Political text messaging (MMS/SMS)','Polling & survey design','Digital advertising (Google, YouTube)','Social media advertising (Meta/Facebook, Instagram)','Email marketing & mass email','Google Workspace (campaign email, calendar, Drive)','Google Drive campaign asset storage','HubSpot CRM setup','Ballotpedia profile setup','Knowledge graph / discoverability package'],'descs'=>['I need cell phone numbers and voter data for my district','I want to reach voters directly by text message','I want to measure voter sentiment beyond the website survey','I want to run online search and video ads','I want to run paid social media campaigns','I want to build and email a supporter list','Professional email on my campaign domain with calendar, mobile access, shared drives, and team collaboration','Centralized cloud storage for campaign photos, documents, and digital assets','I want to manage contacts, outreach, and pipeline in one place','I want help completing my Ballotpedia Candidate Connection survey','I want to show up when voters Google my name']],
-    ['id'=>'tier2_pages','label'=>'Additional Website Pages','type'=>'checkbox','placeholder'=>'Interested in expanding your website beyond the Standard pages?','optional'=>true,'options'=>['Media / Press Kit','Endorsements (dedicated page)','Events / Appearances Calendar','Press / News / Blog','Polling Locator','FAQ'],'descs'=>['Professional media page with press releases, news coverage, and downloadable campaign assets','A standalone page showcasing endorsements with linked sources','A calendar page for rallies, town halls, fundraisers, and public appearances','A news feed or blog for campaign updates, press releases, and announcements','Help voters find their polling place — embedded lookup tool on your site','Frequently asked questions page addressing common voter inquiries']],
+    ['id'=>'tier2_pages','label'=>'Additional Website Pages','type'=>'checkbox','placeholder'=>'Interested in expanding your website beyond the Standard pages?','optional'=>true,'options'=>['Media / Press Kit','Endorsements (dedicated page)','Events / Appearances Calendar','Press / News / Blog','Polling Locator','FAQ'],'descs'=>['Professional media page with press releases, news coverage, and downloadable campaign assets','A standalone page showcasing endorsements with linked sources','A calendar page for rallies, town halls, fundraisers, and public appearances','A news feed or blog for campaign updates, press releases, and announcements','Help voters find their polling place — embedded lookup tool on your site','Frequently asked questions page addressing common voter inquiries'],'subheaders'=>[0=>'Media & Endorsements',2=>'Additional Pages']],
     ['id'=>'additional_survey_focuses','label'=>'Additional Survey Focuses','type'=>'checkbox','placeholder'=>'Want deeper voter insight? Add a survey focused on a different dimension.','optional'=>true,'options'=>['Overall candidate impression','Issue priorities & positions','Messaging & communications feedback','Likelihood to vote & support','Volunteer & grassroots feedback','Website & digital experience'],'descs'=>['Tracks favorability, trust, and support intensity','Tells you what to emphasize in messaging and which policies to feature','Guides spend and channel mix; tests slogans and creative before scaling','Helps segment into supporters, persuadables, and targets for GOTV','Improves events and field operations; surfaces friction for activists','Directly improves the site clarity and conversion paths'],'cond'=>'cond-survey-focuses'],
 ]],
 /* ── Step 15 — Summary & Acknowledgment ── */
-['id'=>'q15','section'=>'15 — Summary & Acknowledgment','question'=>'Review and submit','subtitle'=>'Review the details below, confirm your package, and generate your candidate profile.</p><div id="atpSumContent" style="text-align:left;margin:20px 0"></div><p style="display:none">','fields'=>[
+['id'=>'q15','section'=>'15 — Summary & Acknowledgment','question'=>'Review and submit','subtitle'=>'Review the details below, confirm your package, and generate your candidate profile.','fields'=>[
     ['id'=>'scope_acknowledgment','label'=>'I understand the above represents my Standard website package. Additional pages and services will be discussed separately.','type'=>'checkbox','placeholder'=>'','optional'=>false,'options'=>['I acknowledge']],
     ['id'=>'compliance_acknowledgment','label'=>'I have reviewed the compliance guide for my filing jurisdiction.','type'=>'checkbox','placeholder'=>'','optional'=>false,'options'=>['I acknowledge']],
 ]],
@@ -645,6 +645,7 @@ body.admin-bar .apg{top:89px}
     <div class="asn"><?=esc_html($q['section'])?></div>
     <div class="asq"><?=esc_html($q['question'])?></div>
     <?php if(!empty($q['subtitle'])):?><div class="asu"><?=esc_html($q['subtitle'])?></div><?php endif;?>
+    <?php if($last):?><div id="atpSumContent" style="text-align:left;margin:20px 0"></div><?php endif;?>
     <div class="afg">
     <?php
     $fields=$q['fields'];$fi=0;
@@ -661,11 +662,12 @@ body.admin-bar .apg{top:89px}
         </div>
         <?php endforeach;?>
       </div>
-    <?php elseif($tp==='checkbox'):$descs=$f['descs']??[];?>
+    <?php elseif($tp==='checkbox'):$descs=$f['descs']??[];$subh=$f['subheaders']??[];?>
       <?php if($lbl):?><label class="afl" style="margin-bottom:4px;display:block"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
       <?php if($ph):?><div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:10px"><?=esc_html($ph)?></div><?php endif;?>
       <div class="akg" id="ak_<?=$fid?>">
         <?php foreach($opts as $oi=>$o):?>
+        <?php if(isset($subh[$oi])):?><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:<?=$oi?'14px':'0'?> 0 6px"><?=esc_html($subh[$oi])?></div><?php endif;?>
         <div class="aki" onclick="AK(this)"><div class="akb"><svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.5"/></svg></div><div><div class="acl"><?=esc_html($o)?></div><?php if(!empty($descs[$oi])):?><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;line-height:1.4"><?=esc_html($descs[$oi])?></div><?php endif;?></div></div>
         <?php endforeach;?>
       </div>
@@ -693,7 +695,7 @@ body.admin-bar .apg{top:89px}
     <div class="acta">
       <?php if(!$first):?><button class="abk" onclick="AG(<?=$sn-1?>)">← Back</button><?php endif;?>
       <?php if(!$last):?><button class="abt" onclick="AG(<?=$sn+1?>)">Continue</button>
-      <?php else:?><button class="abt" onclick="AF()">Generate Profile →</button><?php endif;?>
+      <?php else:?><button class="abt" id="atpGenBtn" onclick="AF()" disabled style="opacity:.4;cursor:not-allowed">Generate Profile →</button><?php endif;?>
       <?php if($first):?><div class="aht"><kbd>Enter ↵</kbd></div><?php endif;?>
     </div>
   </div>
@@ -807,7 +809,7 @@ function CV(){
     });}
   }
 }
-document.addEventListener('change',function(e){if(e.target.tagName==='SELECT')CV();});
+document.addEventListener('change',function(e){if(e.target.tagName==='SELECT'){if(e.target.id)D[e.target.id]=e.target.value;CV();}});
 CV();
 
 window.AK=function(el){
@@ -816,7 +818,15 @@ window.AK=function(el){
   const t=el.querySelector('.acl').textContent.trim();
   if(el.classList.contains('chk')){if(!CK[gid].includes(t))CK[gid].push(t);}
   else{CK[gid]=CK[gid].filter(i=>i!==t);}sv();
+  checkGate();
 };
+function checkGate(){
+  var s1=CK['ak_scope_acknowledgment']||[];
+  var s2=CK['ak_compliance_acknowledgment']||[];
+  var ok=s1.length>0&&s2.length>0;
+  var btn=document.getElementById('atpGenBtn');
+  if(btn){btn.disabled=!ok;btn.style.opacity=ok?'1':'.4';btn.style.cursor=ok?'pointer':'not-allowed';}
+}
 
 function buildV3(){
   var ps=['Home','About','Issues','Sign-Up','Donate','Contact','Privacy Policy','Cookie-Tracking-SMS Compliance Policy'];
