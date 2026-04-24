@@ -1,0 +1,64 @@
+{
+  "client_slug": "john-stacy",
+  "client_name": "John Stacy for Commissioner",
+  "client_tagline": "Rockwall County Commissioner, Precinct 4",
+
+  "whitelabel": {
+    "logo_url": "",
+    "logo_width": "200px",
+    "color_primary": "#0B1C33",
+    "color_accent": "#E60000",
+    "login_bg_image": "",
+    "admin_footer": "Powered by <strong>America Tracking Polls</strong> &bull; Mirror Factory",
+    "dashboard_msg": "Welcome to your campaign website dashboard. Use the shortcode editor to update content, or visit the front-end to preview your site."
+  },
+
+  "domain": {
+    "preferred": "commissionerjohnstacy.com",
+    "primary": "commissionerjohnstacy.com"
+  },
+
+  "pages": [
+    {
+      "title": "Home",
+      "slug": "home",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_hero","atp_cand_stats","atp_cand_about","atp_cand_messages","atp_cand_issues","atp_cand_endorsements","atp_cand_video","atp_cand_volunteer","atp_cand_survey","atp_cand_donate","atp_cand_social","atp_cand_footer"],
+      "is_front_page": true
+    },
+    {
+      "title": "Issues and Answers",
+      "slug": "issues",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_issues_page","atp_cand_footer"]
+    },
+    {
+      "title": "Donate",
+      "slug": "donate",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_donate_page","atp_cand_footer"]
+    },
+    {
+      "title": "Contact",
+      "slug": "contact",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_contact","atp_cand_footer"]
+    },
+    {
+      "title": "Privacy Policy",
+      "slug": "privacy-policy",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_privacy","atp_cand_footer"]
+    },
+    {
+      "title": "Cookie and TCPA Policy",
+      "slug": "cookie-policy",
+      "shortcodes": ["atp_cand_styles","atp_cand_nav","atp_cand_cookies","atp_cand_footer"]
+    },
+    {
+      "title": "Candidate Intake Form",
+      "slug": "intake",
+      "shortcodes": ["atp_intake"]
+    }
+  ],
+
+  "intake_json": "intake-v3.json",
+
+  "github_repo": "mirror-factory/ATP-Demo",
+  "deploy_branch": "main"
+}

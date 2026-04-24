@@ -1,0 +1,69 @@
+name: Build & Release Client Plugins
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      client:
+        description: 'Client slug to build (or "all" for all clients)'
+        required: true
+        default: 'all'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Auto-populated from sites/ directory
+        client: ${{ fromJSON(needs.list-clients.outputs.clients) }}
+    needs: list-clients
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build plugin for ${{ matrix.client }}
+        run: ./scripts/build-site.sh ${{ matrix.client }}
+
+      - name: Create ZIP
+        run: |
+          cd dist/${{ matrix.client }}
+          zip -r ../../atp-campaign-site-${{ matrix.client }}.zip atp-campaign-site/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atp-${{ matrix.client }}
+          path: atp-campaign-site-${{ matrix.client }}.zip
+
+  list-clients:
+    runs-on: ubuntu-latest
+    outputs:
+      clients: ${{ steps.list.outputs.clients }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: |
+          if [ "${{ github.event.inputs.client }}" = "all" ] || [ -z "${{ github.event.inputs.client }}" ]; then
+            CLIENTS=$(ls -d sites/*/ | xargs -I{} basename {} | jq -R . | jq -s .)
+          else
+            CLIENTS='["${{ github.event.inputs.client }}"]'
+          fi
+          echo "clients=$CLIENTS" >> "$GITHUB_OUTPUT"
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*.zip
+          generate_release_notes: true

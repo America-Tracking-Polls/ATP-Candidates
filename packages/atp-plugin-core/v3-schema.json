@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "form_version": "3.0",
+    "candidate_id": 0,
+    "submitted_at": "",
+    "status": "new"
+  },
+
+  "source_check": {
+    "submitter_name": "",
+    "submitter_email": "",
+    "submitter_phone": "",
+    "submitter_role": "",
+    "filing_url": "",
+    "ballotpedia_url": "",
+    "existing_website": ""
+  },
+
+  "identity": {
+    "organization_type": "",
+    "legal_name": "",
+    "display_name": "",
+    "ballot_name": "",
+    "office_sought": "",
+    "district": "",
+    "seat_number": "",
+    "state": "",
+    "party": "",
+    "election_year": "",
+    "election_date": "",
+    "election_type": "",
+    "race_status": ""
+  },
+
+  "contacts": {
+    "primary_contact_name": "",
+    "primary_contact_role": "",
+    "primary_contact_email": "",
+    "primary_contact_phone": "",
+    "campaign_mailing_address": "",
+    "campaign_manager_name": "",
+    "campaign_manager_email": "",
+    "campaign_manager_phone": "",
+    "treasurer_name": "",
+    "treasurer_email": "",
+    "treasurer_phone": "",
+    "treasurer_mailing_address": ""
+  },
+
+  "bio_messaging": {
+    "ballotpedia_survey_status": "",
+    "homepage_intro": "",
+    "full_bio": "",
+    "why_running": "",
+    "tagline": "",
+    "differentiator": "",
+    "key_messages": "",
+    "policy_passions": "",
+    "endorsements_list": ""
+  },
+
+  "platform_issues": {
+    "issue_categories": [],
+    "positions": "",
+    "opponents_missing_issue": "",
+    "evolved_position": ""
+  },
+
+  "background": {
+    "current_profession": "",
+    "current_role_title": "",
+    "previous_experience": "",
+    "education_1": "",
+    "education_2": "",
+    "education_3": "",
+    "military_branch": "",
+    "military_years": ""
+  },
+
+  "visual_branding": {
+    "headshot_link": "",
+    "logo_link": "",
+    "additional_photos_link": "",
+    "primary_color": "",
+    "secondary_color": "",
+    "accent_color": "",
+    "visual_style": "",
+    "design_notes": ""
+  },
+
+  "social_media": {
+    "facebook": "",
+    "x_twitter": "",
+    "instagram": "",
+    "youtube": "",
+    "tiktok": "",
+    "linkedin": "",
+    "other_platform": ""
+  },
+
+  "video": {
+    "main_video_url": "",
+    "other_video_assets": ""
+  },
+
+  "survey": {
+    "include_survey_page": "",
+    "primary_focus": "",
+    "page_name": "",
+    "custom_page_label": "",
+    "placement": "",
+    "intro_text": "",
+    "existing_survey_link": ""
+  },
+
+  "legal_compliance": {
+    "committee_name": "",
+    "paid_for_by": "",
+    "filing_level": "",
+    "committee_finance_id": "",
+    "committee_mailing_address": "",
+    "campaign_phone_legal": "",
+    "campaign_email_legal": "",
+    "privacy_contact_email": "",
+    "privacy_contact_phone": "",
+    "privacy_contact_address": "",
+    "uses_cookies_analytics": "",
+    "will_send_texts": "",
+    "sms_message_types": [],
+    "sms_optin_language": "",
+    "survey_collects_contact": "",
+    "donations_solicited_by_text": "",
+    "uses_third_party_analytics": "",
+    "shares_data_with_vendors": "",
+    "service_provider_names": ""
+  },
+
+  "fundraising": {
+    "needs_donation_page": "",
+    "platform": "",
+    "platform_status": "",
+    "donation_page_url": "",
+    "embed_code": "",
+    "button_label": "",
+    "custom_button_label": "",
+    "accepts_text_donations": "",
+    "text_donate_processor": "",
+    "text_donate_accreditation": ""
+  },
+
+  "domain_setup": {
+    "domain_status": "",
+    "preferred_domain": "",
+    "primary_domain": "",
+    "redirect_domains": "",
+    "registrar": "",
+    "current_hosting_provider": "",
+    "has_login_credentials": "",
+    "needs_campaign_email": ""
+  },
+
+  "approval_timeline": {
+    "approver_same_as_primary": "",
+    "approver_name": "",
+    "approver_email": "",
+    "copy_help_needed": "",
+    "launch_timeline": "",
+    "launch_date": "",
+    "preferred_communication": "",
+    "referral_source": "",
+    "referral_source_other": "",
+    "additional_notes": ""
+  },
+
+  "additional_services": {
+    "services_interest": [],
+    "tier2_pages_interest": [],
+    "additional_surveys_interest": []
+  },
+
+  "acknowledgment": {
+    "scope_acknowledged": false,
+    "compliance_acknowledged": false
+  },
+
+  "pages_standard": [
+    "Home",
+    "About",
+    "Issues",
+    "Sign-Up",
+    "Donate",
+    "Contact",
+    "Privacy Policy",
+    "Cookie-Tracking-SMS Compliance Policy"
+  ]
+}
