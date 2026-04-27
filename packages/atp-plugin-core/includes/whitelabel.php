@@ -228,7 +228,16 @@ function atp_wl_render_settings() {
             'dashboard_msg'   => sanitize_textarea_field( $_POST['dashboard_msg'] ?? '' ),
         ];
         update_option( 'atp_whitelabel', $data );
-        echo '<div class="notice notice-success is-dismissible"><p>White label settings saved.</p></div>';
+
+        // Save upload storage settings
+        update_option( 'atp_upload_storage', sanitize_text_field( $_POST['upload_storage'] ?? 'wordpress' ) );
+        if ( ! empty( $_POST['drive_folder_id'] ) ) {
+            $drive_config = get_option( 'atp_drive_config', [] );
+            $drive_config['folder_id'] = sanitize_text_field( $_POST['drive_folder_id'] );
+            update_option( 'atp_drive_config', $drive_config );
+        }
+
+        echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
     }
 
     $wl = atp_wl_get();
@@ -298,7 +307,33 @@ function atp_wl_render_settings() {
                     </tr>
                 </table>
                 <p class="submit">
-                    <button type="submit" name="atp_wl_save" class="button button-primary button-hero">Save White Label Settings</button>
+                </table>
+
+                <h2 style="margin-top:24px">File Upload Storage</h2>
+                <table class="form-table">
+                    <tr>
+                        <th><label for="upload_storage">Upload destination</label></th>
+                        <td>
+                            <?php $storage = get_option( 'atp_upload_storage', 'wordpress' ); ?>
+                            <select name="upload_storage" id="upload_storage">
+                                <option value="wordpress" <?php selected( $storage, 'wordpress' ); ?>>WordPress Media Library</option>
+                                <option value="google_drive" <?php selected( $storage, 'google_drive' ); ?>>Google Drive</option>
+                            </select>
+                            <p class="description">WordPress Media Library works out of the box. Google Drive requires credentials below.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="drive_folder_id">Google Drive Folder ID</label></th>
+                        <td>
+                            <?php $drive_config = get_option( 'atp_drive_config', [] ); ?>
+                            <input type="text" name="drive_folder_id" id="drive_folder_id" value="<?php echo esc_attr( $drive_config['folder_id'] ?? '' ); ?>" class="regular-text">
+                            <p class="description">The folder ID from your Intake_Forms folder URL. Only needed for Google Drive storage.</p>
+                        </td>
+                    </tr>
+                <table>
+
+                <p class="submit">
+                    <button type="submit" name="atp_wl_save" class="button button-primary button-hero">Save Settings</button>
                 </p>
             </form>
         </div>

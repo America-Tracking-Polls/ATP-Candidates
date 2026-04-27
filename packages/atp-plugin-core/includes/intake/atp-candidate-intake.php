@@ -86,9 +86,9 @@ function atp_default_questions(){return[
 ]],
 /* ── Step 6 — Visual Branding ── */
 ['id'=>'q6','section'=>'06 — Visual Branding','question'=>'Campaign branding and visual assets','subtitle'=>'Share what you have. We use the ATP template for anything missing.','fields'=>[
-    ['id'=>'headshot','label'=>'Candidate headshot (required)','type'=>'url','placeholder'=>'Google Drive / Dropbox link — or note to send separately','optional'=>false],
-    ['id'=>'logo','label'=>'Campaign logo','type'=>'url','placeholder'=>'Google Drive / Dropbox link','optional'=>true],
-    ['id'=>'additional_photos','label'=>'Additional campaign photos','type'=>'url','placeholder'=>'Google Drive / Dropbox link','optional'=>true],
+    ['id'=>'headshot','label'=>'Candidate headshot (required)','type'=>'file','placeholder'=>'JPG, PNG, or HEIC — max 10 MB','optional'=>false,'accept'=>'.jpg,.jpeg,.png,.heic','max_size'=>10,'max_files'=>1],
+    ['id'=>'logo','label'=>'Campaign logo','type'=>'file','placeholder'=>'JPG, PNG, SVG, or PDF — max 10 MB','optional'=>true,'accept'=>'.jpg,.jpeg,.png,.svg,.pdf','max_size'=>10,'max_files'=>1],
+    ['id'=>'additional_photos','label'=>'Additional campaign photos','type'=>'file','placeholder'=>'JPG, PNG, or HEIC — max 10 MB each, up to 10 files','optional'=>true,'accept'=>'.jpg,.jpeg,.png,.heic','max_size'=>10,'max_files'=>10],
     ['id'=>'color_primary','label'=>'Primary brand color','type'=>'text','placeholder'=>'e.g. Navy #002868 — or leave blank for template','optional'=>true],
     ['id'=>'color_secondary','label'=>'Secondary brand color','type'=>'text','placeholder'=>'e.g. Red #BF0A30','optional'=>true],
     ['id'=>'color_accent','label'=>'Accent color','type'=>'text','placeholder'=>'e.g. Gold #C4A84F','optional'=>true],
@@ -572,6 +572,16 @@ body.admin-bar .apg{top:89px}
 #atpr select option{background:#151a42;color:var(--wh)}
 #atpr textarea{resize:vertical;min-height:100px;line-height:1.6}
 .ao{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.05em;color:var(--w6);border:1px solid var(--w2);border-radius:3px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.atp-upload-zone{border:2px dashed var(--w2);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.atp-upload-zone:hover,.atp-upload-zone.drag{border-color:var(--rd);background:rgba(212,43,43,.06)}
+.atp-upload-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.atp-upload-thumb{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--w2)}
+.atp-upload-thumb img{width:100%;height:100%;object-fit:cover}
+.atp-upload-thumb .atp-upload-remove{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#fff;line-height:1}
+.atp-upload-progress{height:3px;background:var(--w1);border-radius:2px;margin-top:6px;overflow:hidden}
+.atp-upload-progress-bar{height:100%;background:var(--rd);width:0%;transition:width .3s}
+.atp-upload-file{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--w1);border:1px solid var(--w2);border-radius:6px;font-size:12px;color:rgba(255,255,255,.7);margin-top:6px}
+.atp-upload-file .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ach{display:flex;flex-direction:column;gap:9px}
 .ac{display:flex;align-items:flex-start;gap:13px;padding:14px 17px;border:1px solid var(--w2);border-radius:6px;cursor:pointer;background:var(--w1);transition:border-color .2s,background .2s;user-select:none;opacity:.65}
 .ac:hover{border-color:rgba(212,43,43,.5);background:rgba(212,43,43,.06);opacity:1}
@@ -679,6 +689,20 @@ body.admin-bar .apg{top:89px}
     <?php elseif($tp==='textarea'):?>
       <div class="afc"><?php if($lbl):?><label class="afl" for="<?=$fid?>"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
         <textarea id="<?=$fid?>" placeholder="<?=$ph?>"></textarea>
+      </div>
+    <?php elseif($tp==='file'):$maxFiles=(int)($f['max_files']??1);$accept=esc_attr($f['accept']??'');$maxMB=(int)($f['max_size']??10);?>
+      <div class="afc">
+        <?php if($lbl):?><label class="afl"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
+        <div class="atp-upload" id="upload_<?=$fid?>" data-field="<?=$fid?>" data-accept="<?=$accept?>" data-max-size="<?=$maxMB?>" data-max-files="<?=$maxFiles?>">
+          <div class="atp-upload-zone" onclick="document.getElementById('file_<?=$fid?>').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');atpHandleDrop(event,'<?=$fid?>')">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:8px">Drop file<?=$maxFiles>1?'s':''?> here or <span style="color:var(--rd);cursor:pointer">browse</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px"><?=$ph?></div>
+          </div>
+          <input type="file" id="file_<?=$fid?>" accept="<?=$accept?>" <?=$maxFiles>1?'multiple':''?> style="display:none" onchange="atpHandleFiles(this.files,'<?=$fid?>')">
+          <div class="atp-upload-previews" id="previews_<?=$fid?>"></div>
+          <div class="atp-upload-error" id="error_<?=$fid?>" style="display:none;color:#E60000;font-size:12px;margin-top:6px"></div>
+        </div>
       </div>
     <?php else:
         $nxt=$fields[$fi+1]??null;
@@ -832,6 +856,83 @@ function checkGate(){
   var ok=s1.length>0&&s2.length>0;
   var btn=document.getElementById('atpGenBtn');
   if(btn){btn.disabled=!ok;btn.style.opacity=ok?'1':'.4';btn.style.cursor=ok?'pointer':'not-allowed';}
+}
+
+var UPLOADS={};
+function atpHandleDrop(e,fid){
+  var files=e.dataTransfer.files;
+  atpHandleFiles(files,fid);
+}
+function atpHandleFiles(files,fid){
+  var el=document.getElementById('upload_'+fid);
+  var accept=(el.dataset.accept||'').split(',').map(function(s){return s.trim().toLowerCase();});
+  var maxMB=parseInt(el.dataset.maxSize||'10');
+  var maxFiles=parseInt(el.dataset.maxFiles||'1');
+  var errEl=document.getElementById('error_'+fid);
+  errEl.style.display='none';
+  if(!UPLOADS[fid])UPLOADS[fid]=[];
+  for(var i=0;i<files.length;i++){
+    if(UPLOADS[fid].length>=maxFiles){errEl.textContent='Maximum '+maxFiles+' file'+(maxFiles>1?'s':'')+' allowed.';errEl.style.display='block';break;}
+    var f=files[i];
+    var ext='.'+f.name.split('.').pop().toLowerCase();
+    if(accept.length&&!accept.includes(ext)){errEl.textContent=f.name+': file type not accepted. Use '+accept.join(', ');errEl.style.display='block';continue;}
+    if(f.size>maxMB*1024*1024){errEl.textContent=f.name+': exceeds '+maxMB+' MB limit.';errEl.style.display='block';continue;}
+    UPLOADS[fid].push(f);
+    atpUploadFile(f,fid);
+  }
+}
+function atpUploadFile(file,fid){
+  var fd=new FormData();
+  fd.append('action','atp_upload_file');
+  fd.append('nonce',NC);
+  fd.append('file',file);
+  fd.append('field',fid);
+  fd.append('candidate',D.display_name||D.legal_name||'candidate');
+  fd.append('office',D.office||'');
+  var prev=document.getElementById('previews_'+fid);
+  var thumb=document.createElement('div');thumb.className='atp-upload-thumb';
+  if(file.type.startsWith('image/')){
+    var img=document.createElement('img');
+    var reader=new FileReader();
+    reader.onload=function(e){img.src=e.target.result;};
+    reader.readAsDataURL(file);
+    thumb.appendChild(img);
+  } else {
+    thumb.innerHTML='<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--w1);font-size:10px;color:rgba(255,255,255,.5)">'+file.name.split('.').pop().toUpperCase()+'</div>';
+  }
+  var removeBtn=document.createElement('div');removeBtn.className='atp-upload-remove';removeBtn.textContent='×';
+  removeBtn.onclick=function(){thumb.remove();UPLOADS[fid]=UPLOADS[fid].filter(function(u){return u!==file;});atpUpdateFileData(fid);};
+  thumb.appendChild(removeBtn);
+  prev.appendChild(thumb);
+  var progress=document.createElement('div');progress.className='atp-upload-progress';
+  var bar=document.createElement('div');bar.className='atp-upload-progress-bar';
+  progress.appendChild(bar);thumb.appendChild(progress);
+  var xhr=new XMLHttpRequest();
+  xhr.upload.onprogress=function(e){if(e.lengthComputable)bar.style.width=(e.loaded/e.total*100)+'%';};
+  xhr.onload=function(){
+    progress.remove();
+    try{
+      var r=JSON.parse(xhr.responseText);
+      if(r.success){
+        file._url=r.data.url;file._id=r.data.id;
+        atpUpdateFileData(fid);
+      } else {
+        thumb.style.borderColor='#E60000';
+        var errEl=document.getElementById('error_'+fid);
+        errEl.textContent='Upload failed: '+(r.data||'unknown error');errEl.style.display='block';
+      }
+    }catch(e){thumb.style.borderColor='#E60000';}
+  };
+  xhr.onerror=function(){progress.remove();thumb.style.borderColor='#E60000';};
+  xhr.open('POST',AJ);xhr.send(fd);
+}
+function atpUpdateFileData(fid){
+  var files=(UPLOADS[fid]||[]).filter(function(f){return f._url;});
+  var el=document.getElementById('upload_'+fid);
+  var maxFiles=parseInt(el.dataset.maxFiles||'1');
+  if(maxFiles===1){D[fid]=files.length?files[0]._url:'';}
+  else{D[fid]=files.map(function(f){return f._url;});}
+  sv();
 }
 
 function buildV3(){
