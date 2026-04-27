@@ -250,9 +250,32 @@ function atp_admin_single($id){
     $back=admin_url('admin.php?page=atp-candidates');
     $exp=wp_nonce_url(admin_url('admin-ajax.php?action=atp_export_single&id='.$id),'atp_export','nonce');
     $groups=['Source & Gateway'=>['filler_name','filler_email','filler_phone','filler_role','filing_url','ballotpedia_url','existing_website'],'Identity & Race'=>['org_type','legal_name','display_name','ballot_name','office','district','seat_number','state','party','election_year','election_date','election_type','position'],'Campaign Contact'=>['contact_name','contact_role','contact_email','contact_phone','contact_address','manager_name','manager_email','manager_phone','treasurer_name','treasurer_email','treasurer_phone','treasurer_address'],'Bio & Messaging'=>['ballotpedia_status','homepage_intro','bio_full','why_running','tagline','differentiator','key_messages','policy_passions','endorsements_about'],'Platform & Issues'=>['issue_categories','issue_positions','opponents_missing_issue','changed_position'],'Background & Credentials'=>['profession','current_role','previous_experience','education_1','education_2','education_3','military_branch','military_years'],'Visual Branding'=>['headshot','logo','additional_photos','color_primary','color_secondary','color_accent','visual_style','design_notes'],'Social Media'=>['facebook','twitter_x','instagram','youtube','tiktok','linkedin','social_other'],'Video'=>['video_main','video_other'],'Survey Page'=>['survey_page_wanted','primary_survey_focus','survey_page_label','survey_page_label_custom','survey_display','survey_intro_text','existing_survey_link'],'Legal & Compliance'=>['committee_name','paidfor_text','jurisdiction','committee_id','committee_address','campaign_phone','campaign_email','privacy_contact_email','privacy_contact_phone','privacy_contact_address','uses_cookies','will_send_texts','sms_categories','sms_optin_language','survey_follow_up','donations_by_text','third_party_analytics','shares_data','service_providers'],'Fundraising'=>['donation_needed','donation_platform','fundraising_platform_status','donation_url','donation_embed_code','donation_button_label','donation_button_custom','accept_text_donations','text_donation_processor','text_donation_accreditation'],'Domain Setup'=>['domain_status','domain_preferred','domain_primary','domain_redirects','domain_registrar','hosting_provider','domain_credentials','campaign_email_needed'],'Approval & Timeline'=>['approver_same','approver_name','approver_email','copy_help','launch_timeline','launch_date','comm_pref','referral_source','referral_source_other','open_notes'],'Grow Beyond Your Website'=>['additional_services','tier2_pages','additional_survey_focuses'],'Summary'=>['scope_acknowledgment','compliance_acknowledgment']];
+    $v3=get_post_meta($id,'_v3_json',true);$v3_data=$v3?json_decode($v3,true):[];
+    $sub_folder=$v3_data['visual_branding']['submission_folder']??'';
     echo '<div class="wrap"><h1>'.esc_html($name).' <a href="'.esc_url($back).'" class="button" style="margin-left:16px;font-size:12px">← All</a> <a href="'.esc_url($exp).'" class="button button-primary" style="margin-left:8px">Download JSON</a></h1>';
+    if($sub_folder){echo '<p><a href="'.esc_url($sub_folder).'" target="_blank" class="button" style="margin:8px 0">📁 Open submission folder in Drive</a></p>';}
+    $img_fields=['headshot','logo','additional_photos'];
     foreach($groups as $g=>$fields){
-        $rows='';foreach($fields as $f){$v=$data[$f]??null;if(!$v)continue;if(is_array($v))$v=implode(', ',$v);$l=ucwords(str_replace('_',' ',$f));$rows.='<tr><th style="width:200px;text-align:left;padding:8px 12px;color:#666;font-weight:500">'.esc_html($l).'</th><td style="padding:8px 12px">'.nl2br(esc_html($v)).'</td></tr>';}
+        $rows='';foreach($fields as $f){
+            $v=$data[$f]??null;if(!$v)continue;$l=ucwords(str_replace('_',' ',$f));
+            if(is_array($v)){
+                $items=[];foreach($v as $vi){
+                    if(filter_var($vi,FILTER_VALIDATE_URL)){
+                        $is_img=preg_match('/\.(jpg|jpeg|png|gif|heic|webp)$/i',$vi);
+                        $items[]=$is_img?'<a href="'.esc_url($vi).'" target="_blank"><img src="'.esc_url($vi).'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;border:1px solid #ddd;margin:2px"></a>':'<a href="'.esc_url($vi).'" target="_blank">'.esc_html(basename($vi)).'</a>';
+                    } else {$items[]=esc_html($vi);}
+                }
+                $rows.='<tr><th style="width:200px;text-align:left;padding:8px 12px;color:#666;font-weight:500">'.esc_html($l).'</th><td style="padding:8px 12px">'.implode(' ',$items).'</td></tr>';
+            } else {
+                $display='';
+                if(in_array($f,$img_fields)&&filter_var($v,FILTER_VALIDATE_URL)){
+                    $display='<a href="'.esc_url($v).'" target="_blank"><img src="'.esc_url($v).'" style="max-width:120px;max-height:120px;border-radius:4px;border:1px solid #ddd"></a>';
+                } elseif(filter_var($v,FILTER_VALIDATE_URL)){
+                    $display='<a href="'.esc_url($v).'" target="_blank">'.esc_html($v).'</a>';
+                } else {$display=nl2br(esc_html($v));}
+                $rows.='<tr><th style="width:200px;text-align:left;padding:8px 12px;color:#666;font-weight:500">'.esc_html($l).'</th><td style="padding:8px 12px">'.$display.'</td></tr>';
+            }
+        }
         if(!$rows)continue;
         echo '<h2 style="margin-top:24px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#d42b2b;border-bottom:2px solid #d42b2b;padding-bottom:6px">'.esc_html($g).'</h2><table class="widefat"><tbody>'.$rows.'</tbody></table>';
     }
