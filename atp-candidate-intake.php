@@ -150,7 +150,7 @@ function atp_default_questions(){return[
     ['id'=>'donation_url','label'=>'Donation page URL','type'=>'url','placeholder'=>'e.g. https://secure.anedot.com/campaign/donate','optional'=>true],
     ['id'=>'donation_embed_code','label'=>'Fundraising page embed code','type'=>'textarea','placeholder'=>'Paste the embed code from your fundraising platform if available','optional'=>true],
     ['id'=>'donation_button_label','label'=>'Donation button label','type'=>'select','placeholder'=>'','optional'=>true,'options'=>['Donate','Contribute','Chip In','Support the Campaign','Custom (enter below)']],
-    ['id'=>'donation_button_custom','label'=>'Custom donation button label','type'=>'text','placeholder'=>'Enter your preferred button text','optional'=>true],
+    ['id'=>'donation_button_custom','label'=>'Custom donation button label','type'=>'text','placeholder'=>'Enter your preferred button text','optional'=>true,'cond'=>'cond-donation-custom'],
     ['id'=>'accept_text_donations','label'=>'Will you accept donations by text message?','type'=>'radio','placeholder'=>'','optional'=>true,'options'=>['Yes','No']],
     ['id'=>'text_donation_processor','label'=>'Text-to-donate processor','type'=>'text','placeholder'=>'If accepting donations by text, which processor?','optional'=>true,'cond'=>'cond-text-donate'],
     ['id'=>'text_donation_accreditation','label'=>'Text-to-donate accreditation','type'=>'text','placeholder'=>'Accreditation or compliance info for text donations','optional'=>true,'cond'=>'cond-text-donate'],
@@ -790,7 +790,7 @@ function CV(){
   // Step 10: custom label only if Custom selected
   sh('afc_survey_page_label_custom',eq('survey_page_label','Custom (enter below)'));
   // Step 12: custom button label
-  sh('afc_donation_button_custom',eq('donation_button_label','Custom (enter below)'));
+  shAll('cond-donation-custom',eq('donation_button_label','Custom (enter below)'));
   // Step 12: text-to-donate fields
   shAll('cond-text-donate',yes('accept_text_donations'));
   // Step 13: hosting/credentials only if replace/rebuild
