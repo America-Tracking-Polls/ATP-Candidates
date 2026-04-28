@@ -2,87 +2,136 @@
 
 How to make changes to a live client site after launch.
 
-## How the Override System Works
+## How Content Is Stored
 
-Every piece of content on the site lives in a shortcode. Each shortcode has two possible sources:
+Every piece of content on the site is a shortcode. The HTML for each shortcode comes from one of three sources, checked in this order:
 
-1. **Database** (WP options table) — edits made in the Shortcode Editor
-2. **Registry** (plugin code) — the default template HTML
+1. **`page-json.json`** (in the client's `sites/{slug}/` folder) — the primary source, version-controlled in the repo
+2. **WordPress database** (edits made in the admin Shortcode Editor) — quick fixes, overridden by page-json.json on rebuild
+3. **Registry defaults** (`registry.php` in the core plugin) — the fallback template if nothing else exists
 
-**Database always wins.** If someone edited a shortcode in the admin, that's what renders. Plugin updates only change the registry defaults — they never touch database content.
+`page-json.json` is where all content lives. It's the file the AI reads and writes.
 
-This means:
-- You can edit any section at any time without risk
-- Plugin updates are safe — they won't overwrite custom content
-- Clicking "Reset" on a shortcode reverts it to the plugin default
+## Making Edits via the Repo (Primary Method)
 
-## Making Edits
+All edits go through the repo. The AI reads and writes `sites/{client}/page-json.json`.
 
-### Quick Edit (simple text changes)
+### Change text in a section
 
-1. Go to WP Admin → ATP Shortcodes
-2. Find the shortcode section you want to edit
-3. Change the HTML directly in the editor
-4. Click Save
-5. Changes are live immediately
+Tell the AI:
+```
+Edit sites/john-stacy/page-json.json — in atp_cand_hero, change the 
+tagline from "The Choice for the People" to "Four More Years of Results"
+```
 
-### AI-Assisted Edit (content rewrite)
+The AI edits the JSON value, commits, pushes. Rebuild the plugin. Deploy.
 
-1. Go to ATP Shortcodes → find the section
-2. Click "Copy Code" to copy the current HTML
-3. Paste into Claude/ChatGPT with instructions:
-   - "Change the hero title to 'Fighting for Our Future'"
-   - "Add a new issue card about healthcare"
-   - "Update the bio with this new paragraph: ..."
-4. AI returns updated HTML
-5. Paste back into the shortcode editor → Save
+### Add a new endorsement
 
-### Full Page Regeneration
+Tell the AI:
+```
+Edit sites/john-stacy/page-json.json — in atp_cand_endorsements, add 
+a new endorsement card from Senator Jane Roberts: "John is the leader 
+Rockwall County needs." Title: State Senator, District 14.
+```
 
-If major changes are needed (new candidate info, new issues, complete redesign):
+### Swap a photo
 
-1. Update the intake JSON with new data
-2. Re-run the AI generation prompt
-3. Import the new Page JSON — this overwrites all shortcode database values
-4. Review and adjust as needed
+Tell the AI:
+```
+Edit sites/john-stacy/page-json.json — in atp_cand_hero, replace the 
+headshot image URL with https://new-photo-url.com/headshot.jpg
+```
 
-## What Counts as "In Scope"
+### Update legal pages
 
-### Included in Standard package
-- Text changes (typos, wording updates, bio edits)
-- Swapping photos (new headshot, new campaign photos)
-- Adding/removing issue cards (within the 5-card limit)
-- Updating endorsements
-- Changing colors, button labels
-- Updating legal page contact info
-- Embedding a new campaign video
+Tell the AI:
+```
+Edit sites/john-stacy/page-json.json — in atp_cand_privacy, update 
+the committee mailing address to "456 Oak Street, Rockwall, TX 75087"
+```
 
-### Additional work (quoted separately)
-- New pages beyond the 7 Standard pages
-- Custom functionality (event calendar, press blog, polling locator)
-- Design changes to the page structure/layout
-- Ongoing content management (monthly updates, blog posts)
-- New integrations (email marketing, CRM, analytics)
+### Add a new issue card
+
+Tell the AI:
+```
+Edit sites/john-stacy/page-json.json — in atp_cand_issues, add a new 
+issue card for "Water Infrastructure" with tag "Public Utilities" and 
+this position text: "..."
+```
 
 ## Adding a New Section
 
-To add a section that doesn't exist in the template:
+To add a section that doesn't exist in the standard template:
 
-1. Go to the WordPress page editor
-2. Add the shortcode tag in the content where you want it (e.g., between `[atp_cand_about]` and `[atp_cand_messages]`)
-3. Go to ATP Shortcodes → find the new tag (or create custom HTML)
-4. The new section renders in that position on the page
+1. Tell the AI to add a new key to `page-json.json`:
+```
+Add a new shortcode atp_cand_community to sites/mary-fay/page-json.json 
+with a "Community Partners" section showing 4 organization logos.
+```
+
+2. Tell the AI to add it to the page in `site-config.json`:
+```
+In sites/mary-fay/site-config.json, add atp_cand_community to the Home 
+page shortcodes list, between atp_cand_about and atp_cand_issues.
+```
+
+3. Build and deploy. The section appears only on Mary's site.
 
 ## Removing a Section
 
-1. Go to the WordPress page editor
-2. Delete the shortcode tag from the page content
-3. Save the page
-4. The section no longer renders (the shortcode data stays in the database but isn't called)
+Tell the AI:
+```
+In sites/john-stacy/site-config.json, remove atp_cand_volunteer from 
+the Home page shortcodes list.
+```
+
+The HTML stays in `page-json.json` (harmless) but the shortcode tag is no longer on the page, so it doesn't render.
 
 ## Reordering Sections
 
-1. Go to the WordPress page editor
-2. Move the shortcode tags into the desired order
-3. Save
-4. Sections render in the new order
+Tell the AI:
+```
+In sites/john-stacy/site-config.json, move atp_cand_video above 
+atp_cand_issues in the Home page shortcodes list.
+```
+
+## Full Page Regeneration
+
+If major changes are needed (new candidate info, complete redesign):
+
+1. Update `sites/{client}/intake-v3.json` with new data
+2. Tell the AI to regenerate `page-json.json` using the prompt template
+3. Build and deploy
+
+## Testing Changes
+
+Before deploying to the live site, test via WordPress Playground:
+
+```bash
+# Build the client's plugin
+./scripts/build-site.sh john-stacy
+
+# Test in Playground (update the blueprint to point to the client's build)
+```
+
+Or deploy to a staging URL on SiteGround first.
+
+## Scope Tracking
+
+### Included in Standard package
+- Text changes (typos, wording, bio edits)
+- Photo swaps (new headshot, campaign photos)
+- Adding/removing issue cards (within 5-card limit)
+- Updating endorsements
+- Color, button label changes
+- Legal page contact info updates
+- New campaign video embed
+
+### Additional work (quoted separately)
+- New pages beyond the 7 Standard pages
+- New custom sections not in the template
+- Custom functionality (event calendar, press blog, polling locator)
+- Design changes to the page structure/layout
+- Ongoing content management (monthly updates)
+- New integrations (email marketing, CRM, analytics)

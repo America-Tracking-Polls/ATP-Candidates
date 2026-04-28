@@ -34,9 +34,11 @@ Take the intake JSON and run it through the AI prompt:
 1. Open `PROMPT-TEMPLATE.md` — copy the full prompt
 2. Paste it into Claude/ChatGPT
 3. Paste the client's `intake-v3.json` where indicated
-4. AI outputs Page JSON — save it
+4. AI outputs Page JSON — save it as `sites/client-slug/page-json.json`
 
-Also generate the legal pages by running the legal prompt from `README.md` Quick Start section.
+The Page JSON is a single file with one key per shortcode section, each containing the final HTML. This file is the source of truth for all content on the site. It gets bundled into the plugin during the build step.
+
+Also generate the legal pages (privacy policy + cookie policy) by including them in the same prompt or running the legal prompt from `README.md` Quick Start section. The generated HTML goes into the `atp_cand_privacy` and `atp_cand_cookies` keys in `page-json.json`.
 
 ## Step 3: Set Up WordPress on SiteGround
 
@@ -59,19 +61,13 @@ Also generate the legal pages by running the legal prompt from `README.md` Quick
 4. Step 2: Import all 7 pages
 5. Step 3: Complete
 
-## Step 6: Import Page JSON
+## Step 6: Content Loaded Automatically
 
-1. Go to ATP Shortcodes → Candidate Page
-2. Paste the Page JSON from Step 2
-3. Click Import Page JSON
-4. Each shortcode section is now populated with the candidate's content
+The `page-json.json` file is bundled into the plugin during the build step. When the plugin activates, it loads all shortcode content from this file automatically. No manual pasting needed — the Page JSON, including privacy and cookie policy content, is already in the plugin.
 
-## Step 7: Update Legal Pages
-
-1. Go to ATP Shortcodes
-2. Find `atp_cand_privacy` — paste the generated privacy policy HTML
-3. Find `atp_cand_cookies` — paste the generated cookie policy HTML
-4. Save each
+If you need to make changes after activation, either:
+- Edit `sites/client-slug/page-json.json` in the repo, rebuild, and update the plugin
+- Or use the Shortcode Editor in the WP admin for quick fixes
 
 ## Step 8: Import Media
 

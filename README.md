@@ -94,18 +94,19 @@ ATP-Demo/                           ← this repo (mirror-factory/ATP-Demo)
 │   └── john-stacy/                 ← CLIENT: John Stacy
 │       ├── site-config.json        ← client name, colors, domain, pages
 │       ├── intake-v3.json          ← completed intake data
-│       └── page-overrides/         ← custom shortcode HTML (optional)
+│       ├── page-json.json          ← generated site content (HTML per shortcode)
+│       └── overrides/              ← manual shortcode overrides (optional)
 │
 ├── scripts/
 │   ├── new-site.sh                 ← scaffold a new client site
 │   └── build-site.sh              ← assemble deployable plugin for a client
 │
 ├── docs/                           ← detailed documentation
-│   ├── intake-form.md              ← intake form spec + field reference
 │   ├── json-schema.md              ← V3 JSON schema reference
 │   ├── pages.md                    ← page-by-page breakdown
 │   ├── deployment.md               ← deployment guide
-│   └── editing.md                  ← how to make changes post-launch
+│   ├── editing.md                  ← how to edit via repo + AI
+│   └── launch-checklist.md         ← SOW acceptance checklist
 │
 ├── .github/workflows/
 │   └── build-and-release.yml       ← auto-build client plugins on tag
@@ -280,6 +281,143 @@ The form outputs a nested V3 JSON with 17 sections. See `v3-schema.json` for the
 
 ---
 
+## Content Architecture — How JSON Drives Everything
+
+### The Three JSON Files Per Client
+
+Every client site is defined by three JSON files in their `sites/{slug}/` folder:
+
+| File | Purpose | Who Creates It |
+|------|---------|---------------|
+| `site-config.json` | Branding, domain, page list, shortcode order | Mirror Factory (on new client setup) |
+| `intake-v3.json` | Raw candidate data from the intake form | ATP staff (via the intake form) |
+| `page-json.json` | Generated HTML content for every shortcode | AI (from intake JSON + prompt template) |
+
+### How They Connect
+
+```
+intake-v3.json          ← "The candidate's name is John Stacy, he's running for..."
+        ↓
+AI + PROMPT-TEMPLATE.md
+        ↓
+page-json.json          ← "Here's the hero HTML, here's the about HTML, here's the issues HTML..."
+        ↓
+site-config.json        ← "Put these shortcodes on these pages in this order"
+        ↓
+WordPress renders the site
+```
+
+### What page-json.json Looks Like
+
+Each key is a shortcode tag. Each value is the complete HTML for that section.
+
+```json
+{
+  "atp_cand_nav": "<nav class='cand-nav'>...<span class='cand-nav-name'>John Stacy</span>...</nav>",
+  "atp_cand_hero": "<section class='cand-hero'>...<h1>The Choice for the People.</h1>...</section>",
+  "atp_cand_about": "<section class='cand-section'>...<p>John Stacy is a 6th generation Texan...</p>...</section>",
+  "atp_cand_issues": "<section class='cand-section'>...5 issue cards...</section>",
+  "atp_cand_privacy": "<section class='cand-legal'>...13-section privacy policy...</section>",
+  "atp_cand_cookies": "<section class='cand-legal'>...9-section cookie policy...</section>"
+}
+```
+
+### How Pages Are Assembled
+
+`site-config.json` defines which shortcodes go on which page and in what order:
+
+```json
+{
+  "pages": [
+    {
+      "title": "Home",
+      "slug": "home",
+      "shortcodes": [
+        "atp_cand_styles",
+        "atp_cand_nav",
+        "atp_cand_hero",
+        "atp_cand_stats",
+        "atp_cand_about",
+        "atp_cand_issues",
+        "atp_cand_footer"
+      ],
+      "is_front_page": true
+    }
+  ]
+}
+```
+
+WordPress renders the page by looking up each shortcode tag in `page-json.json` and outputting the HTML in order.
+
+### Adding a New Section to One Client
+
+To add a section that only exists on one client's site:
+
+1. Add the HTML to their `page-json.json`:
+```json
+{
+  "atp_cand_community": "<section class='cand-section'>...custom community section...</section>"
+}
+```
+
+2. Add the shortcode tag to the page in their `site-config.json`:
+```json
+{
+  "shortcodes": [
+    "atp_cand_hero",
+    "atp_cand_community",
+    "atp_cand_about"
+  ]
+}
+```
+
+3. Build and deploy. The section appears between the hero and about sections on that client's site only.
+
+### Editing Content
+
+To edit any section, change the HTML value for that shortcode key in `page-json.json`. The AI can do this directly:
+
+```
+"Edit sites/john-stacy/page-json.json — change the hero tagline to 
+'Four More Years of Results'"
+```
+
+The AI finds the `atp_cand_hero` key, edits the HTML, commits, pushes. The plugin picks it up on the next build/update.
+
+### Removing a Section
+
+Remove the shortcode tag from the page's shortcode list in `site-config.json`. The HTML can stay in `page-json.json` (it just won't render) or be removed.
+
+### The Priority Chain
+
+When the plugin renders a shortcode, it checks in this order:
+
+```
+1. Does page-json.json have content for this tag?    → use it
+2. Does the WP database have a saved admin edit?     → use it
+3. Use the core default from registry.php            → fallback
+```
+
+This means:
+- `page-json.json` is the primary content source (version-controlled in the repo)
+- WP admin edits work as quick fixes but `page-json.json` takes priority on rebuild
+- Core defaults in `registry.php` are the safety net if nothing else exists
+
+### At 30 Sites
+
+```
+sites/
+├── client-01/page-json.json    ← all content for client 1
+├── client-02/page-json.json    ← all content for client 2
+├── client-03/page-json.json    ← all content for client 3
+│   ...
+└── client-30/page-json.json    ← all content for client 30
+```
+
+Each client's content lives in one JSON file. The AI can read any of them, edit any of them, or generate new ones from intake data. Core plugin updates propagate to all 30 sites without touching any client's content.
+
+---
+
 ## Plugin Features
 
 | Feature | What It Does |
@@ -349,15 +487,17 @@ Edits within the 7-page Standard package are included. Additional pages, feature
 
 ## Key Files Reference
 
-| File | Purpose |
-|------|---------|
-| `v3-schema.json` | The JSON contract — every field the form outputs |
-| `v3-field-map.json` | Maps form field IDs to JSON paths |
-| `PROMPT-TEMPLATE.md` | AI prompt for generating Page JSON |
-| `example-intake.json` | Example completed intake (John Stacy) |
-| `example-page.json` | Example Page JSON output |
-| `site-config.json` | Per-client configuration |
-| `playground-blueprint.json` | WordPress Playground instant demo |
+| File | Location | Purpose |
+|------|----------|---------|
+| `v3-schema.json` | `packages/atp-plugin-core/` | The JSON contract — every field the form outputs |
+| `v3-field-map.json` | `packages/atp-plugin-core/` | Maps form field IDs to JSON paths |
+| `PROMPT-TEMPLATE.md` | `packages/atp-plugin-core/` | AI prompt for generating Page JSON from intake data |
+| `site-config.json` | `sites/{client}/` | Client branding, domain, page list with shortcode order |
+| `intake-v3.json` | `sites/{client}/` | Completed intake data — raw candidate info |
+| `page-json.json` | `sites/{client}/` | Generated HTML per shortcode — the site's content |
+| `example-intake.json` | `packages/atp-plugin-core/` | Example completed intake (John Stacy) |
+| `example-page.json` | `packages/atp-plugin-core/` | Example Page JSON output |
+| `playground-blueprint.json` | repo root | WordPress Playground instant demo |
 
 ---
 
@@ -373,8 +513,8 @@ Additional services (text messaging, polling, ads, Tier 2 pages) quoted separate
 ---
 
 See `/docs/` for detailed documentation:
-- `docs/intake-form.md` — complete field reference
-- `docs/json-schema.md` — V3 JSON schema specification
+- `docs/json-schema.md` — V3 JSON schema reference (every field, which pages use it)
 - `docs/pages.md` — page-by-page breakdown with all shortcodes
-- `docs/deployment.md` — SiteGround deployment guide
-- `docs/editing.md` — post-launch editing workflows
+- `docs/deployment.md` — step-by-step deployment guide
+- `docs/editing.md` — how to make changes post-launch via repo + AI
+- `docs/launch-checklist.md` — SOW Exhibit B acceptance checklist
