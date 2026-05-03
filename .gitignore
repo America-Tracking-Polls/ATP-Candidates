@@ -3,3 +3,15 @@ dist/
 node_modules/
 package.json
 package-lock.json
+
+# Service-account credentials and other secrets — never commit.
+# These should live OUTSIDE the repo entirely (outside web root on the server),
+# but these patterns are a belt-and-suspenders safety net.
+*.json.key
+*-service-account*.json
+atp-drive-key*.json
+atp-intake-drive*.json
+*.pem
+*.p12
+.env
+.env.*

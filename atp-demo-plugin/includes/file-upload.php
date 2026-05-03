@@ -109,39 +109,62 @@ function atp_wordpress_upload( $file, $field, $candidate ) {
  */
 function atp_drive_is_configured() {
     $config = get_option( 'atp_drive_config', [] );
-    return ! empty( $config['folder_id'] ) && ! empty( $config['credentials'] );
+    if ( empty( $config['folder_id'] ) || empty( $config['credentials_path'] ) ) {
+        return false;
+    }
+    return is_readable( $config['credentials_path'] );
 }
 
 /**
- * Upload to Google Drive.
- * Returns URL + file ID, or WP_Error.
+ * Upload to Google Drive. Falls back to WordPress media library on any failure
+ * so submissions are never lost.
+ *
+ * @return array|WP_Error
  */
 function atp_drive_upload( $file, $field, $candidate, $office ) {
-    $config = get_option( 'atp_drive_config', [] );
-    $folder_id = $config['folder_id'] ?? '';
-    $credentials = $config['credentials'] ?? '';
+    $config           = get_option( 'atp_drive_config', [] );
+    $parent_folder_id = $config['folder_id'] ?? '';
+    $credentials_path = $config['credentials_path'] ?? '';
 
-    if ( ! $folder_id || ! $credentials ) {
-        // Fall back to WordPress
+    if ( ! $parent_folder_id || ! $credentials_path ) {
         return atp_wordpress_upload( $file, $field, $candidate );
     }
 
     // Build submission folder name: YYYY-MM-DD_Candidate-Name_Office-Slug
-    $date_prefix = date( 'Y-m-d' );
-    $cand_slug = sanitize_file_name( str_replace( ' ', '-', $candidate ) );
+    $date_prefix = gmdate( 'Y-m-d' );
+    $cand_slug   = sanitize_file_name( str_replace( ' ', '-', $candidate ) );
     $office_slug = sanitize_file_name( str_replace( ' ', '-', $office ) );
-    $folder_name = $date_prefix . '_' . $cand_slug . ( $office_slug ? '_' . $office_slug : '' );
+    $folder_name = $date_prefix . '_' . ( $cand_slug ?: 'candidate' ) . ( $office_slug ? '_' . $office_slug : '' );
 
-    // TODO: Implement Google Drive API calls when credentials are provided.
-    // For now, fall back to WordPress upload.
-    // When implemented:
-    // 1. Authenticate with service account / OAuth refresh token
-    // 2. Check if submission folder exists, create if not
-    // 3. Upload file to submission folder
-    // 4. Set file permissions to "anyone with link can view"
-    // 5. Return shareable URL + file ID
+    $token = atp_drive_get_access_token( $credentials_path );
+    if ( is_wp_error( $token ) ) {
+        error_log( '[ATP Drive] auth failed, falling back to WP: ' . $token->get_error_message() );
+        return atp_wordpress_upload( $file, $field, $candidate );
+    }
 
-    return atp_wordpress_upload( $file, $field, $candidate );
+    $sub_folder_id = atp_drive_find_or_create_folder( $parent_folder_id, $folder_name, $token );
+    if ( is_wp_error( $sub_folder_id ) ) {
+        error_log( '[ATP Drive] folder failed, falling back to WP: ' . $sub_folder_id->get_error_message() );
+        return atp_wordpress_upload( $file, $field, $candidate );
+    }
+
+    $upload_name = sanitize_file_name( $field . '_' . $file['name'] );
+    $mime        = ! empty( $file['type'] ) ? $file['type'] : 'application/octet-stream';
+
+    $result = atp_drive_upload_file( $file['tmp_name'], $upload_name, $mime, $sub_folder_id, $token );
+    if ( is_wp_error( $result ) ) {
+        error_log( '[ATP Drive] upload failed, falling back to WP: ' . $result->get_error_message() );
+        return atp_wordpress_upload( $file, $field, $candidate );
+    }
+
+    return [
+        'url'        => $result['webViewLink'] ?? '',
+        'id'         => $result['id'],
+        'name'       => $file['name'],
+        'size'       => $file['size'],
+        'storage'    => 'google_drive',
+        'sub_folder' => 'https://drive.google.com/drive/folders/' . rawurlencode( $sub_folder_id ),
+    ];
 }
 
 /**

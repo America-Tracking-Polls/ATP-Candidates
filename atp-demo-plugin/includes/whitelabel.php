@@ -231,13 +231,33 @@ function atp_wl_render_settings() {
 
         // Save upload storage settings
         update_option( 'atp_upload_storage', sanitize_text_field( $_POST['upload_storage'] ?? 'wordpress' ) );
-        if ( ! empty( $_POST['drive_folder_id'] ) ) {
-            $drive_config = get_option( 'atp_drive_config', [] );
-            $drive_config['folder_id'] = sanitize_text_field( $_POST['drive_folder_id'] );
-            update_option( 'atp_drive_config', $drive_config );
-        }
+        $drive_config = get_option( 'atp_drive_config', [] );
+        $drive_config['folder_id']        = sanitize_text_field( $_POST['drive_folder_id'] ?? '' );
+        $drive_config['credentials_path'] = sanitize_text_field( $_POST['drive_credentials_path'] ?? '' );
+        $drive_config['credentials']      = ! empty( $drive_config['credentials_path'] ); // legacy flag for atp_drive_is_configured
+        update_option( 'atp_drive_config', $drive_config );
+        delete_transient( 'atp_drive_access_token' );
 
         echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
+    }
+
+    // Test connection
+    $test_result = null;
+    if ( isset( $_POST['atp_drive_test'] ) && check_admin_referer( 'atp_wl_settings' ) ) {
+        $cfg = get_option( 'atp_drive_config', [] );
+        if ( function_exists( 'atp_drive_test_connection' ) ) {
+            $test_result = atp_drive_test_connection( $cfg['credentials_path'] ?? '', $cfg['folder_id'] ?? '' );
+        } else {
+            $test_result = new WP_Error( 'atp_drive_missing', 'Drive client not loaded.' );
+        }
+        if ( is_wp_error( $test_result ) ) {
+            echo '<div class="notice notice-error is-dismissible"><p><strong>Drive test failed:</strong> '
+                . esc_html( $test_result->get_error_message() ) . '</p></div>';
+        } else {
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Drive test passed.</strong> '
+                . esc_html( $test_result['message'] ) . ' Parent folder: <code>'
+                . esc_html( $test_result['parent'] ) . '</code></p></div>';
+        }
     }
 
     $wl = atp_wl_get();
@@ -327,13 +347,28 @@ function atp_wl_render_settings() {
                         <td>
                             <?php $drive_config = get_option( 'atp_drive_config', [] ); ?>
                             <input type="text" name="drive_folder_id" id="drive_folder_id" value="<?php echo esc_attr( $drive_config['folder_id'] ?? '' ); ?>" class="regular-text">
-                            <p class="description">The folder ID from your Intake_Forms folder URL. Only needed for Google Drive storage.</p>
+                            <p class="description">The folder ID from the Intake_Forms folder URL (the string after <code>/folders/</code>). The folder must be shared with the service account as Editor.</p>
                         </td>
                     </tr>
-                <table>
+                    <tr>
+                        <th><label for="drive_credentials_path">Service Account JSON Path</label></th>
+                        <td>
+                            <input type="text" name="drive_credentials_path" id="drive_credentials_path" value="<?php echo esc_attr( $drive_config['credentials_path'] ?? '' ); ?>" class="regular-text code" placeholder="/var/www/atp-private/atp-drive-key.json">
+                            <p class="description">Absolute path to the service account JSON key on disk. <strong>Must live outside the web root</strong> (e.g. <code>/var/www/atp-private/</code>, not <code>wp-content/</code>). File should be readable only by the web server user (<code>chmod 600</code>).</p>
+                            <?php if ( ! empty( $drive_config['credentials_path'] ) ) :
+                                $exists = is_readable( $drive_config['credentials_path'] );
+                                ?>
+                                <p class="description">Status: <?php echo $exists
+                                    ? '<span style="color:#1a7f37">✓ file is readable</span>'
+                                    : '<span style="color:#cf222e">✗ file not found or not readable</span>'; ?></p>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </table>
 
                 <p class="submit">
                     <button type="submit" name="atp_wl_save" class="button button-primary button-hero">Save Settings</button>
+                    <button type="submit" name="atp_drive_test" class="button button-secondary button-hero" style="margin-left:8px">Test Drive Connection</button>
                 </p>
             </form>
         </div>

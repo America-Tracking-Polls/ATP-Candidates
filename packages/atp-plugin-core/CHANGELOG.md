@@ -7,6 +7,37 @@ Version numbering follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.1.0] - 2026-05-03
+
+### Added — Google Drive Upload Integration
+
+Activated the previously stubbed Google Drive storage adapter for intake-form
+file uploads (headshots, logos, additional photos).
+
+- New `includes/drive-client.php` implements service-account JWT auth (RS256),
+  access-token caching via transient, folder find-or-create, and multipart
+  file upload — using only `wp_remote_*` and `openssl_sign` (no Composer).
+- `atp_drive_upload()` now performs real Drive uploads:
+  1. Authenticate with the service account
+  2. Find or create a daily submission folder named
+     `YYYY-MM-DD_Candidate-Name_Office-Slug` under the configured parent
+  3. Upload the file with the field name as a prefix
+  4. Return the file's `webViewLink` and the submission folder URL
+- On any auth/folder/upload failure the handler logs and falls back to the
+  WordPress media library, so submissions are never lost.
+- White Label settings page gains a **Service Account JSON Path** field
+  (absolute path to the JSON key on disk; must live outside the web root) and
+  a **Test Drive Connection** button that authenticates, verifies folder
+  access, and round-trips a tiny test file.
+- `atp_drive_is_configured()` now requires both `folder_id` and a readable
+  `credentials_path`.
+
+### Security
+- `.gitignore` now blocks common service-account JSON filename patterns as a
+  safety net. Credentials still must NOT be placed in the repo or web root.
+
+---
+
 ## [3.0.0] - 2026-04-19
 
 ### Changed — Intake Form V3 (Final)
