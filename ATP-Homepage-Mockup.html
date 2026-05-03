@@ -72,27 +72,19 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 .btn-video svg{width:18px;height:18px;fill:var(--white)}
 
 /* Hero Form with red accent */
-.hf{background:rgba(17,16,48,0.82);border:1px solid rgba(255,255,255,0.15);border-top:4px solid var(--red);border-radius:14px;padding:32px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 20px 60px rgba(0,0,0,0.6);opacity:0;transform:translateX(50px)}
-.hf-t{font-family:var(--display);font-size:24px;letter-spacing:2px;color:var(--white);margin-bottom:8px}
-.hf-s{font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:24px;line-height:1.5}
-.hf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.hf-i{width:100%;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:12px 16px;color:var(--white);font-family:var(--body);font-size:13px;transition:border 0.3s}
-.hf-i::placeholder{color:rgba(255,255,255,0.4)}
-.hf-i.full{margin-bottom:12px}
-.hf-i:focus{border-color:var(--red);outline:none}
-.hf-ta{width:100%;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:12px 16px;color:var(--white);font-family:var(--body);font-size:13px;margin-bottom:12px;transition:border 0.3s;resize:vertical;min-height:80px}
-.hf-ta::placeholder{color:rgba(255,255,255,0.4)}
-.hf-ta:focus{border-color:var(--red);outline:none}
-.hf-check{display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;font-size:10px;color:rgba(255,255,255,0.5);line-height:1.4}
-.hf-check input{margin-top:2px;accent-color:var(--red)}
-.hf-b{width:100%;background:var(--red);color:var(--white);border:none;padding:14px;font-family:var(--display);font-size:16px;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:all 0.3s;margin-top:8px}
-.hf-b:hover{background:var(--red-bright);box-shadow:0 6px 20px rgba(178,34,52,0.4)}
+.hero-media{display:flex;flex-direction:column;gap:20px;opacity:0;transform:translateX(50px)}
+.hero-video-wrap{position:relative;background:rgba(17,16,48,0.82);border:1px solid rgba(255,255,255,0.15);border-top:4px solid var(--red);border-radius:14px;overflow:hidden;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.hero-video{display:block;width:100%;height:auto;background:#000;aspect-ratio:16/9}
+.hero-video-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;padding:20px;pointer-events:none}
+.hero-video-placeholder code{background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:3px;color:rgba(255,255,255,0.8)}
+.hero-typeform{background:rgba(17,16,48,0.82);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:24px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 20px 60px rgba(0,0,0,0.6);min-height:160px;display:flex;align-items:center;justify-content:center}
+.hero-typeform-placeholder{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;text-align:center}
 
 @media(max-width:960px){
   .hero-inner .wrap{grid-template-columns:1fr;text-align:center}
   .hero-sub{margin:24px auto 0}
   .hero-btns{justify-content:center}
-  .hf{transform:translateX(0);transform:translateY(30px)}
+  .hero-media{transform:translateX(0);transform:translateY(30px)}
 }
 
 /* ═══ ABOUT ATP ═══ */
@@ -275,6 +267,14 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 .intake-inner h2{font-family:var(--display);font-size:48px;letter-spacing:2px;margin-bottom:12px}
 .intake-inner .intake-sub{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:40px;line-height:1.6}
 .intake-embed{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;min-height:500px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-family:var(--mono);font-size:13px;padding:40px}
+.intake-cta-block{margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}
+.intake-cta-line{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:12px}
+.intake-cta-contact{font-family:var(--display);font-size:24px;letter-spacing:1px;color:var(--white);margin-bottom:10px}
+.intake-cta-contact a{color:var(--white);text-decoration:none;transition:color 0.3s}
+.intake-cta-contact a:hover{color:var(--red)}
+.intake-cta-samples{font-size:13px;color:rgba(255,255,255,0.6)}
+.intake-cta-samples a{color:var(--red);text-decoration:none}
+.intake-cta-samples a:hover{text-decoration:underline}
 
 /* ═══ FOOTER ═══ */
 .ftr{background:var(--blue-dark);border-top:1px solid rgba(255,255,255,0.05);padding:80px 0 30px}
@@ -290,11 +290,10 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 <!-- ANIMATED POLL BAR -->
 <div class="poll-bar">
   <div class="pb-track">
-    <div class="pb-slide active" id="pb-0"><span class="pb-badge">DATA INSIGHT</span><span class="pb-text"><strong>82% of voters</strong> search a candidate on their phone while in line to vote.</span></div>
-    <div class="pb-slide" id="pb-1"><span class="pb-badge">7 STRATEGIES</span><span class="pb-text">ATP delivers <strong>7 proven strategies</strong> that win elections.</span></div>
-    <div class="pb-slide" id="pb-2"><span class="pb-badge">95% REACH</span><span class="pb-text">Coordinated multi-channel outreach achieving <strong>95% voter reach</strong>.</span></div>
-    <div class="pb-slide" id="pb-3"><span class="pb-badge">AEO</span><span class="pb-text">Control how <strong>AI describes your campaign</strong> to voters in real time.</span></div>
-    <div class="pb-slide" id="pb-4"><span class="pb-badge">COMPLIANCE</span><span class="pb-text">Full <strong>TCPA & 10DLC</strong> compliant messaging built in.</span></div>
+    <div class="pb-slide active" id="pb-0"><span class="pb-badge">DATA INSIGHTS</span><span class="pb-text">Persistent <strong>real-time reporting</strong> and survey-result crosstabs.</span></div>
+    <div class="pb-slide" id="pb-1"><span class="pb-badge">5 STRATEGIES</span><span class="pb-text"><strong>Proven high-engagement</strong> coordinated voter outreach.</span></div>
+    <div class="pb-slide" id="pb-2"><span class="pb-badge">COMPLIANCE</span><span class="pb-text">Full <strong>TCPA &amp; 10DLC</strong> compliant messaging built in.</span></div>
+    <div class="pb-slide" id="pb-3"><span class="pb-badge">AI OPTIMIZED</span><span class="pb-text">Your campaign <strong>dominates AI search results</strong> (AEO).</span></div>
   </div>
 </div>
 
@@ -306,6 +305,9 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
     <a href="#journey">The Path</a>
     <a href="#pipeline">The Pipeline</a>
     <a href="#aeo">AEO</a>
+    <a href="#compliance">Compliance</a>
+    <a href="#ai-ethics">AI Ethics</a>
+    <a href="#privacy">Privacy</a>
   </nav>
   <button class="hdr-btn" onclick="document.getElementById('intake').scrollIntoView({behavior:'smooth'})">Get Started</button>
 </div></header>
@@ -321,25 +323,32 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
   </div>
   <div class="hero-inner"><div class="wrap">
     <div class="hero-text">
-      <div class="h-tag">POLLING-POWERED CAMPAIGN MARKETING</div>
+      <div class="h-tag">MULTI-MEDIA CAMPAIGN MARKETING</div>
       <div class="h-line h-big">WIN YOUR ELECTION</div>
-      <div class="h-line h-big h-red">WITH DATA-DRIVEN</div>
-      <div class="h-line h-big">CAMPAIGN MARKETING.</div>
-      <p class="hero-sub">We poll your voters, learn what they care about, and distribute your message across every channel&mdash;<strong>digital ads</strong>, <strong>SMS</strong>, <strong>direct mail</strong>, <strong>voter websites</strong>, and <strong>AI-optimized content</strong>. Real insights. Real distribution. Real results.</p>
+      <div class="h-line h-big h-red">BEFORE</div>
+      <div class="h-line h-big">ELECTION DAY.</div>
+      <p class="hero-sub">Every channel we deliver&mdash;<strong>five high-response MMS surveys</strong>, a <strong>voter-driven website</strong>, <strong>digital and social media advertising</strong>, <strong>QR-enabled print</strong>, and <strong>expert consulting across every touchpoint</strong>&mdash;works together to give your campaign a clear, measurable advantage.</p>
       <div class="hero-btns">
         <a href="#intake" class="btn-p">SCHEDULE A STRATEGY CALL <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
-        <a href="#" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> WATCH THE VIDEO</a>
+        <a href="#hero-video" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> WATCH THE VIDEO</a>
       </div>
     </div>
-    <div class="hf">
-      <div class="hf-t">READY TO WIN?</div>
-      <div class="hf-s">Tell us about your race. We'll build a custom strategy built on data, not guesswork.</div>
-      <div class="hf-row"><input class="hf-i" placeholder="Your Name" required><input class="hf-i" placeholder="Office Sought" required></div>
-      <div class="hf-row"><input class="hf-i" placeholder="State / District" required><input class="hf-i" placeholder="Phone" type="tel" required></div>
-      <input class="hf-i full" placeholder="Email Address" type="email" required>
-      <textarea class="hf-ta" placeholder="Tell us about your campaign goals and timeline..." required></textarea>
-      <div class="hf-check"><input type="checkbox" id="tcpa" required><label for="tcpa">I consent to being contacted about campaign services via phone or email.</label></div>
-      <button class="hf-b">GET YOUR FREE STRATEGY SESSION</button>
+    <div class="hero-media">
+      <!-- HERO VIDEO -->
+      <div class="hero-video-wrap" id="hero-video">
+        <video class="hero-video" controls preload="metadata" poster="">
+          <!-- TODO: replace src with the new Hero MP4 once provided -->
+          <source src="" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
+        <div class="hero-video-placeholder">Hero video &mdash; drop the new MP4 in <code>&lt;source src&gt;</code> above.</div>
+      </div>
+      <!-- TYPEFORM CAMPAIGN APPLICATION (below the video) -->
+      <div class="hero-typeform" id="hero-typeform">
+        <!-- TODO: replace this placeholder with the real Typeform embed
+             (either an iframe to the form URL, or the Typeform embed snippet). -->
+        <div class="hero-typeform-placeholder">Typeform Campaign Application embed goes here.</div>
+      </div>
     </div>
   </div></div>
 </section>
@@ -347,9 +356,9 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 <!-- ABOUT ATP -->
 <section class="about-atp" id="about"><div class="wrap"><div class="about-grid">
   <div class="about-text">
-    <h2>WHY WORK WITH <span class="red">AMERICA TRACKING POLLS</span>?</h2>
-    <p>ATP is a <strong>Florida-based election research and campaign services firm</strong> providing voter engagement guidance, compliance resources, and data-driven best practices for local, statewide, and federal races.</p>
-    <p>Our formula is simple: <strong>Intelligence + Engagement + Persistence + Conversion = Victory.</strong> We don't just poll your voters&mdash;we use those insights to power every piece of your campaign, from your website to the way AI describes you.</p>
+    <h2>5 COORDINATED MULTI-MEDIA CHANNELS HELP REACH OUT TO <span class="red">95% OF REGISTERED VOTERS.</span></h2>
+    <p>America Tracking Polls delivers the most powerful integrated solution to incumbents and candidates determined to win.</p>
+    <p>We combine <strong>Answer Engine Optimized data</strong>, <strong>bulletproof compliance</strong>, and <strong>coordinated multi-media engagement</strong> into a single path to victory.</p>
   </div>
   <div class="about-video">
     <div class="video-placeholder">
@@ -417,18 +426,22 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
     <!-- Text on the right -->
     <div class="survey-text">
       <h3>REAL OUTREACH. REAL DATA. REAL INSIGHTS.</h3>
-      <p>It starts with a single text message. Your voter receives an SMS from your campaign with a link to a quick, mobile-optimized survey&mdash;built to feel personal, not political.</p>
-      <p>Within seconds, they're answering questions about what matters most to them: the economy, healthcare, education, infrastructure. Every response feeds directly into your campaign's intelligence engine.</p>
+      <p>Every voter response flows instantly into your dashboard&mdash;giving you instant, real-time toplines and actionable intelligence.</p>
       <h4>WHAT YOU LEARN</h4>
       <ul>
-        <li>Which issues resonate most in your district</li>
-        <li>How likely voters are to show up on Election Day</li>
-        <li>Geographic patterns in voter priorities</li>
-        <li>Real sentiment data&mdash;not assumptions</li>
+        <li>The exact issues that decide this election</li>
+        <li>Where you're winning&mdash;and where you're losing</li>
+        <li>Who the undecided voters are&mdash;and how to convert them</li>
+        <li>The vulnerabilities in your opponent's support</li>
+        <li>Real voter intelligence&mdash;not guesses, not assumptions</li>
       </ul>
       <h4>HOW IT POWERS YOUR CAMPAIGN</h4>
-      <p>This isn't just polling for the sake of numbers. Every data point flows into ATP's strategy engine, automatically shaping your ads, your website, your mail pieces, and your AI presence. <strong>The data decides the message.</strong></p>
-      <p style="margin-top:20px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">ALL SMS OUTREACH IS TCPA & 10DLC COMPLIANT</p>
+      <p>Real-time data is the engine behind every winning campaign. With ATP, every voter response flows instantly into your dashboard&mdash;fueling continuous analysis and immediate action.</p>
+      <p>This isn't static polling. <strong>It's a live intelligence system.</strong></p>
+      <p>Every data point actively shapes your campaign&mdash;refining your digital and social media, strengthening your messaging, powering your print and QR outreach, informing press releases, sharpening donor communications, optimizing your website, and driving AI search and summary dominance.</p>
+      <p>Nothing is wasted. Every move is informed. Every message is aligned with what voters actually care about.</p>
+      <p style="margin-top:24px;font-size:16px;color:var(--blue-dark)"><strong>This is how campaigns stop reacting&mdash;and start controlling the outcome.</strong></p>
+      <p style="margin-top:20px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">ALL MMS OUTREACH IS TCPA &amp; 10DLC COMPLIANT</p>
     </div>
   </div>
 </div></section>
@@ -459,11 +472,11 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
     <div class="p-node" id="node-2"><div class="p-node-title">2. ATP STRATEGY ENGINE</div><div class="p-node-desc">CENTRALIZED CAMPAIGN HUB</div></div>
     <div class="pipe-fan"><svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M200,0 L200,15 L40,15 L40,40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><path d="M200,0 L200,15 L120,15 L120,40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><path d="M200,0 L200,40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><path d="M200,0 L200,15 L280,15 L280,40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><path d="M200,0 L200,15 L360,15 L360,40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><path class="pipe-fan-line" d="M200,0 L200,15 L40,15 L40,40" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="200" stroke-dashoffset="200"/><path class="pipe-fan-line" d="M200,0 L200,15 L120,15 L120,40" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="200" stroke-dashoffset="200"/><path class="pipe-fan-line" d="M200,0 L200,40" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="200" stroke-dashoffset="200"/><path class="pipe-fan-line" d="M200,0 L200,15 L280,15 L280,40" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="200" stroke-dashoffset="200"/><path class="pipe-fan-line" d="M200,0 L200,15 L360,15 L360,40" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="200" stroke-dashoffset="200"/></svg></div>
     <div class="p-branches">
-      <div class="p-branch" id="branch-1"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10z"/></svg></div><div class="p-branch-title">WEB</div><div class="p-branch-desc">VOTER SITES &<br>LANDING PAGES</div></div>
-      <div class="p-branch" id="branch-2"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 16h18v2H3zm0-8h18v2H3zm4-4h14v2H7zm0 8h14v2H7z"/></svg></div><div class="p-branch-title">ADS</div><div class="p-branch-desc">TARGETED<br>DIGITAL ADS</div></div>
-      <div class="p-branch" id="branch-3"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="p-branch-title">MAIL</div><div class="p-branch-desc">DIRECT MAIL<br>& PRINT</div></div>
-      <div class="p-branch" id="branch-4"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></div><div class="p-branch-title">SMS</div><div class="p-branch-desc">TEXT VOTER<br>OUTREACH</div></div>
-      <div class="p-branch" id="branch-5"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div><div class="p-branch-title">AEO</div><div class="p-branch-desc">AI ANSWER<br>ENGINE OPT.</div></div>
+      <div class="p-branch" id="branch-1"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10z"/></svg></div><div class="p-branch-title">WEB</div></div>
+      <div class="p-branch" id="branch-2"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 16h18v2H3zm0-8h18v2H3zm4-4h14v2H7zm0 8h14v2H7z"/></svg></div><div class="p-branch-title">ADS</div></div>
+      <div class="p-branch" id="branch-3"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm8-2h3v3h-3v-3zm0 5h3v3h-3v-3zm5-5h3v3h-3v-3zm0 5h3v3h-3v-3z"/></svg></div><div class="p-branch-title">QR PRINT</div></div>
+      <div class="p-branch" id="branch-4"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></div><div class="p-branch-title">MMS</div></div>
+      <div class="p-branch" id="branch-5"><div class="p-branch-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div><div class="p-branch-title">AEO</div></div>
     </div>
   </div>
 </div></section>
@@ -491,20 +504,20 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 </div></section>
 
 <!-- COMPLIANCE & TRUST -->
-<section class="trust-sec"><div class="wrap">
+<section class="trust-sec" id="compliance"><div class="wrap">
   <div class="trust-hdr"><h2>COMPLIANCE-FIRST. <span style="color:var(--red)">ALWAYS.</span></h2><p>We take regulatory compliance and ethical AI usage seriously. Every campaign we run meets the highest standards.</p></div>
   <div class="trust-grid">
-    <div class="trust-card">
+    <div class="trust-card" id="tcpa">
       <div class="trust-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="var(--red)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
       <h4>TCPA & 10DLC COMPLIANCE</h4>
       <p>Every text message we send meets Telephone Consumer Protection Act requirements and uses registered 10-Digit Long Code numbers. Full opt-in/opt-out management built in.</p>
     </div>
-    <div class="trust-card">
+    <div class="trust-card" id="ai-ethics">
       <div class="trust-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="var(--red)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
       <h4>AI ETHICS PLEDGE</h4>
       <p>We have a public commitment to responsible AI usage. Our AEO content is factual, source-verified, and designed to inform&mdash;never to mislead voters or manipulate AI outputs.</p>
     </div>
-    <div class="trust-card">
+    <div class="trust-card" id="privacy">
       <div class="trust-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="var(--red)"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
       <h4>DATA PRIVACY</h4>
       <p>Voter data is encrypted, stored securely, and never sold to third parties. We follow strict privacy protocols for every campaign we manage.</p>
@@ -515,12 +528,17 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 <!-- INTAKE FORM SECTION -->
 <section class="intake-sec" id="intake"><div class="wrap">
   <div class="intake-inner">
-    <h2>GET STARTED WITH ATP</h2>
+    <h2>SCHEDULE YOUR FREE CONSULT</h2>
     <p class="intake-sub">Whether you're launching a campaign, exploring a run, or building your public brand before Election Day&mdash;we'll create a custom strategy powered by real voter data. Fill out the form below and our team will reach out within 24 hours.</p>
     <p class="intake-sub" style="margin-bottom:40px;font-size:12px;opacity:0.6">Free consultation. No obligation. We serve local, statewide, and federal races.</p>
     <div class="intake-embed">
       <!-- Typeform or intake form embed goes here -->
       Your Typeform embed will be placed here. Use an iframe or Typeform embed script to insert your intake form.
+    </div>
+    <div class="intake-cta-block">
+      <p class="intake-cta-line">Or reach us directly:</p>
+      <p class="intake-cta-contact"><a href="tel:+12028154637">(202) 815-4637</a> &nbsp;&middot;&nbsp; <a href="mailto:info@americatrackingpolls.com">info@americatrackingpolls.com</a></p>
+      <p class="intake-cta-samples">View more survey samples at <a href="https://ameritrackpolls.com/" target="_blank" rel="noopener">ameritrackpolls.com</a></p>
     </div>
   </div>
 </div></section>
@@ -529,7 +547,14 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 <footer class="ftr" id="footer"><div class="wrap">
   <div class="ftr-b">
     <div class="hdr-brand" style="font-size:16px"><span class="w">AMERICA </span><span class="r">TRACKING </span><span class="w">POLLS</span></div>
-    <div class="ftr-l"><a href="#">Knowledge Base</a><a href="#">Compliance & TCPA</a><a href="#">AI Ethics Pledge</a><a href="#">Privacy</a></div>
+    <div class="ftr-l">
+      <a href="tel:+12028154637">(202) 815-4637</a>
+      <a href="mailto:info@americatrackingpolls.com">info@americatrackingpolls.com</a>
+      <a href="https://ameritrackpolls.com/" target="_blank" rel="noopener">More Survey Samples</a>
+      <a href="#compliance">Compliance &amp; TCPA</a>
+      <a href="#ai-ethics">AI Ethics Pledge</a>
+      <a href="#privacy">Privacy</a>
+    </div>
     <div class="ftr-c">&copy; 2026 America Tracking Polls LLC. Built by the Numbers.</div>
   </div>
 </div></footer>
@@ -559,7 +584,7 @@ const htl=gsap.timeline({delay:0.2});
 htl.to('.h-line',{opacity:1,y:0,duration:0.8,stagger:0.15,ease:'power3.out'})
    .to('.hero-sub',{opacity:1,y:0,duration:0.8,ease:'power2.out'},'-=0.4')
    .to('.hero-btns',{opacity:1,y:0,duration:0.5,ease:'back.out(1.5)'},'-=0.2')
-   .to('.hf',{opacity:1,x:0,duration:0.8,ease:'power3.out'},'-=0.8');
+   .to('.hero-media',{opacity:1,x:0,duration:0.8,ease:'power3.out'},'-=0.8');
 
 /* ═══ HERO CANVAS BACKGROUND ═══ */
 (function(){
