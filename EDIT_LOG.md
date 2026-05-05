@@ -24,6 +24,69 @@
 
 ---
 
+## 2026-05-05 — Drive integration: switched from service account to OAuth user flow
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+User asked for OAuth user flow + visual folder picker + always-keep-WP-copy
+instead of the service-account architecture shipped on 3.1.0. Plugin
+bumped to 3.2.0.
+
+### Done
+
+- **Auth method swapped.** `drive-client.php` rewritten:
+  - Removed service-account JWT/RS256 signing
+  - Added OAuth authorize URL builder, callback handler, refresh-token
+    cache, access-token transient (~55 min TTL)
+  - New helpers: `atp_drive_oauth_get/set/clear_tokens`,
+    `atp_drive_redirect_uri`, `atp_drive_authorize_url`,
+    `atp_drive_handle_oauth_callback`, `atp_drive_list_folders`,
+    `atp_drive_get_folder_meta`, `atp_drive_ajax_browse`
+  - Kept (and reused) `atp_drive_find_or_create_folder` and
+    `atp_drive_upload_file` — they didn't depend on auth method
+- **Settings UI rebuilt** in `whitelabel.php`:
+  - Removed: "Service Account JSON Path" field, manual folder ID field
+  - Added: OAuth Client ID + Secret fields, Authorized redirect URI
+    display, Connect / Disconnect / Test Connection buttons,
+    connected-account email display, "Browse my Drive…" modal that
+    calls the new AJAX endpoint to navigate folders and pick one
+  - "Drive mirroring" dropdown reframed: "WordPress only" vs
+    "WordPress + Google Drive" (was "WordPress Media Library" vs
+    "Google Drive")
+- **Upload routing changed** in `file-upload.php`:
+  - WP media library is now **always** saved (no longer a fallback)
+  - Drive is **always** an additional mirror when configured
+  - On Drive failure: `error_log()` + WP-only result; submission still succeeds
+- **AJAX endpoint** `wp_ajax_atp_drive_browse` registered in
+  `drive-client.php`, capability-checked + nonce-protected, returns
+  JSON list of subfolders for the in-admin picker
+- **Docs rewritten** — `docs/google-drive-setup.md` walks through
+  Cloud Console → OAuth client → Connect → Pick folder → Test, plus
+  full troubleshooting section
+- **Mirrored to legacy** `atp-demo-plugin/` folder; PHP lint clean on
+  all 6 files (3 canonical + 3 legacy)
+- **Plugin version bumped** 3.1.0 → 3.2.0; CHANGELOG entry includes
+  migration notes from 3.1.0
+
+### Architecture decision: server-side folder browser, not Google Picker JS
+
+Google Picker API would require an additional API key + Picker API
+enable in Cloud Console. Instead, the picker is a small in-admin
+modal that calls the Drive `files.list` API via a WP AJAX endpoint
+(reusing the OAuth access token) and lets the user navigate folders
+with breadcrumbs. Less polished UX than Google Picker but no extra
+Cloud setup and one less credential to manage.
+
+### Skipped — needs input
+- ATP staff still needs to create an OAuth Client ID in Google Cloud
+  (instructions in `docs/google-drive-setup.md`).
+- The previously-uploaded service-account JSON key (from the
+  Bitwarden Send link earlier in the project) is no longer used. If
+  it was placed on a server, it can be deleted.
+
+---
+
 ## 2026-05-05 — Complete the candidate-platform / ATP-marketing split
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

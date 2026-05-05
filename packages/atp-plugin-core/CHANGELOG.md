@@ -7,6 +7,45 @@ Version numbering follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.2.0] - 2026-05-05
+
+### Changed — Drive integration switched to OAuth user flow
+
+Replaces the v3.1.0 service-account auth with OAuth 2.0 user flow.
+The admin connects their own Google account, picks a folder visually,
+and intake submissions are mirrored into that folder. Files are now
+**always** saved to the WordPress media library; Drive is a secondary
+mirror, not a replacement.
+
+- New `drive-client.php` auth: OAuth authorize URL + callback handler
+  + refresh-token-based access-token cache. JWT/RS256 service-account
+  code removed.
+- New `whitelabel.php` settings:
+  - OAuth Client ID + Client Secret fields
+  - Authorized redirect URI display (for pasting into Google Cloud)
+  - **Connect Google Drive** / **Disconnect** / **Test Connection** buttons
+  - Connected-account email display
+  - **Browse my Drive…** modal that lets the admin navigate folders
+    and pick a destination — no more manual folder ID entry
+- New AJAX endpoint `wp_ajax_atp_drive_browse` to power the picker.
+- `file-upload.php` now always saves to WP media first, then
+  optionally mirrors to Drive when configured. The "fallback" path is
+  gone because WP is no longer the fallback — it's the primary.
+- `docs/google-drive-setup.md` rewritten end-to-end for the OAuth
+  flow, including troubleshooting for `redirect_uri_mismatch`,
+  `invalid_grant`, missing refresh token, etc.
+
+### Migration from 3.1.0
+If you were on 3.1.0 with a service-account JSON key, the old admin
+fields (Drive Folder ID, Service Account JSON Path) are gone.
+Reconfigure via the new OAuth flow; the JSON key file on disk can be
+deleted from the server. Old `atp_drive_config` keys
+(`folder_id`, `credentials_path`, `credentials`) are no longer read;
+new keys are `folder_id` and `folder_name`. New `atp_drive_oauth`
+option holds the OAuth credentials and refresh token.
+
+---
+
 ## [3.1.0] - 2026-05-03
 
 ### Added — Google Drive Upload Integration

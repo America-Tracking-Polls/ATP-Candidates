@@ -1,218 +1,230 @@
-# Google Drive Upload — Setup Guide
+# Google Drive Mirror — Setup Guide (OAuth flow)
 
-The intake form can store uploaded files (headshots, logos, additional photos)
-in Google Drive instead of the WordPress media library. This document walks
-through everything required to activate it on a fresh install.
+The intake plugin can mirror every uploaded file (headshot, logo,
+additional photos) into a Google Drive folder you choose, organized
+into one subfolder per submission. **Mirroring is on top of the
+WordPress media library**, not instead of it: every file always lands
+in WP media first, and Drive is a secondary destination.
 
-> **Important:** the service-account JSON key is a credential. It must NEVER
-> be committed to this repo, pasted into chat, or stored inside the WordPress
-> web root. Treat it like a password.
+This guide walks you through:
 
----
+1. Creating an OAuth 2.0 client in Google Cloud
+2. Connecting WordPress to your Google account
+3. Picking a destination folder
+4. Testing the connection
 
-## Architecture
-
-```
-WP form submission
-   └─► atp_handle_file_upload()             (file-upload.php)
-         └─► atp_drive_upload()             when storage = google_drive
-               ├─► atp_drive_get_access_token()    JWT → OAuth token (cached)
-               ├─► atp_drive_find_or_create_folder()
-               │     parent: configured Folder ID
-               │     name:   YYYY-MM-DD_Candidate-Name_Office-Slug
-               └─► atp_drive_upload_file()        multipart upload
-```
-
-All Drive code lives in `packages/atp-plugin-core/includes/drive-client.php`.
-It uses only `wp_remote_*` and PHP's `openssl` extension — no Composer or
-Google SDK.
-
-On any failure (auth, folder, upload) the handler logs to `error_log()` and
-falls back to the WordPress media library so submissions are never lost.
+> Stored in the WP database (admin-only): the OAuth Client ID, Client
+> Secret, refresh token, connected account email, and picked folder
+> ID/name. No JSON key files, no shell access, no Drive folder
+> sharing.
 
 ---
 
 ## One-time Google Cloud setup
 
-This is normally done once per agency / environment, not per campaign site.
+Do this once per environment (typically once for ATP's intake host).
 
-1. **Create a Google Cloud project** (e.g. `atp-intake-drive`).
-2. **Enable the Google Drive API** for the project.
-3. **Create a service account** (e.g. `atp-intake-uploader`).
-4. **Generate a JSON key** for the service account. Download it. This file
-   is the credential — protect it accordingly.
-5. **Create the parent Drive folder** (e.g. `Intake_Submissions_Live`) in a
-   Drive you control (personal, shared drive, or Workspace).
-6. **Share the folder with the service account email** as **Editor**. The
-   email looks like `atp-intake-uploader@<project>.iam.gserviceaccount.com`.
+### 1. Create or pick a Google Cloud project
 
-> **Why Editor and not Viewer?** The plugin needs to create dated subfolders
-> and upload files into them.
+1. Go to <https://console.cloud.google.com/>.
+2. Project picker (top bar) → **New Project** (e.g. `atp-intake-drive`)
+   or select an existing one.
 
-> **Why share the folder?** The plugin uses the `drive.file` OAuth scope,
-> which means the service account can only see files it created or files
-> explicitly shared with it. Without the share, the parent folder is
-> invisible to the service account and upload will fail with
-> "Could not access folder."
+### 2. Enable the Drive API
 
-The folder ID is the string in the folder URL after `/folders/`:
+1. Project dashboard → **APIs & Services → Library**.
+2. Search "Google Drive API" → **Enable**.
 
-```
-https://drive.google.com/drive/folders/1AmUatOOqqliQezIJZM2qqO6jt3M_dHZR
-                                       └────────── folder ID ──────────┘
-```
+### 3. Configure the OAuth consent screen
+
+1. **APIs & Services → OAuth consent screen**.
+2. User type: **External** (unless this is a Google Workspace project,
+   in which case **Internal** is fine).
+3. App name: e.g. "ATP Intake Drive Mirror".
+4. User support email: yours.
+5. Developer contact: yours.
+6. Save.
+7. On the **Scopes** step you don't need to add scopes here — they're
+   requested at connect time.
+8. On the **Test users** step (if External): add the Google account
+   that will be connecting (the account that owns the destination
+   folder). External apps in test mode only allow listed users to
+   connect; this is fine for an internal tool.
+
+### 4. Create the OAuth 2.0 Client ID
+
+1. **APIs & Services → Credentials → Create Credentials → OAuth
+   client ID**.
+2. Application type: **Web application**.
+3. Name: e.g. "ATP WordPress Plugin".
+4. Authorized JavaScript origins: not required.
+5. **Authorized redirect URIs:** add the exact URL shown in your
+   plugin's settings page. It looks like:
+   ```
+   https://YOUR-WP-DOMAIN/wp-admin/admin.php?page=atp-whitelabel&atp_drive_oauth=callback
+   ```
+   You can grab this from **WP Admin → ATP → White Label Settings →
+   File Upload Storage → Authorized redirect URI** (the URL is shown
+   in a code box right under the Client Secret field).
+6. Create. Google shows you the **Client ID** and **Client Secret** —
+   copy both. Treat the secret like a password.
+
+> If your WP site has a staging URL and a production URL, add both
+> redirect URIs to the same OAuth client.
 
 ---
 
-## Per-server installation
+## Connect WordPress to Drive
 
-Do this once per WordPress server.
+1. **WP Admin → ATP → White Label Settings**, scroll to the **File
+   Upload Storage** section.
+2. **Drive mirroring** dropdown: select **WordPress + Google Drive**.
+3. Paste the **OAuth Client ID** and **OAuth Client Secret** from
+   step 4 above.
+4. Click **Save Settings**. A Connect button now appears.
+5. Click **Connect Google Drive**. You're redirected to Google's
+   consent screen.
+6. Pick the Google account that owns (or has access to) the folder
+   you want submissions mirrored into.
+7. Approve the requested scope (`drive.file` — only files this app
+   creates, plus the folder you pick).
+8. You're redirected back to the WP settings page. The status row
+   should now show **"Connected as: your-email@example.com"**.
 
-### 1. Place the JSON key outside the web root
+---
 
-The web root is wherever WordPress lives (e.g. `/var/www/html/`). The key
-must NOT be under that path — anything in the web root can in principle be
-served as a static file.
+## Pick a destination folder
 
-```bash
-sudo mkdir -p /var/www/atp-private
-sudo chmod 700 /var/www/atp-private
-sudo chown www-data:www-data /var/www/atp-private
-```
+After connecting, a **"Browse my Drive…"** button appears.
 
-Then upload the JSON key from your laptop:
+1. Click it. A folder browser opens with your Drive root.
+2. Click **Open** on a folder to navigate into it; click **Select**
+   on the folder you want to use, or use the **Select this folder**
+   button in the breadcrumbs.
+3. Click **Pick this folder** at the bottom of the picker.
+4. The settings page reloads showing **"Picked folder: \<name\>"**.
 
-```bash
-scp ~/Downloads/atp-intake-drive-XXXXX.json \
-    user@host:/tmp/atp-drive-key.json
+You can change the picked folder later by clicking **Browse my
+Drive…** again.
 
-ssh user@host
-sudo mv /tmp/atp-drive-key.json /var/www/atp-private/atp-drive-key.json
-sudo chmod 600 /var/www/atp-private/atp-drive-key.json
-sudo chown www-data:www-data /var/www/atp-private/atp-drive-key.json
-```
+---
 
-Verify the web server user can read it:
+## Test the connection
 
-```bash
-sudo -u www-data cat /var/www/atp-private/atp-drive-key.json | head -c 50
-# Should print the start of the JSON (e.g. {"type": "service_account", ...)
-```
+Click **Test Connection**. The plugin will:
 
-> **Why `chmod 600` and `chown www-data`?** Only the WordPress process needs
-> to read this file. No other users on the box should be able to. The exact
-> user name (`www-data`, `nginx`, `apache`, etc.) depends on your distro and
-> web server.
+1. Refresh the access token using your stored refresh token
+2. Read the picked folder's metadata
+3. Upload a tiny `atp-drive-test-<timestamp>.txt` file into it
+4. Delete that test file
 
-### 2. Configure the WordPress plugin
+On success: **"Drive test passed. OK — authenticated, folder
+reachable, test file uploaded and removed. Folder: \<name\>"**.
 
-In WP admin: **ATP → White Label Settings → File Upload Storage**:
+---
 
-| Field | Value |
-|---|---|
-| Upload destination | **Google Drive** |
-| Google Drive Folder ID | The ID from step 5 of Cloud setup |
-| Service Account JSON Path | Absolute path, e.g. `/var/www/atp-private/atp-drive-key.json` |
+## What happens on a real intake submission
 
-Click **Save Settings**.
+For every uploaded file:
 
-### 3. Test the connection
+1. The plugin always saves it to the **WordPress media library**
+   under `wp-content/uploads/atp-intake/<candidate-slug>/`. This is
+   the primary, always-on copy.
+2. If Drive is connected and a folder is picked, the plugin **also**
+   mirrors the file into the picked Drive folder, inside a per-
+   submission subfolder named:
+   ```
+   YYYY-MM-DD_Candidate-Name_Office-Slug/
+   ```
+3. The file's filename in Drive is prefixed with the intake field
+   name (`headshot_*`, `logo_*`, `additional_photos_*`) for clarity.
 
-Click **Test Drive Connection** on the same page.
+If the Drive mirror fails (auth expired, network blip, folder
+deleted) the plugin logs to `error_log()` and **the submission still
+succeeds** — the WP media-library copy is the safety net.
 
-On success you'll see:
+---
 
-> **Drive test passed.** OK — authenticated, folder reachable, test file
-> uploaded and removed. Parent folder: `Intake_Submissions_Live`
+## Disconnect / reconnect / rotate
 
-The test:
-1. Performs a fresh JWT exchange (bypasses the token cache).
-2. Reads the parent folder metadata.
-3. Uploads a tiny `atp-drive-test-<timestamp>.txt` file into the parent.
-4. Deletes the test file.
-
-### 4. Submit a real intake
-
-Walk through the candidate intake form with a test headshot. After submit,
-verify:
-- A subfolder named `YYYY-MM-DD_Candidate-Name_Office-Slug` exists under the
-  parent.
-- The uploaded file is inside that subfolder.
-- In WP admin the submission detail page shows an "Open submission folder
-  in Drive" button that opens the right folder.
+- **Disconnect**: click **Disconnect** in the Connection row. The
+  refresh token and folder selection are cleared. Future uploads go
+  to WP media only until you reconnect.
+- **Reconnect**: click **Connect Google Drive** again and re-approve
+  consent. You'll get a fresh refresh token.
+- **Rotate the OAuth client secret**: regenerate it in Google Cloud,
+  paste the new value into the WP settings, save, click **Connect
+  Google Drive** again. The old refresh token will be invalidated.
+- **Revoke from Google's side**: <https://myaccount.google.com/security>
+  → "Third-party apps with account access" → remove. Plugin will
+  detect the revocation on next refresh and clear its cached tokens.
 
 ---
 
 ## Troubleshooting
 
-### "Service account JSON file is missing or not readable"
+### "OAuth state token mismatch"
+The CSRF state token expired (15-minute window) or was lost. Click
+**Connect Google Drive** again.
 
-The path saved in settings does not exist or `www-data` cannot read it.
+### "Token exchange failed: redirect_uri_mismatch"
+The redirect URI you registered in Google Cloud doesn't exactly match
+what the plugin is sending. Compare the URL shown in the **Authorized
+redirect URI** row on the settings page against what's in your OAuth
+client → **Authorized redirect URIs**. Trailing slashes, http vs
+https, and query params must match exactly.
 
-- Confirm the file exists: `ls -l /var/www/atp-private/atp-drive-key.json`
-- Confirm web server can read it:
-  `sudo -u www-data test -r /var/www/atp-private/atp-drive-key.json && echo OK`
-- Check parent directory is traversable: `chmod 711` on the directory if
-  needed (or keep `700` and chown the directory to `www-data`).
+### "Token exchange failed: invalid_client"
+Client ID or Client Secret is wrong, or the OAuth consent screen
+isn't published / you're not in the test users list. Re-check both
+fields and the consent screen configuration.
 
-### "Token exchange failed (400): invalid_grant"
+### "Token refresh failed: invalid_grant"
+The refresh token has been revoked (someone clicked "remove access"
+in Google Account settings, or the OAuth client was deleted). The
+plugin will auto-clear its cached tokens and prompt you to reconnect.
 
-The JWT couldn't be signed or the system clock is skewed.
+### "Google did not return a refresh token"
+This happens if you've connected this OAuth client to this Google
+account before. Go to
+<https://myaccount.google.com/permissions>, remove the app's prior
+grant, then click **Connect Google Drive** again. The plugin sends
+`prompt=consent` to force re-issue.
 
-- Check server time: `date -u` should match real UTC within a minute.
-- Confirm the JSON key is the full unmodified file from Google Cloud — if
-  someone copy/pasted it, the `private_key` field's `\n` escapes may be
-  broken. The file must be exactly what Google issued.
+### "Could not access folder"
+The connected account doesn't have permission on the picked folder
+(e.g. you connected as user A but the folder is owned by user B and
+not shared). Either share the folder with the connected account, or
+disconnect and reconnect as the folder's owner.
 
-### "Could not access folder."
+### "Folder lookup failed: insufficientScopes"
+The OAuth consent didn't include the Drive scope. Disconnect and
+reconnect — the plugin requests `drive.file` on every connect.
 
-The parent folder is not shared with the service account, OR the folder ID
-is wrong.
-
-- Re-check the folder ID is the string after `/folders/` in the URL.
-- In Drive, right-click the folder → Share → confirm the service account
-  email is listed as Editor (not Viewer, not Commenter).
-- Service account email is in the JSON key as `client_email`.
-
-### Uploads succeed but go to WordPress media library, not Drive
-
-The fallback path is engaging. Check:
-- Upload destination is set to "Google Drive" (not "WordPress Media Library").
-- The credentials path field is filled and shows ✓ readable.
-- Tail the PHP error log — fallbacks log a `[ATP Drive]` line with the reason.
-
-### "Folder lookup failed: ... insufficientScopes"
-
-The service account JSON has been replaced with one for a different scope,
-or the Drive API is not enabled on the project. Re-enable the Drive API in
-Google Cloud and regenerate the key if needed.
-
----
-
-## Rotating the key
-
-If the key is leaked or you need to rotate periodically:
-
-1. In Google Cloud → IAM → Service Accounts → keys: **Create new key** (JSON).
-2. `scp` the new file to the server, replacing
-   `/var/www/atp-private/atp-drive-key.json`.
-3. In Google Cloud, delete the old key.
-4. In WP admin, click **Save Settings** (this clears the cached access
-   token), then **Test Drive Connection**.
-
-No code changes required.
+### Submissions go to WP media only, never to Drive
+Check, in order:
+- Drive mirroring dropdown is set to **"WordPress + Google Drive"**
+- Connection status shows **Connected**
+- A folder is picked
+- `error_log()` for `[ATP Drive] mirror upload failed: ...` entries —
+  any failure path leaves a line there
 
 ---
 
-## What never to do
+## What's stored where
 
-- ❌ Don't commit the JSON key to git. The repo `.gitignore` blocks common
-  filename patterns as a safety net, but the only safe location is outside
-  the repo entirely.
-- ❌ Don't paste the JSON into the WP database (e.g. as a setting value
-  rather than a file path). Database backups and exports would carry the
-  credential.
-- ❌ Don't store the JSON under `wp-content/`, `wp-includes/`, or any path
-  served by the web server.
-- ❌ Don't share the JSON in chat, email, or screenshots. Use a secrets
-  manager or a one-time-link service (Bitwarden Send, 1Password share, etc.).
+| Item | Stored in | Why |
+|---|---|---|
+| OAuth Client ID | `wp_options.atp_drive_oauth.client_id` | Public identifier |
+| OAuth Client Secret | `wp_options.atp_drive_oauth.client_secret` | Required for token refresh — admin-only |
+| Refresh token | `wp_options.atp_drive_oauth.refresh_token` | Long-lived credential — admin-only |
+| Connected account email | `wp_options.atp_drive_oauth.connected_email` | Display only |
+| Access token | WP transient `atp_drive_access_token`, ~55 min TTL | Cached; refreshed automatically |
+| Picked folder ID + name | `wp_options.atp_drive_config` | Destination |
+| Per-submission Drive subfolders | The picked folder, named `YYYY-MM-DD_Name_Office` | Mirror of submission |
+| Files | WP media library (always) + Drive subfolder (when mirroring on) | Belt + suspenders |
+
+The OAuth Client Secret and refresh token live in `wp_options`, which
+is admin-only via WordPress capability checks. If you want extra
+hardening you can encrypt them at rest using a key in
+`wp-config.php` — that's a follow-up, not currently implemented.

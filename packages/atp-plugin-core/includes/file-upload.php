@@ -38,20 +38,27 @@ function atp_handle_file_upload() {
         wp_send_json_error( 'File exceeds 10 MB limit.' );
     }
 
-    // Check which storage adapter to use
+    // Always save a copy in the WP media library — that's the safety net.
+    $wp_result = atp_wordpress_upload( $file, $field, $candidate );
+    if ( is_wp_error( $wp_result ) ) {
+        wp_send_json_error( $wp_result->get_error_message() );
+    }
+
+    // Optionally also mirror into Google Drive.
     $storage = get_option( 'atp_upload_storage', 'wordpress' );
-
     if ( $storage === 'google_drive' && atp_drive_is_configured() ) {
-        $result = atp_drive_upload( $file, $field, $candidate, $office );
-    } else {
-        $result = atp_wordpress_upload( $file, $field, $candidate );
+        $drive_result = atp_drive_upload( $file, $field, $candidate, $office );
+        if ( is_wp_error( $drive_result ) ) {
+            error_log( '[ATP Drive] mirror upload failed: ' . $drive_result->get_error_message() );
+        } else {
+            $wp_result['drive']      = $drive_result;
+            $wp_result['drive_url']  = $drive_result['url']        ?? '';
+            $wp_result['sub_folder'] = $drive_result['sub_folder'] ?? '';
+            $wp_result['storage']    = 'wordpress+drive';
+        }
     }
 
-    if ( is_wp_error( $result ) ) {
-        wp_send_json_error( $result->get_error_message() );
-    }
-
-    wp_send_json_success( $result );
+    wp_send_json_success( $wp_result );
 }
 
 /**
@@ -105,64 +112,41 @@ function atp_wordpress_upload( $file, $field, $candidate ) {
 }
 
 /**
- * Check if Google Drive is configured.
- */
-function atp_drive_is_configured() {
-    $config = get_option( 'atp_drive_config', [] );
-    if ( empty( $config['folder_id'] ) || empty( $config['credentials_path'] ) ) {
-        return false;
-    }
-    return is_readable( $config['credentials_path'] );
-}
-
-/**
- * Upload to Google Drive. Falls back to WordPress media library on any failure
- * so submissions are never lost.
+ * Mirror an uploaded file into the connected Google Drive folder.
+ * Configuration comes from drive-client.php (OAuth user flow).
  *
- * @return array|WP_Error
+ * @return array|WP_Error  ['url','id','sub_folder'] or error.
  */
 function atp_drive_upload( $file, $field, $candidate, $office ) {
     $config           = get_option( 'atp_drive_config', [] );
     $parent_folder_id = $config['folder_id'] ?? '';
-    $credentials_path = $config['credentials_path'] ?? '';
-
-    if ( ! $parent_folder_id || ! $credentials_path ) {
-        return atp_wordpress_upload( $file, $field, $candidate );
+    if ( ! $parent_folder_id ) {
+        return new WP_Error( 'atp_drive_no_folder', 'No destination folder picked.' );
     }
 
-    // Build submission folder name: YYYY-MM-DD_Candidate-Name_Office-Slug
+    $token = atp_drive_get_access_token();
+    if ( is_wp_error( $token ) ) return $token;
+
+    // Submission subfolder: YYYY-MM-DD_Candidate-Name_Office-Slug
     $date_prefix = gmdate( 'Y-m-d' );
     $cand_slug   = sanitize_file_name( str_replace( ' ', '-', $candidate ) );
     $office_slug = sanitize_file_name( str_replace( ' ', '-', $office ) );
     $folder_name = $date_prefix . '_' . ( $cand_slug ?: 'candidate' ) . ( $office_slug ? '_' . $office_slug : '' );
 
-    $token = atp_drive_get_access_token( $credentials_path );
-    if ( is_wp_error( $token ) ) {
-        error_log( '[ATP Drive] auth failed, falling back to WP: ' . $token->get_error_message() );
-        return atp_wordpress_upload( $file, $field, $candidate );
-    }
-
     $sub_folder_id = atp_drive_find_or_create_folder( $parent_folder_id, $folder_name, $token );
-    if ( is_wp_error( $sub_folder_id ) ) {
-        error_log( '[ATP Drive] folder failed, falling back to WP: ' . $sub_folder_id->get_error_message() );
-        return atp_wordpress_upload( $file, $field, $candidate );
-    }
+    if ( is_wp_error( $sub_folder_id ) ) return $sub_folder_id;
 
     $upload_name = sanitize_file_name( $field . '_' . $file['name'] );
     $mime        = ! empty( $file['type'] ) ? $file['type'] : 'application/octet-stream';
 
     $result = atp_drive_upload_file( $file['tmp_name'], $upload_name, $mime, $sub_folder_id, $token );
-    if ( is_wp_error( $result ) ) {
-        error_log( '[ATP Drive] upload failed, falling back to WP: ' . $result->get_error_message() );
-        return atp_wordpress_upload( $file, $field, $candidate );
-    }
+    if ( is_wp_error( $result ) ) return $result;
 
     return [
         'url'        => $result['webViewLink'] ?? '',
         'id'         => $result['id'],
         'name'       => $file['name'],
         'size'       => $file['size'],
-        'storage'    => 'google_drive',
         'sub_folder' => 'https://drive.google.com/drive/folders/' . rawurlencode( $sub_folder_id ),
     ];
 }

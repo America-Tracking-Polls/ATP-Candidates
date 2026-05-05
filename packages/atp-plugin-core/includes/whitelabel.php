@@ -229,24 +229,70 @@ function atp_wl_render_settings() {
         ];
         update_option( 'atp_whitelabel', $data );
 
-        // Save upload storage settings
+        // Save upload storage settings + OAuth client credentials
         update_option( 'atp_upload_storage', sanitize_text_field( $_POST['upload_storage'] ?? 'wordpress' ) );
-        $drive_config = get_option( 'atp_drive_config', [] );
-        $drive_config['folder_id']        = sanitize_text_field( $_POST['drive_folder_id'] ?? '' );
-        $drive_config['credentials_path'] = sanitize_text_field( $_POST['drive_credentials_path'] ?? '' );
-        $drive_config['credentials']      = ! empty( $drive_config['credentials_path'] ); // legacy flag for atp_drive_is_configured
-        update_option( 'atp_drive_config', $drive_config );
-        delete_transient( 'atp_drive_access_token' );
+        if ( isset( $_POST['drive_client_id'] ) || isset( $_POST['drive_client_secret'] ) ) {
+            atp_drive_oauth_set( [
+                'client_id'     => sanitize_text_field( $_POST['drive_client_id']     ?? '' ),
+                'client_secret' => sanitize_text_field( $_POST['drive_client_secret'] ?? '' ),
+            ] );
+        }
 
         echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
     }
 
-    // Test connection
-    $test_result = null;
+    // ── Drive: Connect (kick off OAuth) ────────────────────────────────
+    if ( isset( $_POST['atp_drive_connect'] ) && check_admin_referer( 'atp_wl_settings' ) ) {
+        $authorize = atp_drive_authorize_url();
+        if ( ! $authorize ) {
+            echo '<div class="notice notice-error is-dismissible"><p>Save your OAuth Client ID and Client Secret first.</p></div>';
+        } else {
+            wp_redirect( $authorize );
+            exit;
+        }
+    }
+
+    // ── Drive: Disconnect ──────────────────────────────────────────────
+    if ( isset( $_POST['atp_drive_disconnect'] ) && check_admin_referer( 'atp_wl_settings' ) ) {
+        atp_drive_oauth_clear_tokens();
+        update_option( 'atp_drive_config', [] );
+        echo '<div class="notice notice-success is-dismissible"><p>Disconnected from Google Drive. Refresh token and folder selection cleared.</p></div>';
+    }
+
+    // ── Drive: OAuth callback (Google redirects here with ?code=&state=)
+    if ( ( $_GET['atp_drive_oauth'] ?? '' ) === 'callback' ) {
+        if ( ! empty( $_GET['error'] ) ) {
+            echo '<div class="notice notice-error is-dismissible"><p>Drive authorization failed: '
+                . esc_html( sanitize_text_field( $_GET['error'] ) ) . '</p></div>';
+        } elseif ( ! empty( $_GET['code'] ) ) {
+            $r = atp_drive_handle_oauth_callback(
+                sanitize_text_field( $_GET['code'] ),
+                sanitize_text_field( $_GET['state'] ?? '' )
+            );
+            if ( is_wp_error( $r ) ) {
+                echo '<div class="notice notice-error is-dismissible"><p><strong>Connect failed:</strong> '
+                    . esc_html( $r->get_error_message() ) . '</p></div>';
+            } else {
+                echo '<div class="notice notice-success is-dismissible"><p><strong>Google Drive connected.</strong> Now pick a destination folder below.</p></div>';
+            }
+        }
+    }
+
+    // ── Drive: Pick folder (POST from JS browser) ──────────────────────
+    if ( isset( $_POST['atp_drive_pick_folder'] ) && check_admin_referer( 'atp_wl_settings' ) ) {
+        $fid   = sanitize_text_field( $_POST['drive_pick_folder_id']   ?? '' );
+        $fname = sanitize_text_field( $_POST['drive_pick_folder_name'] ?? '' );
+        if ( $fid ) {
+            update_option( 'atp_drive_config', [ 'folder_id' => $fid, 'folder_name' => $fname ] );
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Folder selected:</strong> '
+                . esc_html( $fname ?: $fid ) . '</p></div>';
+        }
+    }
+
+    // ── Drive: Test connection ─────────────────────────────────────────
     if ( isset( $_POST['atp_drive_test'] ) && check_admin_referer( 'atp_wl_settings' ) ) {
-        $cfg = get_option( 'atp_drive_config', [] );
         if ( function_exists( 'atp_drive_test_connection' ) ) {
-            $test_result = atp_drive_test_connection( $cfg['credentials_path'] ?? '', $cfg['folder_id'] ?? '' );
+            $test_result = atp_drive_test_connection();
         } else {
             $test_result = new WP_Error( 'atp_drive_missing', 'Drive client not loaded.' );
         }
@@ -255,8 +301,8 @@ function atp_wl_render_settings() {
                 . esc_html( $test_result->get_error_message() ) . '</p></div>';
         } else {
             echo '<div class="notice notice-success is-dismissible"><p><strong>Drive test passed.</strong> '
-                . esc_html( $test_result['message'] ) . ' Parent folder: <code>'
-                . esc_html( $test_result['parent'] ) . '</code></p></div>';
+                . esc_html( $test_result['message'] ) . ' Folder: <code>'
+                . esc_html( $test_result['folder'] ) . '</code></p></div>';
         }
     }
 
@@ -330,47 +376,226 @@ function atp_wl_render_settings() {
                 </table>
 
                 <h2 style="margin-top:24px">File Upload Storage</h2>
+                <p class="description" style="max-width:780px">
+                    Every intake submission's uploads are <strong>always saved to the WordPress Media Library</strong>
+                    (organized by candidate). When Google Drive is connected and a folder is picked below, files are
+                    <strong>also</strong> copied into Drive under <code>YYYY-MM-DD_Candidate-Name_Office-Slug</code>
+                    subfolders. Drive is a secondary mirror, not a replacement.
+                </p>
                 <table class="form-table">
                     <tr>
-                        <th><label for="upload_storage">Upload destination</label></th>
+                        <th><label for="upload_storage">Drive mirroring</label></th>
                         <td>
                             <?php $storage = get_option( 'atp_upload_storage', 'wordpress' ); ?>
                             <select name="upload_storage" id="upload_storage">
-                                <option value="wordpress" <?php selected( $storage, 'wordpress' ); ?>>WordPress Media Library</option>
-                                <option value="google_drive" <?php selected( $storage, 'google_drive' ); ?>>Google Drive</option>
+                                <option value="wordpress" <?php selected( $storage, 'wordpress' ); ?>>WordPress only</option>
+                                <option value="google_drive" <?php selected( $storage, 'google_drive' ); ?>>WordPress + Google Drive</option>
                             </select>
-                            <p class="description">WordPress Media Library works out of the box. Google Drive requires credentials below.</p>
+                            <p class="description">When set to "WordPress + Google Drive", Drive must be connected and a folder picked.</p>
                         </td>
                     </tr>
                     <tr>
-                        <th><label for="drive_folder_id">Google Drive Folder ID</label></th>
+                        <th><label for="drive_client_id">OAuth Client ID</label></th>
                         <td>
-                            <?php $drive_config = get_option( 'atp_drive_config', [] ); ?>
-                            <input type="text" name="drive_folder_id" id="drive_folder_id" value="<?php echo esc_attr( $drive_config['folder_id'] ?? '' ); ?>" class="regular-text">
-                            <p class="description">The folder ID from the Intake_Forms folder URL (the string after <code>/folders/</code>). The folder must be shared with the service account as Editor.</p>
+                            <?php $oauth = atp_drive_oauth_get(); ?>
+                            <input type="text" name="drive_client_id" id="drive_client_id" value="<?php echo esc_attr( $oauth['client_id'] ); ?>" class="regular-text code" autocomplete="off">
+                            <p class="description">From your Google Cloud project → APIs &amp; Services → Credentials → OAuth 2.0 Client IDs (Web application).</p>
                         </td>
                     </tr>
                     <tr>
-                        <th><label for="drive_credentials_path">Service Account JSON Path</label></th>
+                        <th><label for="drive_client_secret">OAuth Client Secret</label></th>
                         <td>
-                            <input type="text" name="drive_credentials_path" id="drive_credentials_path" value="<?php echo esc_attr( $drive_config['credentials_path'] ?? '' ); ?>" class="regular-text code" placeholder="/var/www/atp-private/atp-drive-key.json">
-                            <p class="description">Absolute path to the service account JSON key on disk. <strong>Must live outside the web root</strong> (e.g. <code>/var/www/atp-private/</code>, not <code>wp-content/</code>). File should be readable only by the web server user (<code>chmod 600</code>).</p>
-                            <?php if ( ! empty( $drive_config['credentials_path'] ) ) :
-                                $exists = is_readable( $drive_config['credentials_path'] );
-                                ?>
-                                <p class="description">Status: <?php echo $exists
-                                    ? '<span style="color:#1a7f37">✓ file is readable</span>'
-                                    : '<span style="color:#cf222e">✗ file not found or not readable</span>'; ?></p>
-                            <?php endif; ?>
+                            <input type="password" name="drive_client_secret" id="drive_client_secret" value="<?php echo esc_attr( $oauth['client_secret'] ); ?>" class="regular-text code" autocomplete="off">
+                            <p class="description">Stored in WordPress settings (admin-only).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Authorized redirect URI</th>
+                        <td>
+                            <code style="background:#f6f7f7;padding:6px 10px;border-radius:3px;display:inline-block"><?php echo esc_html( atp_drive_redirect_uri() ); ?></code>
+                            <p class="description">Add this exact URL to your OAuth client's "Authorized redirect URIs" in Google Cloud Console.</p>
                         </td>
                     </tr>
                 </table>
 
+                <h3 style="margin-top:18px">Connection</h3>
+                <table class="form-table">
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <?php if ( atp_drive_is_connected() ) :
+                                $cfg = get_option( 'atp_drive_config', [] );
+                                ?>
+                                <p>
+                                    <span style="display:inline-block;width:10px;height:10px;background:#1a7f37;border-radius:50%;margin-right:6px"></span>
+                                    <strong>Connected</strong>
+                                    <?php if ( ! empty( $oauth['connected_email'] ) ) : ?>
+                                        as <code><?php echo esc_html( $oauth['connected_email'] ); ?></code>
+                                    <?php endif; ?>
+                                </p>
+                                <p>
+                                    Picked folder:
+                                    <?php if ( ! empty( $cfg['folder_id'] ) ) : ?>
+                                        <strong><?php echo esc_html( $cfg['folder_name'] ?: $cfg['folder_id'] ); ?></strong>
+                                        <code style="font-size:11px;color:#666">(<?php echo esc_html( $cfg['folder_id'] ); ?>)</code>
+                                    <?php else : ?>
+                                        <em>none yet — pick one below</em>
+                                    <?php endif; ?>
+                                </p>
+                                <p>
+                                    <button type="submit" name="atp_drive_disconnect" class="button button-secondary"
+                                            onclick="return confirm('Disconnect Google Drive? The refresh token and folder selection will be cleared. Future intake uploads will go to WordPress only until you reconnect.');">Disconnect</button>
+                                    <button type="submit" name="atp_drive_test" class="button button-secondary" style="margin-left:8px">Test Connection</button>
+                                </p>
+                            <?php elseif ( ! empty( $oauth['client_id'] ) && ! empty( $oauth['client_secret'] ) ) : ?>
+                                <p>
+                                    <span style="display:inline-block;width:10px;height:10px;background:#cc8400;border-radius:50%;margin-right:6px"></span>
+                                    <strong>Not connected.</strong> Save your settings, then click Connect.
+                                </p>
+                                <p>
+                                    <button type="submit" name="atp_drive_connect" class="button button-primary">Connect Google Drive</button>
+                                </p>
+                            <?php else : ?>
+                                <p>
+                                    <span style="display:inline-block;width:10px;height:10px;background:#999;border-radius:50%;margin-right:6px"></span>
+                                    Enter your OAuth Client ID and Client Secret above, save, and a Connect button will appear.
+                                </p>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+
+                    <?php if ( atp_drive_is_connected() ) : ?>
+                    <tr>
+                        <th>Pick destination folder</th>
+                        <td>
+                            <button type="button" id="atp-drive-pick-btn" class="button">Browse my Drive…</button>
+                            <input type="hidden" name="drive_pick_folder_id"   id="drive_pick_folder_id"   value="">
+                            <input type="hidden" name="drive_pick_folder_name" id="drive_pick_folder_name" value="">
+                            <p class="description">Click to browse your Drive folders and choose where intake submissions should be mirrored. The selected folder will receive one subfolder per submission.</p>
+
+                            <div id="atp-drive-picker" style="display:none;margin-top:14px;border:1px solid #ddd;border-radius:6px;padding:14px;background:#fafafa;max-width:680px">
+                                <div id="atp-drive-picker-crumbs" style="font-size:12px;color:#666;margin-bottom:10px"></div>
+                                <ul id="atp-drive-picker-list" style="list-style:none;margin:0;padding:0;max-height:320px;overflow-y:auto;background:#fff;border:1px solid #e5e5e5;border-radius:4px"></ul>
+                                <p style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                                    <button type="submit" name="atp_drive_pick_folder" id="atp-drive-pick-confirm" class="button button-primary" disabled>Pick this folder</button>
+                                    <span id="atp-drive-pick-current" style="font-size:12px;color:#666"></span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                </table>
+
                 <p class="submit">
                     <button type="submit" name="atp_wl_save" class="button button-primary button-hero">Save Settings</button>
-                    <button type="submit" name="atp_drive_test" class="button button-secondary button-hero" style="margin-left:8px">Test Drive Connection</button>
                 </p>
             </form>
+
+            <?php if ( atp_drive_is_connected() ) : ?>
+            <script>
+            (function(){
+              const ajaxUrl = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
+              const nonce   = <?php echo wp_json_encode( wp_create_nonce( 'atp_drive_browse' ) ); ?>;
+              const picker  = document.getElementById('atp-drive-picker');
+              const list    = document.getElementById('atp-drive-picker-list');
+              const crumbs  = document.getElementById('atp-drive-picker-crumbs');
+              const confirm = document.getElementById('atp-drive-pick-confirm');
+              const current = document.getElementById('atp-drive-pick-current');
+              const fidIn   = document.getElementById('drive_pick_folder_id');
+              const fnIn    = document.getElementById('drive_pick_folder_name');
+              let stack = [{ id: 'root', name: 'My Drive' }];
+
+              document.getElementById('atp-drive-pick-btn').addEventListener('click', function(){
+                picker.style.display = 'block';
+                stack = [{ id: 'root', name: 'My Drive' }];
+                load();
+              });
+
+              function load(){
+                const here = stack[stack.length - 1];
+                renderCrumbs();
+                list.innerHTML = '<li style="padding:14px;color:#888">Loading…</li>';
+                const fd = new FormData();
+                fd.append('action', 'atp_drive_browse');
+                fd.append('_ajax_nonce', nonce);
+                fd.append('parent_id', here.id);
+                fetch(ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+                  .then(r => r.json())
+                  .then(json => {
+                    if (!json || !json.success) {
+                      list.innerHTML = '<li style="padding:14px;color:#cf222e">Error loading folders: ' + (json && json.data ? json.data : 'unknown') + '</li>';
+                      return;
+                    }
+                    if (!json.data.length) {
+                      list.innerHTML = '<li style="padding:14px;color:#888">No subfolders here.</li>';
+                    } else {
+                      list.innerHTML = '';
+                      json.data.forEach(function(f){
+                        const li = document.createElement('li');
+                        li.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee';
+                        const left = document.createElement('span');
+                        left.innerHTML = '<span style="margin-right:8px">📁</span>' + escapeHtml(f.name);
+                        const right = document.createElement('span');
+                        const open = mkBtn('Open', function(){ stack.push({ id: f.id, name: f.name }); load(); });
+                        const pick = mkBtn('Select', function(){
+                          fidIn.value = f.id;
+                          fnIn.value  = f.name;
+                          confirm.disabled = false;
+                          current.textContent = 'Selected: ' + f.name;
+                          [...list.querySelectorAll('li')].forEach(x => x.style.background = '');
+                          li.style.background = '#fff8e1';
+                        }, 'button-primary');
+                        right.appendChild(open);
+                        right.appendChild(document.createTextNode(' '));
+                        right.appendChild(pick);
+                        li.appendChild(left);
+                        li.appendChild(right);
+                        list.appendChild(li);
+                      });
+                    }
+                  })
+                  .catch(err => {
+                    list.innerHTML = '<li style="padding:14px;color:#cf222e">Network error: ' + escapeHtml(String(err)) + '</li>';
+                  });
+              }
+              function renderCrumbs(){
+                crumbs.innerHTML = '';
+                stack.forEach(function(node, i){
+                  if (i > 0) crumbs.appendChild(document.createTextNode(' / '));
+                  if (i < stack.length - 1) {
+                    const a = document.createElement('a');
+                    a.href = '#'; a.textContent = node.name;
+                    a.addEventListener('click', function(e){ e.preventDefault(); stack = stack.slice(0, i+1); load(); });
+                    crumbs.appendChild(a);
+                  } else {
+                    const s = document.createElement('strong');
+                    s.textContent = node.name;
+                    crumbs.appendChild(s);
+                  }
+                });
+                const here = stack[stack.length - 1];
+                const pickHere = mkBtn('Select this folder', function(){
+                  if (here.id === 'root') { alert('Pick a subfolder, not the root of your Drive.'); return; }
+                  fidIn.value = here.id;
+                  fnIn.value  = here.name;
+                  confirm.disabled = false;
+                  current.textContent = 'Selected: ' + here.name;
+                });
+                pickHere.style.marginLeft = '12px';
+                if (here.id !== 'root') crumbs.appendChild(pickHere);
+              }
+              function mkBtn(label, onclick, extraClass){
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'button ' + (extraClass || '');
+                b.textContent = label;
+                b.addEventListener('click', onclick);
+                return b;
+              }
+              function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+            })();
+            </script>
+            <?php endif; ?>
         </div>
     </div>
     <?php

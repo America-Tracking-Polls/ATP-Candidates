@@ -3,13 +3,13 @@
  * Plugin Name: ATP Campaign Site
  * Plugin URI:  https://americatrackingpolls.com
  * Description: America Tracking Polls — campaign website plugin with shortcode-driven pages, candidate intake form, white-label admin, and AI-powered page generation.
- * Version:     3.1.0
+ * Version:     3.2.0
  * Author:      Mirror Factory / ROI Amplified
  * Text Domain: atp-demo
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'ATP_DEMO_VERSION', '3.1.0' );
+define( 'ATP_DEMO_VERSION', '3.2.0' );
 define( 'ATP_DEMO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ATP_DEMO_URL', plugin_dir_url( __FILE__ ) );
 
