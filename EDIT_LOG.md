@@ -24,6 +24,55 @@
 
 ---
 
+## 2026-05-05 — AGENTS.md + atp-website branch carve-out
+
+**Branch:** `claude/activate-drive-upload-P3yOj` (this branch),
+&nbsp; new branch `atp-website` for marketing-site export
+**Commits:** _pending push_
+
+Set up two structural items the user requested:
+
+1. **AGENTS.md** at the repo root — operating rules for AI coding
+   agents working in this repo. Codifies the EDIT_LOG.md convention,
+   the two-repo split plan, the canonical-vs-legacy plugin folder
+   rule, secret-handling rules, and a pre-commit checklist. Any AI
+   agent (Claude Code, Cursor, Aider, etc.) starting a session here
+   should read this file first.
+
+2. **`atp-website` branch** carved out of the current state of this
+   repo. Contains only ATP marketing-site files (the homepage
+   mockup, brand guide, top-level demo `index.html`, ATP logos,
+   `css/brand.css`, `js/brand-*.js`) so it can be exported as a
+   standalone repo. The candidate platform stays here on `main` /
+   working branches. Nothing was deleted from this branch.
+
+### Verified
+
+- Full intake form is functional: 1094-line
+  `packages/atp-plugin-core/includes/intake/atp-candidate-intake.php`
+  with `wp_ajax_atp_save` + `wp_ajax_nopriv_atp_save` handlers, the
+  `[atp_intake]` shortcode, file uploads routed through
+  `file-upload.php` to either WP media or Drive (via the new
+  `drive-client.php`), and email notifications via `wp_mail()` to
+  `atp_settings.notify_emails`.
+
+### Done
+
+- New `AGENTS.md` at repo root
+- New `atp-website` branch with marketing-site files only
+  (cherry-picked, not removed from this branch)
+- This entry logged
+
+### Noticed but didn't touch
+
+- The legacy `atp-demo-plugin/` folder (v2.1.0) and the canonical
+  `packages/atp-plugin-core/` (v3.1.0) are still both maintained.
+  AGENTS.md formalizes that v3 is canonical. Once v3 has rolled out
+  to all live client sites, v2 can be removed in a separate cleanup
+  commit.
+
+---
+
 ## 2026-05-05 — Architecture documentation
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
