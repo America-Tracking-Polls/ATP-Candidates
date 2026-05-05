@@ -24,6 +24,31 @@
 
 ---
 
+## 2026-05-05 — Architecture documentation
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+**File:** `packages/atp-plugin-core/ARCHITECTURE.md` (new)
+
+Authored an architecture & intake-flow doc for the plugin, placed
+inside `packages/atp-plugin-core/` so it travels with every client
+deploy.
+
+### Done
+
+- Diagram 1: repository / monorepo layout
+- Diagram 2: intake submission lifecycle (form → `wp_ajax_atp_save` →
+  post + meta + email + Drive)
+- Diagram 3: from intake to live candidate site (`new-site.sh` → AI →
+  `build-site.sh` → deploy)
+- Two-roles section explaining how the same codebase serves the intake
+  host and each candidate site
+- Data-lineage diagram (intake → V3 JSON → page-json → dist → live WP)
+- FAQ covering: shared install vs per-client, automation level,
+  upload destinations, schema overrides, plugin updates
+
+---
+
 ## 2026-05-05 — Landing-page revisions + Drive integration status
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
