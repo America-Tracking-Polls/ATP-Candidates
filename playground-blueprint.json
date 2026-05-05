@@ -17,8 +17,8 @@
       "pluginData": {
         "resource": "git:directory",
         "url": "https://github.com/mirror-factory/ATP-Demo",
-        "ref": "refs/heads/claude/tier1-intake-form-uq7Mc",
-        "path": "atp-demo-plugin"
+        "ref": "refs/heads/claude/activate-drive-upload-P3yOj",
+        "path": "packages/atp-plugin-core"
       },
       "options": {
         "activate": true

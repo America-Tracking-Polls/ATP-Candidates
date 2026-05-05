@@ -24,6 +24,28 @@
 
 ---
 
+## 2026-05-05 — Update Playground blueprint to current branch + canonical plugin
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+`playground-blueprint.json` was pointing at a stale branch
+(`claude/tier1-intake-form-uq7Mc`) and the legacy `atp-demo-plugin/`
+folder (v2.1.0). Updated to point at the current working branch and
+the canonical `packages/atp-plugin-core/` (v3.2.0) so the Playground
+link boots the live OAuth Drive integration.
+
+### Done
+- Blueprint `ref` → `refs/heads/claude/activate-drive-upload-P3yOj`
+- Blueprint `path` → `packages/atp-plugin-core`
+
+### Follow-up
+After this branch is merged into `main`, swap `ref` back to
+`refs/heads/main` so the Playground link is stable across future
+branches.
+
+---
+
 ## 2026-05-05 — Drive integration: switched from service account to OAuth user flow
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
