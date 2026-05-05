@@ -24,6 +24,36 @@
 
 ---
 
+## 2026-05-05 — AGENTS.md note: V3 JSON contract is out of scope
+
+**Branch:** `atp-website`
+**Commits:** _pending push_
+
+Added a short clarifying note to `AGENTS.md` so an AI agent landing
+on this branch isn't confused about JSON contracts. The
+candidate-platform repo binds its page templates to
+`v3-schema.json` / `v3-field-map.json`, but **this branch has no
+such contract** — it's pure static marketing HTML/CSS/JS.
+
+The candidate-platform monorepo (`mirror-factory/ATP-Demo`,
+`claude/activate-drive-upload-P3yOj` and `main`) finished its half
+of the split today: `ATP-Homepage-Mockup.html`, `brand-guide.html`,
+the brand CSS/JS, and two of the three ATP logo PNGs were removed
+from that branch. Only `ATP-Logo-Standard.png` was kept there
+(referenced by an ATP-branded intake landing page that fronts the
+intake form on the candidate-onboarding WP install).
+
+### Done
+
+- AGENTS.md gains a short "About the V3 JSON contract" subsection
+  under Scope, explaining the contract belongs to the
+  candidate-platform repo and does NOT apply here.
+
+### No file changes
+Files in scope on this branch are unchanged.
+
+---
+
 ## 2026-05-05 — Branch initialized from monorepo carve-out
 
 **Branch:** `atp-website` (created from

@@ -43,6 +43,15 @@ If a request needs the intake form or the candidate-site plugin,
 push back: that work belongs on the `main` branch (or a `claude/*`
 task branch) of this repo, not here.
 
+### About the V3 JSON contract
+
+In the candidate-platform repo, page templates are bound to a V3
+JSON schema (`v3-schema.json`) that drives every shortcode. **That
+contract does not apply here.** Files in this branch are pure static
+HTML/CSS/JS for ATP's own marketing site — no JSON contract, no
+field map, no schema migration. If you find yourself thinking about
+JSON-driven content, you are on the wrong branch.
+
 ---
 
 ## Style + scope rules
