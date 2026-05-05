@@ -24,6 +24,63 @@
 
 ---
 
+## 2026-05-05 — Complete the candidate-platform / ATP-marketing split
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+Finished separating the candidate-platform monorepo from the ATP
+marketing-site files. Previously the `atp-website` branch had the
+marketing files but they hadn't been removed from this branch — now
+they are. Also added the JSON-contract rule to `AGENTS.md` and
+introduced an ATP-branded intake landing page as the new
+`index.html`.
+
+### Done
+
+- **Removed from this branch** (now exclusive to `atp-website`):
+  - `ATP-Homepage-Mockup.html`
+  - `brand-guide.html`
+  - `ATP-Logo-Blue-White.png`, `ATP-Logo-Red-White.png` (still
+    available in `packages/atp-plugin-core/assets/images/`)
+  - `css/brand.css`, `js/brand-*.js` (six brand JS files)
+- **Kept at repo root**: `ATP-Logo-Standard.png` (referenced by the
+  new `index.html`).
+- **Replaced `index.html`** with an ATP-branded intake-onboarding
+  landing page. It is meant to be the homepage of whichever WP
+  install hosts the `[atp_intake]` shortcode — typically ATP's
+  candidate-onboarding host. It explains the demo experience, why
+  the intake matters, what we'll ask about (6 pillars), and what
+  happens after submission (4 steps), with two CTAs pointing at
+  `/candidate-intake-form/`. Notes inline that the page can be
+  removed or replaced once the candidate's own site goes live.
+- **Updated `AGENTS.md`** with the JSON-contract rule (rule #6):
+  any edit to candidate-site templates (plugin shortcodes, demo
+  mockups in `campaign-site/` and `personal-site/`) MUST stay
+  compatible with the V3 JSON contract. Don't rename placeholders,
+  don't add required fields without schema bumps, gracefully
+  handle missing fields. The two demo sites are positioned as
+  **foundational examples**, not throwaway demos.
+- **Updated branch description** in AGENTS.md to remove the
+  "transitional" framing — the split is now real on this branch.
+
+### Why the JSON-contract rule
+
+The candidate-site plugin's templates are fed by specific paths in
+`v3-schema.json` via `v3-field-map.json`. If a template removes a
+placeholder, renames a field, or adds a new required input without
+extending the schema, intake submissions can produce broken pages.
+Both the in-plugin templates and the static demo mockups
+(`campaign-site/`, `personal-site/`) need to track the schema so the
+demos stay portable back to the plugin.
+
+### Skipped — needs input
+
+(unchanged from prior entries — Hero MP4, Typeform embed, BIO/SLOGAN
+section source, WIN BEFORE ELECTION DAY graphic placement, etc.)
+
+---
+
 ## 2026-05-05 — AGENTS.md + atp-website branch carve-out
 
 **Branch:** `claude/activate-drive-upload-P3yOj` (this branch),

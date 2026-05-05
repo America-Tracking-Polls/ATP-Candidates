@@ -85,12 +85,13 @@ next agent or engineer is flying blind.
 | `claude/...` | In-flight AI agent work, scoped per task |
 | `atp-website` | Carved-out copy of the ATP marketing site files, intended for export to a separate repo. Do **not** add candidate-platform code to this branch. See "The two-repo split" below. |
 
-If you're on `main` or a `claude/*` branch: focus on the candidate
-platform. The marketing-site HTML files at the repo root
-(`ATP-Homepage-Mockup.html`, `brand-guide.html`, `index.html`, the
-`css/` and `js/` brand assets, the `ATP-Logo-*.png` files) are kept
-here transitionally and will be removed once the `atp-website` branch
-is exported as its own repo.
+If you're on `main` or a `claude/*` branch: this repo is the
+**candidate-site platform**. It contains the plugin, the build
+pipeline, per-client configs, the candidate-site demo mockups, and
+an ATP-branded intake landing page (`index.html`) that fronts the
+intake form on whatever WP install hosts this plugin. The standalone
+ATP marketing site (homepage mockup, brand guide, brand JS) lives on
+the `atp-website` branch — do **not** add those back here.
 
 If you're on `atp-website`: only touch ATP marketing files. The
 plugin, `sites/`, `scripts/`, and `dist/` are out of scope on that
@@ -100,27 +101,14 @@ branch.
 
 ## The two-repo split
 
-This monorepo currently contains both:
-- The candidate-site plugin platform (the primary purpose)
-- ATP's marketing site HTML/CSS/JS (transitional)
+This repo split into two scopes on 2026-05-05:
 
-The plan is to split the marketing site into its own repo. The
-`atp-website` branch holds a clean version of just those files so it
-can be exported.
+- **This repo (`mirror-factory/ATP-Demo`)** — the candidate-site
+  platform. ATP's marketing site files are NOT here.
+- **`atp-website` branch** — a carved-out copy of just the ATP
+  marketing site files, intended to be exported into its own repo.
 
-Files that belong to the **ATP marketing site** (i.e. on the
-`atp-website` branch, will leave this repo eventually):
-
-- `ATP-Homepage-Mockup.html`
-- `brand-guide.html`
-- `index.html`
-- `ATP-Logo-Blue-White.png`, `ATP-Logo-Red-White.png`,
-  `ATP-Logo-Standard.png`
-- `css/brand.css`
-- `js/brand-*.js`
-
-Files that belong to the **candidate platform** (i.e. stay in this
-repo permanently):
+Files that belong to the **candidate platform** (this repo):
 
 - `packages/atp-plugin-core/` — shared plugin code
 - `sites/` — per-client configs
@@ -130,12 +118,26 @@ repo permanently):
 - `playground-blueprint.json` — Playground demo
 - `atp-candidate-intake.php` — top-level legacy copy of the intake plugin
 - `atp-demo-plugin/` — legacy v2 plugin folder (kept until v3 migration is verified everywhere)
-- `campaign-site/` (Sarah Chen demo), `personal-site/` (Michael Torres demo) — candidate-site mockups for reference
+- `campaign-site/` (Sarah Chen demo), `personal-site/` (Michael
+  Torres demo) — **foundational examples** of what a real candidate
+  site looks like. Treat as reference templates, not throwaway
+  demos. They share the V3 JSON contract.
+- `index.html` — ATP-branded landing page that fronts the intake
+  form on whatever WP install hosts this plugin. Can be removed
+  from a candidate's WP install once their site goes live.
 
-The intake form code is **shared between both contexts** by virtue of
-living in the plugin. When the marketing site repo is broken out, it
-will pull the intake form from the published plugin (or sync the
-file). Either way, the schema lives at
+Files that belong to the **ATP marketing site** (`atp-website`
+branch — keep them out of this repo):
+
+- `ATP-Homepage-Mockup.html`
+- `brand-guide.html`
+- `css/brand.css`
+- `js/brand-*.js`
+
+The intake form code is shared between both contexts by virtue of
+living in the plugin. When the marketing site repo is broken out
+into its own repository, it will pull the intake form from the
+published plugin (or sync the file). Either way, the schema lives at
 `packages/atp-plugin-core/v3-schema.json` and is the contract.
 
 ---
@@ -165,13 +167,35 @@ These are project-specific overrides on top of normal best practices.
    prompt template (`PROMPT-TEMPLATE.md`), update
    `docs/json-schema.md`, and add an explicit migration note to
    `EDIT_LOG.md`.
-6. **Secrets never enter the repo.** Service-account JSON keys, API
+6. **Page templates must stay compatible with the V3 JSON.** This is
+   the most important rule about candidate-site work. Every shortcode
+   in the `atp_cand_*` family is fed by specific paths in the V3 JSON
+   (see the JSON-source table in `README.md` and the field map in
+   `v3-field-map.json`). When you edit the styling, structure, or
+   markup of any candidate-site template — whether in
+   `packages/atp-plugin-core/includes/registry.php`, in
+   `candidate-page.php`, or in the static demo mockups in
+   `campaign-site/` and `personal-site/` — the result MUST still
+   render correctly when fed real V3 JSON output. That means:
+   - Don't rename or remove a placeholder/variable that the JSON
+     populates.
+   - Don't introduce new required fields without adding them to the
+     schema (see rule 5) and the intake form.
+   - If a template element should be optional, the markup must
+     gracefully handle missing JSON fields (empty strings, missing
+     keys, empty arrays).
+   - The two demo sites (`campaign-site/` Sarah Chen and
+     `personal-site/` Michael Torres) exist as **examples and
+     foundations** for what a real candidate site looks like. If you
+     change them, the changes should be portable back to the
+     plugin's templates and the JSON contract.
+7. **Secrets never enter the repo.** Service-account JSON keys, API
    tokens, OAuth refresh tokens — none of these go into git, the WP
    database, or chat. The Drive integration uses a JSON key file
    stored outside the web root; see `docs/google-drive-setup.md`.
-7. **Don't push to `main` without an explicit instruction.** Default
+8. **Don't push to `main` without an explicit instruction.** Default
    to a `claude/*` task branch. Open a PR or wait for review.
-8. **Test what you can locally.** PHP `php -l <file>` for syntax,
+9. **Test what you can locally.** PHP `php -l <file>` for syntax,
    WordPress Playground for runtime checks (use
    `playground-blueprint.json` as the entry).
 
