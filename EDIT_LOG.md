@@ -24,6 +24,42 @@
 
 ---
 
+## 2026-05-05 — Master plan diagrams
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+**File:** `MASTER-PLAN.md` (new, repo root)
+
+Captured the architecture decisions from this session's interview
+into five ASCII diagrams + commentary. Lives at repo root alongside
+`AGENTS.md` and `EDIT_LOG.md` so it's discoverable without spelunking.
+
+### Diagrams
+
+1. **System topology** — clarifies that there is no "one plugin
+   containing all candidates"; each candidate has their own WP, and
+   the MCP server is what unifies the team's view.
+2. **Edit lifecycle** — request → triage → MCP edit or MF code
+   change → Playground preview → push live → audit log.
+3. **Release channels + election freeze** — `stable` / `frozen` /
+   `beta`; auto-freeze 30 days before election day; force-deploy
+   escape hatch for security fixes.
+4. **Customization decision tree** — three lanes (content edit,
+   core feature, one-off override) with a 12-month "would another
+   candidate benefit?" test, and the post-release override conflict
+   detector.
+5. **Site lifecycle** — intake → build → live → freeze → election
+   → unlock → archive → choose-your-ending, with ATP sales
+   touchpoints called out.
+
+### Done
+- New `MASTER-PLAN.md` at repo root
+- Five ASCII diagrams + per-diagram commentary
+- Closing summary tying the diagrams together for "many
+  candidates, one plugin"
+
+---
+
 ## 2026-05-05 — Update Playground blueprint to current branch + canonical plugin
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
