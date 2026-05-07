@@ -24,6 +24,50 @@
 
 ---
 
+## 2026-05-05 — Make atp-website installable as a WP plugin (Playground)
+
+**Branch:** `atp-website`
+**Commits:** _pending push_
+
+User asked to be able to boot the marketing site inside WordPress
+Playground. Added a single-file WP wrapper plugin and a Playground
+blueprint at the branch root.
+
+### Done
+- New `atp-marketing-plugin.php` — single PHP file at the branch
+  root with a proper Plugin Name header. On activation it registers
+  three rewrite rules:
+  - `/marketing/` → `ATP-Homepage-Mockup.html`
+  - `/marketing/brand/` → `brand-guide.html`
+  - `/marketing/hub/` → `index.html`
+  Each route reads the corresponding HTML file, rewrites relative
+  `href=` and `src=` URLs (`css/brand.css`, `js/brand-*.js`, ATP
+  logos) to plugin URLs so assets load correctly, and serves the
+  result with `Content-Type: text/html`. Also adds an "ATP Marketing"
+  admin menu with links to all three pages.
+- New `playground-blueprint.json` — boots WP, sets pretty
+  permalinks (required for rewrite rules), installs the plugin from
+  this branch via `git:directory` with `path: "."`, lands on
+  `/marketing/`.
+- `AGENTS.md` updated: scope now allows this single PHP wrapper
+  file. "No PHP" rule relaxed accordingly. Additional PHP still
+  out of scope.
+- `README.md` updated: added the new files to the file table and a
+  "Open this in WordPress Playground" section with the boot link.
+
+### Caveats
+- Blueprint uses `path: "."` (whole branch as the plugin directory).
+  If Playground rejects that, fallback is to move the plugin + static
+  assets into an `atp-marketing-plugin/` subdirectory and switch the
+  blueprint path. Will iterate based on user testing.
+- The plugin is **optional** in production. ATP's actual marketing
+  site is served as static HTML/CSS/JS — this plugin exists purely
+  for previewing the site inside WP. When this branch is exported
+  into its own repo, the static-only path is still the recommended
+  deployment.
+
+---
+
 ## 2026-05-05 — AGENTS.md note: V3 JSON contract is out of scope
 
 **Branch:** `atp-website`

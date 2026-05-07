@@ -29,15 +29,23 @@ In scope:
 - `ATP-Logo-*.png`
 - `css/brand.css`
 - `js/brand-*.js`
+- `atp-marketing-plugin.php` — single-file WP wrapper plugin that
+  serves the static pages at `/marketing/*` URLs inside a WordPress
+  install. Used for Playground previews. Production marketing is
+  static — this plugin is optional.
+- `playground-blueprint.json` — Playground recipe that boots WP and
+  loads the wrapper plugin
 - `AGENTS.md`, `EDIT_LOG.md`, `README.md`
 
 Out of scope (do not add):
-- WordPress plugin code
-- Intake form code (PHP)
+- Additional PHP files. The single wrapper plugin is the only PHP
+  allowed on this branch. If you need WP/PHP work that goes beyond
+  serving static pages, that belongs on the candidate-platform
+  branch — push back.
+- Intake form code
 - Per-client `sites/<slug>/` folders
 - Build scripts
 - Drive integration code
-- Anything PHP
 
 If a request needs the intake form or the candidate-site plugin,
 push back: that work belongs on the `main` branch (or a `claude/*`

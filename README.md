@@ -28,8 +28,19 @@ plugin.
 | `ATP-Logo-Blue-White.png`, `ATP-Logo-Red-White.png`, `ATP-Logo-Standard.png` | Logo assets |
 | `css/brand.css` | Brand stylesheet |
 | `js/brand-*.js` | Brand-specific JS modules (charts, issues, map, network, pixels, quiz) |
+| `atp-marketing-plugin.php` | Optional WP wrapper plugin so the static pages can be installed and viewed inside a WordPress install (e.g. WordPress Playground). Not required for production. |
+| `playground-blueprint.json` | Playground recipe that boots WP and loads the wrapper plugin |
 | `AGENTS.md` | Operating rules for AI agents working in this branch |
 | `EDIT_LOG.md` | Running log of edits (please keep updated) |
+
+## Open this in WordPress Playground
+
+[**Boot in Playground**](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/mirror-factory/ATP-Demo/atp-website/playground-blueprint.json)
+
+The blueprint logs you in as `admin` / `password`, installs the
+wrapper plugin, and lands on `/marketing/`. From the WP admin you'll
+also see an **ATP Marketing** menu with links to the Brand Guide
+and Demo Hub.
 
 ## What's intentionally NOT in this branch
 
