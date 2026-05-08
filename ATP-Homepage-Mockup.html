@@ -122,6 +122,9 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 
 /* ═══ SURVEY ═══ */
 .survey-sim{background:var(--off-white);padding:100px 0;color:var(--dark);overflow:hidden}
+.survey-cta-banner{display:flex;justify-content:center;margin-bottom:36px}
+.survey-cta-btn{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:var(--white);font-family:var(--display);font-size:13px;letter-spacing:2px;padding:14px 28px;border-radius:6px;text-decoration:none;text-transform:uppercase;box-shadow:0 8px 20px rgba(212,43,43,0.25);transition:background 0.2s,transform 0.2s}
+.survey-cta-btn:hover{background:var(--red-bright);transform:translateY(-1px)}
 .survey-hdr{text-align:center;margin-bottom:60px}
 .survey-hdr h2{font-family:var(--display);font-size:48px;letter-spacing:2px;color:var(--blue-dark)}
 .survey-hdr p{font-size:16px;color:#5A5F6E;max-width:600px;margin:10px auto 0;line-height:1.6}
@@ -134,7 +137,7 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 .survey-text li::before{content:'';position:absolute;left:0;top:8px;width:8px;height:8px;background:var(--red);border-radius:2px}
 
 /* iPhone */
-.iphone{position:relative;width:320px;height:680px;background:#000;border-radius:44px;border:3px solid #333;box-shadow:0 30px 80px rgba(0,0,0,0.25),inset 0 0 0 2px #1a1a1a;margin:0 auto;overflow:hidden;display:flex;flex-direction:column}
+.iphone{position:relative;width:340px;height:820px;background:#000;border-radius:44px;border:3px solid #333;box-shadow:0 30px 80px rgba(0,0,0,0.25),inset 0 0 0 2px #1a1a1a;margin:0 auto;overflow:hidden;display:flex;flex-direction:column}
 .iphone-screen{flex:1;display:flex;flex-direction:column;background:#fff;margin:8px;border-radius:36px;overflow:hidden;position:relative;transition:background-color 0.3s}
 .iphone-screen.dark-mode{background:var(--blue-dark)}
 .iphone-dynamic-island{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:90px;height:24px;background:#000;border-radius:20px;z-index:20}
@@ -330,7 +333,6 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
       <p class="hero-sub">Every channel we deliver&mdash;<strong>five high-response MMS surveys</strong>, a <strong>voter-driven website</strong>, <strong>digital and social media advertising</strong>, <strong>QR-enabled print</strong>, and <strong>expert consulting across every touchpoint</strong>&mdash;works together to give your campaign a clear, measurable advantage.</p>
       <div class="hero-btns">
         <a href="#intake" class="btn-p">SCHEDULE A STRATEGY CALL <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
-        <a href="#hero-video" class="btn-video"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> WATCH THE VIDEO</a>
       </div>
     </div>
     <div class="hero-media">
@@ -372,6 +374,9 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 
 <!-- SURVEY -->
 <section class="survey-sim" id="survey-sim"><div class="wrap">
+  <div class="survey-cta-banner">
+    <a href="#intake" class="survey-cta-btn">SCHEDULE YOUR FREE CONSULT <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
+  </div>
   <div class="survey-hdr">
     <h2>HOW WE GATHER <span style="color:var(--red)">INTELLIGENCE</span></h2>
     <p>We reach your voters where they are, through authentic outreach that builds connection and gathers the data you need to win.</p>
@@ -528,7 +533,7 @@ body{font-family:var(--body);color:var(--white);background:var(--blue-dark);over
 <!-- INTAKE FORM SECTION -->
 <section class="intake-sec" id="intake"><div class="wrap">
   <div class="intake-inner">
-    <h2>SCHEDULE YOUR FREE CONSULT</h2>
+    <h2>GET STARTED WITH ATP</h2>
     <p class="intake-sub">Whether you're launching a campaign, exploring a run, or building your public brand before Election Day&mdash;we'll create a custom strategy powered by real voter data. Fill out the form below and our team will reach out within 24 hours.</p>
     <p class="intake-sub" style="margin-bottom:40px;font-size:12px;opacity:0.6">Free consultation. No obligation. We serve local, statewide, and federal races.</p>
     <div class="intake-embed">

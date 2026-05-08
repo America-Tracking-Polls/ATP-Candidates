@@ -24,6 +24,42 @@
 
 ---
 
+## 2026-05-05 — Fix the three "missed/done wrong" landing-page items
+
+**Branch:** `atp-website`
+**Commits:** _pending push_
+**File:** `ATP-Homepage-Mockup.html`
+
+Cleaned up the three open items from the original review-slide notes
+that were either missed or placed in the wrong section.
+
+### Done
+
+- **Survey iPhone mockup is taller.** `.iphone` width 320 → 340,
+  height 680 → 820. The inner SMS thread + Typeform questions now
+  have room to breathe and stay readable without the screen feeling
+  cramped.
+- **"Schedule your free consult" CTA moved above the SMS-survey
+  simulation.** Added a `.survey-cta-banner` block at the top of the
+  `survey-sim` section with a red button that anchors to `#intake`.
+  Reverted the intake section heading from "SCHEDULE YOUR FREE
+  CONSULT" back to "GET STARTED WITH ATP" so the CTA isn't
+  duplicated as a section title later in the page.
+- **Dropped the secondary hero CTA.** Removed "WATCH THE VIDEO"
+  button. The hero now has one CTA — "SCHEDULE A STRATEGY CALL" —
+  pointing at the intake section. The video sits adjacent in the
+  hero-media column anyway, so the redundant CTA was pulling focus.
+
+### Still pending (asset-blocked)
+- Hero MP4 (`<source src="">` still empty)
+- Typeform Campaign Application embed
+- "WIN BEFORE ELECTION DAY" graphic placement
+- Quick-View Benchmark Survey + social-media examples block
+- Sample Typeform Benchmark Survey
+- BIO/SLOGAN section edits (content lives elsewhere — source TBD)
+
+---
+
 ## 2026-05-05 — Make atp-website installable as a WP plugin (Playground)
 
 **Branch:** `atp-website`
