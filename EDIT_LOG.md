@@ -76,6 +76,80 @@ notifications, build pipeline.
 
 ---
 
+## 2026-05-05 — Override system v2 + brand guide shortcode + plugin v3.5.0
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+User asked for clean separation of concerns: JSON = data, template =
+presentation, with per-section override toggles and a way to preview
+core vs. override side-by-side without deleting the override. Built
+the infrastructure for all of it.
+
+### What landed
+
+**`shortcodes.php` — full override system**
+- `atp_demo_render_shortcode()` rewritten to support `source="core"` and `source="override"` attributes for preview
+- New `atp_demo_resolve_template($tag, $source)` — picks the template based on source param + per-site override + per-site disable toggle
+- New `atp_demo_get_data_patch($tag)` — loads per-shortcode JSON data patches from `atp_sc_<tag>_data`
+- Renderer always runs through token replacement at the end so any tokenized template stays JSON-driven regardless of whether template came from override or default
+
+**`candidate-page.php` — token replacer accepts a patch**
+- `atp_cand_replace_tokens($html, $patch=[])` — patch keys win over V3 JSON keys with the same name; everything else falls through to V3 source of truth
+- Non-scalar values are skipped (won't break on nested arrays)
+- Empty data still cleans up unmatched `{{tokens}}`
+
+**`admin.php` — full Edit Shortcodes UI**
+- Each shortcode card now exposes:
+  - Disable toggle ("Disable override (use core default)")
+  - Preview shortcode quick-copy chips: `[tag source="core"]`, `[tag source="override"]`
+  - Data-patch JSON textarea (collapsible details element)
+  - Status badges: "Override active" / "Override stored, disabled" / "Data patch"
+- Save persists template + data + toggle in one form submit
+- Reset clears all three
+
+**`marketing-shortcodes.php` — same system**
+- Marketing shortcodes (`atp_mkt_*`) get the same source attribute + disable toggle
+- Storage prefix is `atp_mkt_sc_*`
+- Marketing edit page UI includes the toggle + preview hints
+- (Token replacement is a no-op for marketing shortcodes today since the templates don't have `{{tokens}}` yet — adding tokens to marketing templates will Just Work, same data-patch flow)
+
+**New `[atp_cand_brand_guide]` shortcode**
+- Per-candidate brand guide page: pulls colors, headshot, logo from V3 JSON
+- Tokens: `{{display_name}}`, `{{tagline}}`, `{{color_primary}}`, `{{color_secondary}}`, `{{color_accent}}`, `{{headshot_link}}`, `{{logo_link}}`
+- Importer entry added — one click to create a Brand Guide page on a candidate site
+
+**`OVERRIDE-SYSTEM.md` — documentation**
+- Full write-up of the override architecture
+- Storage cheat sheet
+- Use-case walkthroughs (tweak copy, customize layout, partial data override, toggle for testing)
+- Renderer flow diagram
+- Lives at `packages/atp-plugin-core/OVERRIDE-SYSTEM.md` so it ships with every client install
+
+**Plugin version bump**
+- 3.2.0 → 3.5.0 (jumped past 3.3.0 + 3.4.0 because the in-flight intake-bundle + signup work hadn't been versioned yet; consolidating)
+
+### What was deferred (Phase B)
+
+Tokenizing the existing legacy heredoc templates in `registry.php`
+(hero, about, messages, etc.) — they currently bake content like
+"John Stacy" into the HTML. The override system supports them as-is
+(they just won't benefit from the data-patch path until tokenized).
+Better to do this incrementally — when an engineer touches a section
+they convert it. Trying to do all 14+ heredocs in one push is too
+risky.
+
+### Open issues NOT touched here
+
+- Image upload to the intake form failing on americatrackingpolls.com
+  — needs DevTools diagnostics or SiteGround WAF whitelist. Not a
+  code change; root cause is in the host-level WAF.
+- Drive shared-folder picker shipped in `8a35103` but the live site
+  needs a re-deploy + Drive disconnect/reconnect for it to take
+  effect.
+
+---
+
 ## 2026-05-05 — Drive scope broadened + legacy folder deleted
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

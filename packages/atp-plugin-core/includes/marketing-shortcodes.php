@@ -46,7 +46,19 @@ function atp_mkt_registry() {
    Renderer + shortcode registration
    ───────────────────────────────────────────────────────────────────────── */
 
-function atp_mkt_render_shortcode( $tag ) {
+/**
+ * Marketing shortcode renderer with the same override system as
+ * candidate-side shortcodes:
+ *   - Per-site override: wp_options.atp_mkt_sc_<tag>  (string)
+ *   - Disable toggle:    wp_options.atp_mkt_sc_<tag>_disabled (bool)
+ *   - source="..."       attribute forces a specific source for preview
+ *
+ * (Marketing site doesn't currently use {{token}} substitution so the
+ *  data-patch path is wired but a no-op here. Adding tokens to a
+ *  marketing template will Just Work once the templates themselves use
+ *  {{tokens}} — same data-patch flow as candidate side.)
+ */
+function atp_mkt_render_shortcode( $tag, $source = '' ) {
     $reg = atp_mkt_registry();
     if ( ! isset( $reg[ $tag ] ) ) return '';
     $row    = $reg[ $tag ];
@@ -54,21 +66,30 @@ function atp_mkt_render_shortcode( $tag ) {
     $open   = $row[1];
     $close  = $row[2];
 
-    $stored = get_option( 'atp_mkt_sc_' . $tag, null );
-    if ( is_string( $stored ) && $stored !== '' ) {
-        $content = $stored;
+    $override = get_option( 'atp_mkt_sc_' . $tag, '' );
+    $disabled = (bool) get_option( 'atp_mkt_sc_' . $tag . '_disabled', false );
+    $path     = ATP_DEMO_DIR . ATP_MKT_TEMPLATES_DIR . $file;
+    $default  = is_readable( $path ) ? file_get_contents( $path ) : '';
+
+    if ( $source === 'core' ) {
+        $content = $default;
+    } elseif ( $source === 'override' ) {
+        $content = is_string( $override ) && $override !== '' ? $override : $default;
+    } elseif ( $disabled || ! is_string( $override ) || $override === '' ) {
+        $content = $default;
     } else {
-        $path = ATP_DEMO_DIR . ATP_MKT_TEMPLATES_DIR . $file;
-        $content = is_readable( $path ) ? file_get_contents( $path ) : '';
+        $content = $override;
     }
+
     return $open . $content . $close;
 }
 
 add_action( 'init', 'atp_mkt_register_shortcodes' );
 function atp_mkt_register_shortcodes() {
     foreach ( array_keys( atp_mkt_registry() ) as $tag ) {
-        add_shortcode( $tag, function() use ( $tag ) {
-            return atp_mkt_render_shortcode( $tag );
+        add_shortcode( $tag, function( $atts ) use ( $tag ) {
+            $atts = shortcode_atts( [ 'source' => '' ], (array) $atts, $tag );
+            return atp_mkt_render_shortcode( $tag, $atts['source'] );
         } );
     }
 }
@@ -151,18 +172,26 @@ function atp_mkt_admin_edit_page() {
     if ( ! isset( $reg[ $sel ] ) ) $sel = array_key_first( $reg );
 
     if ( isset( $_POST['atp_mkt_save'] ) && check_admin_referer( 'atp_mkt_edit_' . $sel ) ) {
-        $val = wp_unslash( $_POST['atp_mkt_content'] ?? '' );
+        $val      = wp_unslash( $_POST['atp_mkt_content'] ?? '' );
+        $disabled = ! empty( $_POST['atp_mkt_disabled'] );
         update_option( 'atp_mkt_sc_' . $sel, $val );
+        if ( $disabled ) {
+            update_option( 'atp_mkt_sc_' . $sel . '_disabled', 1 );
+        } else {
+            delete_option( 'atp_mkt_sc_' . $sel . '_disabled' );
+        }
         echo '<div class="notice notice-success is-dismissible"><p>Saved.</p></div>';
     }
     if ( isset( $_POST['atp_mkt_reset'] ) && check_admin_referer( 'atp_mkt_edit_' . $sel ) ) {
         delete_option( 'atp_mkt_sc_' . $sel );
-        echo '<div class="notice notice-success is-dismissible"><p>Reverted to template default.</p></div>';
+        delete_option( 'atp_mkt_sc_' . $sel . '_disabled' );
+        echo '<div class="notice notice-success is-dismissible"><p>Reverted to template default (override + toggle cleared).</p></div>';
     }
 
-    $stored      = get_option( 'atp_mkt_sc_' . $sel, null );
-    $is_override = is_string( $stored ) && $stored !== '';
-    $current     = $is_override ? $stored : @file_get_contents( ATP_DEMO_DIR . ATP_MKT_TEMPLATES_DIR . $reg[ $sel ][0] );
+    $stored        = get_option( 'atp_mkt_sc_' . $sel, null );
+    $is_disabled   = (bool) get_option( 'atp_mkt_sc_' . $sel . '_disabled', false );
+    $is_override   = is_string( $stored ) && $stored !== '';
+    $current       = $is_override ? $stored : @file_get_contents( ATP_DEMO_DIR . ATP_MKT_TEMPLATES_DIR . $reg[ $sel ][0] );
     $home        = get_page_by_path( 'marketing' );
     ?>
     <div class="wrap" style="max-width:1100px">
@@ -191,14 +220,26 @@ function atp_mkt_admin_edit_page() {
             <?php endif; ?>
         </p>
 
+        <p style="font-size:12px;color:#666">
+            Preview shortcodes:
+            <code>[<?php echo esc_html( $sel ); ?> source="core"]</code>
+            (forces template default) ·
+            <code>[<?php echo esc_html( $sel ); ?> source="override"]</code>
+            (forces stored override). Drop either onto a test page to compare.
+        </p>
+
         <form method="post">
             <?php wp_nonce_field( 'atp_mkt_edit_' . $sel ); ?>
             <textarea name="atp_mkt_content" rows="24" style="width:100%;font-family:Menlo,Monaco,monospace;font-size:12px"><?php echo esc_textarea( $current ); ?></textarea>
             <p>
+                <label style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px">
+                    <input type="checkbox" name="atp_mkt_disabled" value="1" <?php checked( $is_disabled ); ?>>
+                    Disable override (use template default)
+                </label>
                 <button type="submit" name="atp_mkt_save" class="button button-primary">Save override</button>
-                <?php if ( $is_override ) : ?>
+                <?php if ( $is_override || $is_disabled ) : ?>
                     <button type="submit" name="atp_mkt_reset" class="button" style="margin-left:8px"
-                            onclick="return confirm('Revert this shortcode to the template default and delete the override?');">Revert to default</button>
+                            onclick="return confirm('Revert this shortcode to the template default? Clears override + toggle.');">Revert to default</button>
                 <?php endif; ?>
             </p>
         </form>

@@ -26,13 +26,32 @@ function atp_demo_admin_assets( $hook ) {
 function atp_demo_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) return;
 
-    // ── Handle save ────────────────────────────────────────────────────────────
+    // ── Handle save (template + data + toggle in one form) ───────────────
     if ( isset( $_POST['atp_save_sc'] ) && check_admin_referer( 'atp_demo_save' ) ) {
-        $tag     = sanitize_key( $_POST['atp_sc_tag'] ?? '' );
-        $content = wp_unslash( $_POST['atp_sc_content'] ?? '' );
+        $tag      = sanitize_key( $_POST['atp_sc_tag'] ?? '' );
+        $content  = wp_unslash( $_POST['atp_sc_content'] ?? '' );
+        $data     = wp_unslash( $_POST['atp_sc_data']    ?? '' );
+        $disabled = ! empty( $_POST['atp_sc_disabled'] );
         if ( $tag ) {
             update_option( 'atp_sc_' . $tag, $content, false );
-            echo '<div class="notice notice-success is-dismissible"><p>Shortcode <code>[' . esc_html( $tag ) . ']</code> saved.</p></div>';
+            // Validate JSON data patch — empty / valid OK; invalid JSON is a saved warning
+            $data_msg = '';
+            if ( $data === '' ) {
+                delete_option( 'atp_sc_' . $tag . '_data' );
+            } else {
+                $decoded = json_decode( $data, true );
+                if ( $decoded === null && json_last_error() !== JSON_ERROR_NONE ) {
+                    $data_msg = ' <strong style="color:#cf222e">Data patch ignored — invalid JSON: ' . esc_html( json_last_error_msg() ) . '</strong>';
+                } else {
+                    update_option( 'atp_sc_' . $tag . '_data', $data, false );
+                }
+            }
+            if ( $disabled ) {
+                update_option( 'atp_sc_' . $tag . '_disabled', 1, false );
+            } else {
+                delete_option( 'atp_sc_' . $tag . '_disabled' );
+            }
+            echo '<div class="notice notice-success is-dismissible"><p>Shortcode <code>[' . esc_html( $tag ) . ']</code> saved.' . $data_msg . '</p></div>';
         }
     }
 
@@ -41,7 +60,9 @@ function atp_demo_admin_page() {
         $tag = sanitize_key( $_POST['atp_sc_tag'] ?? '' );
         if ( $tag ) {
             delete_option( 'atp_sc_' . $tag );
-            echo '<div class="notice notice-success is-dismissible"><p>Shortcode <code>[' . esc_html( $tag ) . ']</code> reset to default.</p></div>';
+            delete_option( 'atp_sc_' . $tag . '_data' );
+            delete_option( 'atp_sc_' . $tag . '_disabled' );
+            echo '<div class="notice notice-success is-dismissible"><p>Shortcode <code>[' . esc_html( $tag ) . ']</code> reset to default (template, data, and toggle cleared).</p></div>';
         }
     }
 
@@ -144,16 +165,21 @@ function atp_demo_admin_page() {
             <h3 class="atp-group-title"><?php echo esc_html( $group['group'] ); ?></h3>
 
             <?php foreach ( $group['shortcodes'] as $sc ) :
-                $stored      = get_option( 'atp_sc_' . $sc['tag'] );
-                $is_modified = $stored !== false;
-                $display     = $is_modified ? $stored : $sc['default'];
+                $stored       = get_option( 'atp_sc_' . $sc['tag'] );
+                $stored_data  = get_option( 'atp_sc_' . $sc['tag'] . '_data', '' );
+                $is_disabled  = (bool) get_option( 'atp_sc_' . $sc['tag'] . '_disabled', false );
+                $is_modified  = $stored !== false && $stored !== '';
+                $has_data     = is_string( $stored_data ) && $stored_data !== '';
+                $display      = $is_modified ? $stored : $sc['default'];
             ?>
             <div class="atp-sc-card" id="sc-<?php echo esc_attr( $sc['tag'] ); ?>">
 
                 <div class="atp-sc-card-header">
                     <div class="atp-sc-card-meta">
                         <span class="atp-sc-label"><?php echo esc_html( $sc['label'] ); ?></span>
-                        <?php if ( $is_modified ) : ?><span class="atp-badge-modified">Modified</span><?php endif; ?>
+                        <?php if ( $is_modified && ! $is_disabled ) : ?><span class="atp-badge-modified" style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Override active</span><?php endif; ?>
+                        <?php if ( $is_modified && $is_disabled ) : ?><span style="background:#e2e3e5;color:#41464b;border:1px solid #d3d6d8;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Override stored, disabled</span><?php endif; ?>
+                        <?php if ( $has_data ) : ?><span style="background:#cfe2ff;color:#084298;border:1px solid #b6d4fe;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Data patch</span><?php endif; ?>
                     </div>
                     <p class="atp-sc-desc"><?php echo esc_html( $sc['desc'] ); ?></p>
                     <div class="atp-sc-tag-row">
@@ -161,6 +187,11 @@ function atp_demo_admin_page() {
                               data-copy="[<?php echo esc_attr( $sc['tag'] ); ?>]"
                               title="Click to copy">[<?php echo esc_html( $sc['tag'] ); ?>]</code>
                         <span class="atp-tag-hint">↑ click to copy</span>
+                        <span style="margin-left:auto;font-size:11px;color:#666">Preview:
+                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;core&quot;]" style="cursor:pointer">core</code>
+                            ·
+                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;override&quot;]" style="cursor:pointer">override</code>
+                        </span>
                     </div>
                 </div>
 
@@ -170,19 +201,34 @@ function atp_demo_admin_page() {
 
                     <div class="atp-textarea-wrap">
                         <div class="atp-textarea-toolbar">
-                            <span class="atp-toolbar-hint">HTML · Copy → paste into AI → edit → paste back → Save</span>
+                            <span class="atp-toolbar-hint">HTML template · {{tokens}} pull from V3 JSON</span>
                             <div class="atp-toolbar-btns">
+                                <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-right:8px">
+                                    <input type="checkbox" name="atp_sc_disabled" value="1" <?php checked( $is_disabled ); ?>>
+                                    Disable override (use core default)
+                                </label>
                                 <button type="button" class="atp-copy-code-btn button">⎘ Copy Code</button>
                                 <button type="submit" name="atp_save_sc" class="button button-primary">Save</button>
-                                <?php if ( $is_modified ) : ?>
+                                <?php if ( $is_modified || $has_data || $is_disabled ) : ?>
                                 <button type="submit" name="atp_reset_sc" class="button atp-reset-btn"
-                                    onclick="return confirm('Reset [<?php echo esc_js( $sc['tag'] ); ?>] to its default?')">↺ Reset</button>
+                                    onclick="return confirm('Reset [<?php echo esc_js( $sc['tag'] ); ?>] to its default? Clears template override, data patch, and disable toggle.')">↺ Reset all</button>
                                 <?php endif; ?>
                             </div>
                         </div>
                         <textarea name="atp_sc_content" class="atp-sc-textarea" rows="14"
                                   spellcheck="false"><?php echo esc_textarea( $display ); ?></textarea>
                     </div>
+
+                    <details style="margin-top:8px;padding:8px 10px;background:#f6f7f9;border:1px solid #e0e0e0;border-radius:4px">
+                        <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#555">Data patch (optional JSON) — overrides specific {{tokens}} for this shortcode only</summary>
+                        <p style="font-size:11px;color:#666;margin:8px 0 6px">
+                            Paste a JSON object like <code>{"display_name":"Sarah J. Chen","tagline":"For District 5"}</code>.
+                            Keys you specify here win over the V3 JSON; anything you leave out falls through to the V3 source of truth.
+                            Leave empty to use V3 JSON only.
+                        </p>
+                        <textarea name="atp_sc_data" rows="6" style="width:100%;font-family:Menlo,Monaco,monospace;font-size:11px"
+                                  spellcheck="false"><?php echo esc_textarea( $stored_data ); ?></textarea>
+                    </details>
                 </form>
             </div>
             <?php endforeach; ?>

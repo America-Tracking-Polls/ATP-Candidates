@@ -153,6 +153,19 @@ function atp_importer_page_sets() {
             'focus_kw'    => 'campaign signup email sms',
             'meta_desc'   => 'Join the campaign — sign up for updates, events, and ways to get involved.',
         ],
+        'candidate-brand-guide' => [
+            'title'       => 'Brand Guide',
+            'desc'        => 'Per-candidate brand reference: colors, headshot, logo, voice. JSON-driven — edit V3 to update.',
+            'color'       => '#888',
+            'shortcodes'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_brand_guide]',
+                '[atp_cand_footer]',
+            ],
+            'focus_kw'    => 'brand guide colors logo',
+            'meta_desc'   => 'Visual identity for the campaign — colors, logo, headshot, and voice.',
+        ],
     ];
 }
 
