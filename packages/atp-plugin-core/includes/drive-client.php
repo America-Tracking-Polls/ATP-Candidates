@@ -88,7 +88,19 @@ function atp_drive_authorize_url() {
     if ( empty( $o['client_id'] ) ) return '';
 
     $state = wp_generate_password( 32, false );
-    set_transient( ATP_DRIVE_STATE_TRANSIENT, $state, 15 * MINUTE_IN_SECONDS );
+
+    // Store in user_meta (NOT a transient). Transients on hosts with
+    // object cache (SiteGround, WP Engine) can be evicted between the
+    // outbound redirect and the callback, which causes spurious
+    // "OAuth state token mismatch" errors. user_meta is persistent.
+    $uid = get_current_user_id();
+    if ( $uid ) {
+        update_user_meta( $uid, 'atp_drive_oauth_state',    $state );
+        update_user_meta( $uid, 'atp_drive_oauth_state_ts', time() );
+    } else {
+        // Fallback if somehow not in an admin session
+        set_transient( ATP_DRIVE_STATE_TRANSIENT, $state, HOUR_IN_SECONDS );
+    }
 
     return ATP_DRIVE_AUTHORIZE_URL . '?' . http_build_query( [
         'client_id'              => $o['client_id'],
@@ -109,8 +121,23 @@ function atp_drive_authorize_url() {
  * @return true|WP_Error
  */
 function atp_drive_handle_oauth_callback( $code, $state ) {
-    $expected_state = get_transient( ATP_DRIVE_STATE_TRANSIENT );
-    delete_transient( ATP_DRIVE_STATE_TRANSIENT );
+    // Pull state from user_meta first (modern path); fall back to transient.
+    $expected_state = '';
+    $ts             = 0;
+    $uid            = get_current_user_id();
+    if ( $uid ) {
+        $expected_state = (string) get_user_meta( $uid, 'atp_drive_oauth_state', true );
+        $ts             = (int)    get_user_meta( $uid, 'atp_drive_oauth_state_ts', true );
+        delete_user_meta( $uid, 'atp_drive_oauth_state' );
+        delete_user_meta( $uid, 'atp_drive_oauth_state_ts' );
+    }
+    if ( ! $expected_state ) {
+        $expected_state = (string) get_transient( ATP_DRIVE_STATE_TRANSIENT );
+        delete_transient( ATP_DRIVE_STATE_TRANSIENT );
+    }
+    if ( $ts && ( time() - $ts ) > HOUR_IN_SECONDS ) {
+        return new WP_Error( 'atp_drive_state', 'OAuth state expired (more than an hour since you started connecting). Please try connecting again.' );
+    }
     if ( ! $expected_state || ! hash_equals( $expected_state, (string) $state ) ) {
         return new WP_Error( 'atp_drive_state', 'OAuth state token mismatch. Please try connecting again.' );
     }
