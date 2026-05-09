@@ -24,6 +24,58 @@
 
 ---
 
+## 2026-05-05 — Consolidate: marketing shortcodes fold into the core plugin
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+User: "put it all in the one plugin in one branch — intake form, drive
+connector, email notifications, etc, etc."
+
+Folded the ATP marketing shortcodes (previously a separate plugin on
+the `atp-website` branch) into the candidate-platform plugin so there
+is now ONE plugin that does everything. Each WordPress install (ATP's
+intake host AND each candidate's site) installs the same plugin and
+just uses the shortcodes relevant to its context.
+
+### Done
+- Marketing templates moved into the core plugin at
+  `packages/atp-plugin-core/templates/marketing/` (13 files extracted
+  from `ATP-Homepage-Mockup.html`).
+- Brand assets relocated:
+  - `ATP-Logo-Blue-White.png`, `ATP-Logo-Red-White.png` → `packages/atp-plugin-core/assets/images/`
+  - `css/brand.css` → `packages/atp-plugin-core/assets/marketing/brand.css`
+  - `js/brand-*.js` → `packages/atp-plugin-core/assets/marketing/`
+- New `packages/atp-plugin-core/includes/marketing-shortcodes.php`:
+  registers all 13 `[atp_mkt_*]` shortcodes, registry pattern, override
+  storage in `wp_options.atp_mkt_sc_*`, admin editor under
+  ATP Demo → Marketing Shortcodes, activation hook creates marketing
+  pages (Marketing Home composed of all 13 shortcodes + Brand Guide
+  placeholder + Demo Hub placeholder).
+- `atp-demo-plugin.php` now loads `marketing-shortcodes.php` at
+  bootstrap.
+
+### Architecture after this commit
+One plugin, two shortcode families:
+- `[atp_cand_*]` — candidate-site templates (renders campaign sites)
+- `[atp_mkt_*]` — marketing-site templates (renders ATP's site)
+- `[atp_intake]` — intake form (lives on ATP's site only)
+Plus Drive integration, V3 JSON storage, intake-bundle export, email
+notifications, build pipeline.
+
+### Still pending in this consolidation (next commits)
+- Mirror the new `marketing-shortcodes.php` + templates folder into
+  the legacy `atp-demo-plugin/` mirror.
+- Update `playground-blueprint.json` to also assign canvas template
+  to the new marketing pages.
+- Update `README.md`, `ARCHITECTURE.md`, `MASTER-PLAN.md`, `AGENTS.md`
+  to reflect the one-plugin model (no more atp-website split).
+- Decide whether to delete the `atp-website` branch and its
+  workarounds (`atp-website-merged`, `atp-website-shortcoded`,
+  `atp-website-vibe`) once the consolidation is verified.
+
+---
+
 ## 2026-05-05 — Add Vibe AI as required plugin dependency
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
