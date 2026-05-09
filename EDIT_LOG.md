@@ -24,6 +24,23 @@
 
 ---
 
+## 2026-05-05 — Add Vibe AI as required plugin dependency
+
+**Branch:** `atp-website`
+**Commits:** _pending push_
+
+User picked Vibe AI (https://wordpress.org/plugins/vibe-ai/) as the
+canonical MCP plugin for both ATP marketing and candidate sites.
+
+### Done
+- `Requires Plugins: vibe-ai` header added to `atp-marketing-plugin.php`.
+  WP 6.5+ will prompt to install Vibe AI when our plugin activates.
+- `playground-blueprint.json`: pre-installs `vibe-ai` from
+  wordpress.org before our plugin so Playground demos boot with
+  both plugins active.
+
+---
+
 ## 2026-05-05 — Fix the three "missed/done wrong" landing-page items
 
 **Branch:** `atp-website`

@@ -6,6 +6,7 @@
  * Version:     1.0.0
  * Author:      Mirror Factory / America Tracking Polls
  * Text Domain: atp-marketing
+ * Requires Plugins: vibe-ai
  *
  * Why this exists:
  *   The atp-website branch is a static marketing site. It works fine as a

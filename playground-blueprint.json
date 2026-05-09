@@ -23,6 +23,16 @@
     {
       "step": "installPlugin",
       "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "vibe-ai"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
         "resource": "git:directory",
         "url": "https://github.com/mirror-factory/ATP-Demo",
         "ref": "refs/heads/atp-website",
