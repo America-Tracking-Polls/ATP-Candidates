@@ -140,6 +140,19 @@ function atp_importer_page_sets() {
             'focus_kw'    => 'cookie policy TCPA DLC10',
             'meta_desc'   => 'Cookie, tracking, and TCPA/DLC10 policy for Commissioner John Stacy website.',
         ],
+        'candidate-signup' => [
+            'title'       => 'Sign Up',
+            'desc'        => 'Email/SMS signup page with TCPA-compliant opt-in. Submissions are stored as Subscribers and the campaign contact is emailed on each submit.',
+            'color'       => '#0E1235',
+            'shortcodes'  => [
+                '[atp_cand_styles]',
+                '[atp_cand_nav]',
+                '[atp_cand_signup]',
+                '[atp_cand_footer]',
+            ],
+            'focus_kw'    => 'campaign signup email sms',
+            'meta_desc'   => 'Join the campaign — sign up for updates, events, and ways to get involved.',
+        ],
     ];
 }
 
