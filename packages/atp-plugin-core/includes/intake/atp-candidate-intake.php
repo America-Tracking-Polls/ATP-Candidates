@@ -545,6 +545,58 @@ function atp_intake_collect($pid){
     return $data;
 }
 
+function atp_intake_collect_assets($data){
+    // Pull every URL-looking value from the intake data so REFERENCE.md
+    // can list each uploaded asset directly. Looks at flat post meta
+    // (legacy form field names) and at known V3 paths.
+    $assets = [];
+    $flat_keys = [
+        'headshot'          => 'Headshot',
+        'logo'              => 'Logo',
+        'additional_photos' => 'Additional photos',
+        'video_main'        => 'Main video',
+        'video_other'       => 'Other video',
+        'logo_url'          => 'Logo URL',
+    ];
+    foreach ( $flat_keys as $k => $label ) {
+        if ( empty( $data[ $k ] ) ) continue;
+        $vals = is_array( $data[ $k ] ) ? $data[ $k ] : [ $data[ $k ] ];
+        foreach ( $vals as $v ) {
+            $v = is_array( $v ) ? ( $v['url'] ?? '' ) : $v;
+            if ( $v && filter_var( $v, FILTER_VALIDATE_URL ) ) {
+                $assets[] = [ 'label' => $label, 'url' => $v ];
+            }
+        }
+    }
+    $v3 = $data['_v3_json'] ?? [];
+    $v3_paths = [
+        [ 'visual_branding', 'headshot_link',          'V3: headshot_link' ],
+        [ 'visual_branding', 'logo_link',              'V3: logo_link' ],
+        [ 'visual_branding', 'additional_photos',      'V3: additional_photos' ],
+        [ 'video',           'main_video_url',         'V3: main_video_url' ],
+        [ 'video',           'other_video_url',        'V3: other_video_url' ],
+    ];
+    foreach ( $v3_paths as [ $sec, $key, $label ] ) {
+        $v = $v3[ $sec ][ $key ] ?? null;
+        if ( ! $v ) continue;
+        $list = is_array( $v ) ? $v : [ $v ];
+        foreach ( $list as $url ) {
+            if ( is_array( $url ) ) $url = $url['url'] ?? '';
+            if ( $url && filter_var( $url, FILTER_VALIDATE_URL ) ) {
+                $assets[] = [ 'label' => $label, 'url' => $url ];
+            }
+        }
+    }
+    // De-dup
+    $seen = []; $out = [];
+    foreach ( $assets as $a ) {
+        if ( isset( $seen[ $a['url'] ] ) ) continue;
+        $seen[ $a['url'] ] = 1;
+        $out[] = $a;
+    }
+    return $out;
+}
+
 function atp_intake_build_reference($pid,$data){
     $name=$data['display_name']??$data['legal_name']??'Candidate';
     $slug=atp_intake_suggested_slug($data);
@@ -553,25 +605,64 @@ function atp_intake_build_reference($pid,$data){
     $view=admin_url('admin.php?page=atp-candidates&view='.$pid);
     $drive=atp_intake_drive_folder_link($pid,$data);
     $media=admin_url('upload.php?mode=grid&search='.rawurlencode($name));
+    $assets=atp_intake_collect_assets($data);
+    $sub_folder = $data['_atp_drive_subfolder_url'] ?? ($data['_v3_json']['visual_branding']['submission_folder'] ?? '');
+
     $r ="# ATP Intake — $name\n\n";
     $r.="**Suggested slug:** `$slug`\n";
     $r.="**Office:** $office\n";
     $r.="**State:** $state\n";
     $r.="**WP submission ID:** $pid\n\n";
-    $r.="## Links\n\n";
+
+    $r.="## Quick links\n\n";
     $r.="- [View submission in WP admin]($view)\n";
-    $r.="- [Search WP media library for '".$name."']($media)\n";
-    if($drive)$r.="- [Open Drive folder (parent — find the dated subfolder for this submission)]($drive)\n";
-    $r.="\n## Bundle contents\n\n";
-    $r.="- `REFERENCE.md` — this file\n";
+    $r.="- [WP media library — filter for '".$name."']($media)\n";
+    if($sub_folder){
+        $r.="- [Open Drive submission subfolder (this candidate)](".$sub_folder.")\n";
+    } elseif($drive){
+        $r.="- [Open Drive parent folder — drill into the dated subfolder for this candidate]($drive)\n";
+    }
+    $r.="\n";
+
+    $r.="## Uploaded assets\n\n";
+    if(empty($assets)){
+        $r.="_No uploaded assets found in this submission._ If files were attempted but aren't here, "
+         . "the upload may have failed silently — most commonly because the plugin's `file-upload.php` "
+         . "handler wasn't loaded (e.g., on a stale legacy install). Verify the deployed plugin is "
+         . "`packages/atp-plugin-core/` (canonical), not the deleted `atp-demo-plugin/` mirror.\n\n";
+    } else {
+        foreach($assets as $a){
+            $r.="- **".$a['label']."** — [".$a['url']."](".$a['url'].")\n";
+        }
+        $r.="\n_Right-click → Save link as_, or use `wget`/`curl`, to pull each asset locally.\n\n";
+    }
+
+    $r.="## Bundle contents\n\n";
+    $r.="- `REFERENCE.md` — this file (links + instructions)\n";
     $r.="- `$slug-v3.json` — V3 JSON (intake answers)\n";
-    $r.="- `$slug-PROMPT.md` — prompt template + V3 inlined; paste into Claude/ChatGPT to generate the candidate site\n\n";
-    $r.="## Engineer steps\n\n";
-    $r.="1. Download all uploaded media (headshot/logo/photos) from Drive **and/or** the WP media library link above.\n";
-    $r.="2. Run `./scripts/new-site.sh $slug \"$name\" \"$office\"` from the monorepo.\n";
-    $r.="3. Save the bundle's `*-v3.json` as `sites/$slug/intake-v3.json`.\n";
-    $r.="4. Paste the bundle's `*-PROMPT.md` contents into Claude. Save its output as `sites/$slug/page-json.json`.\n";
-    $r.="5. Run `./scripts/build-site.sh $slug` and deploy `dist/$slug/atp-campaign-site/` to a fresh WP install.\n";
+    $r.="- `$slug-PROMPT.md` — prompt template + V3 JSON inlined; paste this whole file into Claude or ChatGPT to generate the site content\n\n";
+
+    $r.="## How to generate the candidate site (engineer steps)\n\n";
+    $r.="1. **Pull assets.** Download every URL from the *Uploaded assets* section above into a local folder (or just keep them in Drive — you'll re-upload later).\n";
+    $r.="2. **Scaffold.** From the monorepo:\n";
+    $r.="   ```sh\n   ./scripts/new-site.sh $slug \"$name\" \"$office\"\n   ```\n";
+    $r.="3. **Drop in the V3 JSON.** Save the bundle's `$slug-v3.json` as `sites/$slug/intake-v3.json`.\n";
+    $r.="4. **Run the AI prompt.** Open Claude or ChatGPT, paste the contents of `$slug-PROMPT.md`. The model returns a Page JSON object.\n";
+    $r.="5. **Save the Page JSON.** Save the model's output as `sites/$slug/page-json.json`.\n";
+    $r.="6. **Build.**\n";
+    $r.="   ```sh\n   ./scripts/build-site.sh $slug\n   ```\n";
+    $r.="   This produces `dist/$slug/atp-campaign-site/` — a deployable WP plugin zip.\n";
+    $r.="7. **Provision WP.** Spin up a fresh WordPress install for the candidate (SiteGround, etc.).\n";
+    $r.="8. **Install + activate** the built plugin (`atp-campaign-site`). Vibe AI will be auto-prompted as a dependency.\n";
+    $r.="9. **Import pages.** WP Admin → ATP Demo → Import Pages — click Import on Home, Issues, Donate, Contact, About, Privacy, Cookie/TCPA, Sign Up.\n";
+    $r.="10. **Upload media.** WP Admin → Media → Add New — upload the assets you pulled in step 1. Then in *ATP Demo → Page JSON* re-point any image references to the new media library URLs.\n";
+    $r.="11. **Configure white label.** WP Admin → ATP → White Label Settings — set client name, logo, colors. Drive integration is optional on a candidate site.\n";
+    $r.="12. **Configure domain + SSL** with the host. Done.\n\n";
+
+    $r.="## Notes\n\n";
+    $r.="- The Page JSON output from step 4 may need a quick human review before step 5. The AI prompt is good but campaign content quality matters — check copy for accuracy, tone, factual claims.\n";
+    $r.="- If the bundle is missing assets, the form upload likely failed. See the *Uploaded assets* section above for diagnostic guidance.\n";
+
     return $r;
 }
 
