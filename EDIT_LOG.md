@@ -76,6 +76,53 @@ notifications, build pipeline.
 
 ---
 
+## 2026-05-05 — Candidate signup form ([atp_cand_signup])
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+**Files:** `packages/atp-plugin-core/includes/registry.php`,
+`packages/atp-plugin-core/includes/signup.php` (new),
+`packages/atp-plugin-core/includes/shortcodes.php`,
+`packages/atp-plugin-core/atp-demo-plugin.php`,
+mirrored to `atp-demo-plugin/`.
+
+### Done
+- New `[atp_cand_signup]` shortcode — full signup page with Name (first/last),
+  Email, Phone, TCPA-compliant SMS opt-in, submit, social row, paid-for-by
+  disclaimer. Matches the screenshot reference.
+- Dynamic renderer `atp_cand_render_signup()` — pulls candidate name,
+  committee, paid_for_by, privacy URL, social links from V3 JSON; injects
+  AJAX URL + nonce at render time.
+- New custom post type `atp_subscriber` — captures submissions with
+  name/email/phone/sms_optin/IP/UA + timestamp.
+- AJAX handler `wp_ajax(_nopriv)_atp_cand_signup_save` — verifies nonce,
+  sanitizes inputs, creates the post, sends notification email to the
+  campaign contact (`legal_compliance.campaign_email_legal` →
+  `contact_email` → admin_email fallback).
+- Notification email links straight to the WP admin edit screen for the
+  submission.
+- Mirrored to legacy `atp-demo-plugin/`. PHP lint clean across all files.
+
+### Compatibility note (per AGENTS.md rule #6)
+- New placeholders supported by `atp_cand_render_signup()` only:
+  `{{committee_short}}`, `{{committee_full}}`, `{{paid_for_by}}`,
+  `{{privacy_url}}`, `{{social_icons}}`, `{{ajax_url}}`, `{{nonce}}`.
+  These are HTML-safe contexts (URLs are url-escaped, raw HTML stays
+  raw for the social icons).
+- `{{display_name}}` continues to be substituted by the standard
+  `atp_cand_replace_tokens()` loop.
+- No V3 schema changes.
+- No changes to other shortcodes.
+
+### Skipped — needs follow-up
+- The signup section isn't yet added to `atp_cand_volunteer` "Sign Up"
+  CTA target. Could wire that to anchor at `#signup` in a follow-up.
+- Importer doesn't yet auto-create a "Signup" page. Add `[atp_cand_signup]`
+  to the importer's page-set if you want a dedicated /signup/ page on
+  every new candidate site.
+
+---
+
 ## 2026-05-05 — Add Vibe AI as required plugin dependency
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

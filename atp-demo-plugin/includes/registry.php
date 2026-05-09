@@ -1133,6 +1133,101 @@ HTML,
 HTML,
 ],
 
+[
+'tag'   => 'atp_cand_signup',
+'label' => 'Candidate Page — Email / SMS Signup',
+'desc'  => 'Standalone signup page that captures Name, Email, Phone, and TCPA-compliant SMS opt-in. Submissions are stored as `atp_subscriber` posts and a notification is emailed to the campaign contact. Pulls candidate name + committee + privacy URL from V3 JSON via PHP placeholders rendered server-side.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light" id="signup">
+  <div class="cand-container" style="max-width:780px">
+    <div class="cand-section-label" style="text-align:center">Stay Connected</div>
+    <h2 class="cand-section-title" style="text-align:center;margin-left:auto;margin-right:auto">Join the {{committee_short}} List</h2>
+    <p class="cand-section-subtitle" style="text-align:center;margin:0 auto 32px">Updates from the campaign — events, volunteer opportunities, and where {{display_name}} stands. We respect your inbox.</p>
+
+    <div class="cand-signup-social" style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px">
+      {{social_icons}}
+    </div>
+
+    <form class="cand-signup-form" id="atp-cand-signup-form" style="display:flex;flex-direction:column;gap:18px;max-width:560px;margin:0 auto">
+      <input type="hidden" name="action" value="atp_cand_signup_save">
+      <input type="hidden" name="nonce" value="{{nonce}}">
+
+      <div class="cand-signup-field">
+        <label for="signup_name_first" style="display:block;font-weight:700;margin-bottom:8px">Name <span style="color:#cf2232">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <input type="text" id="signup_name_first" name="name_first" required style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:4px;font-size:15px">
+            <div style="font-size:11px;color:#888;margin-top:4px">First</div>
+          </div>
+          <div>
+            <input type="text" id="signup_name_last" name="name_last" required style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:4px;font-size:15px">
+            <div style="font-size:11px;color:#888;margin-top:4px">Last</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cand-signup-field">
+        <label for="signup_email" style="display:block;font-weight:700;margin-bottom:8px">Email <span style="color:#cf2232">*</span></label>
+        <input type="email" id="signup_email" name="email" required style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:4px;font-size:15px">
+      </div>
+
+      <div class="cand-signup-field">
+        <label for="signup_phone" style="display:block;font-weight:700;margin-bottom:8px">Phone</label>
+        <input type="tel" id="signup_phone" name="phone" style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:4px;font-size:15px" placeholder="(555) 555-5555">
+      </div>
+
+      <div class="cand-signup-field" style="margin-top:8px">
+        <div style="font-weight:700;margin-bottom:10px">SMS | MMS Text Opt-in</div>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.55;color:#333">
+          <input type="checkbox" id="signup_sms_optin" name="sms_optin" value="1" style="margin-top:4px;flex-shrink:0">
+          <span>By providing your mobile phone number and checking this box you consent to receive text messages from <strong>{{committee_full}}</strong>. Msg &amp; data rates may apply. Msg frequency may vary. Messaging may include requests for donation. Reply STOP to opt-out &amp; HELP for help. View <a href="{{privacy_url}}">Privacy Policy</a> for more info.</span>
+        </label>
+      </div>
+
+      <button type="submit" class="cand-signup-submit" style="align-self:flex-start;background:#0e1235;color:#fff;border:0;padding:12px 24px;font-family:inherit;font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;border-radius:4px;cursor:pointer">Submit</button>
+
+      <div class="cand-signup-msg" id="atp-cand-signup-msg" style="font-size:14px;display:none"></div>
+    </form>
+
+    <p class="cand-signup-disclaimer" style="text-align:center;margin-top:48px;font-size:12px;color:#888">
+      {{paid_for_by}}
+    </p>
+  </div>
+</section>
+
+<script>
+(function(){
+  var form = document.getElementById('atp-cand-signup-form');
+  if(!form) return;
+  var msg = document.getElementById('atp-cand-signup-msg');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    msg.style.display='block';
+    msg.style.color='#666';
+    msg.textContent='Submitting…';
+    var fd = new FormData(form);
+    fetch('{{ajax_url}}', { method:'POST', body:fd, credentials:'same-origin' })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j && j.success){
+          msg.style.color='#1a7f37';
+          msg.textContent='Thanks — you\'re on the list.';
+          form.reset();
+        } else {
+          msg.style.color='#cf2232';
+          msg.textContent='Sorry, something went wrong: ' + ((j && j.data) || 'unknown error');
+        }
+      })
+      .catch(function(err){
+        msg.style.color='#cf2232';
+        msg.textContent='Network error: ' + err.message;
+      });
+  });
+})();
+</script>
+HTML,
+],
+
 ]], // end Candidate Page
 
 
