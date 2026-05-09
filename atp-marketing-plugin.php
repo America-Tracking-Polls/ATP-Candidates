@@ -10,6 +10,7 @@
  * Version:     2.0.0
  * Author:      Mirror Factory / America Tracking Polls
  * Text Domain: atp-marketing
+ * Requires Plugins: vibe-ai
  *
  * Architecture
  *   - 13 shortcodes ([atp_mkt_*]), one per logical section
