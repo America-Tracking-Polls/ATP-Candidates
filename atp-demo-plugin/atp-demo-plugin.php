@@ -22,8 +22,12 @@ require_once ATP_DEMO_DIR . 'includes/importer.php';
 require_once ATP_DEMO_DIR . 'includes/setup-wizard.php';
 require_once ATP_DEMO_DIR . 'includes/changelog.php';
 require_once ATP_DEMO_DIR . 'includes/candidate-page.php';
+require_once ATP_DEMO_DIR . 'includes/site-config.php';
+require_once ATP_DEMO_DIR . 'includes/drive-client.php';
+require_once ATP_DEMO_DIR . 'includes/file-upload.php';
 require_once ATP_DEMO_DIR . 'includes/whitelabel.php';
 require_once ATP_DEMO_DIR . 'includes/signup.php';
+require_once ATP_DEMO_DIR . 'includes/marketing-shortcodes.php';
 
 // Intake form plugin — load only if not already active as standalone
 if ( ! function_exists( 'atp_default_questions' ) ) {

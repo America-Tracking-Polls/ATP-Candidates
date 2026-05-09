@@ -1,0 +1,78 @@
+<!-- SURVEY -->
+<section class="survey-sim" id="survey-sim"><div class="wrap">
+  <div class="survey-cta-banner">
+    <a href="#intake" class="survey-cta-btn">SCHEDULE YOUR FREE CONSULT <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></a>
+  </div>
+  <div class="survey-hdr">
+    <h2>HOW WE GATHER <span style="color:var(--red)">INTELLIGENCE</span></h2>
+    <p>We reach your voters where they are, through authentic outreach that builds connection and gathers the data you need to win.</p>
+  </div>
+  <div class="survey-container">
+    <!-- Phone with SMS → Form transition -->
+    <div class="iphone" style="flex-shrink:0">
+      <div class="iphone-screen">
+        <div class="iphone-dynamic-island"></div>
+        <div class="iphone-statusbar"><span>9:41</span><div class="iphone-statusbar-icons"><svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="#000"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="#000"/><rect x="9" y="0" width="3" height="12" rx="0.5" fill="#000"/><rect x="13.5" y="1" width="3" height="11" rx="0.5" fill="#000" opacity="0.3"/></svg><svg width="22" height="12" viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" stroke="#000" stroke-width="1.2" fill="none"/><rect x="1.5" y="2.5" width="12" height="7" rx="1" fill="#000"/><rect x="19" y="4" width="2" height="4" rx="0.5" fill="#000"/></svg></div></div>
+
+        <!-- Messages View (initial) -->
+        <div id="phone-sms-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+          <div class="msg-header">
+            <a class="msg-back"><svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="msg-avatar">SC</div>
+            <div style="display:flex;flex-direction:column"><div class="msg-contact-name">Sarah Chen Campaign</div><div class="msg-contact-label">SMS</div></div>
+          </div>
+          <div class="msg-thread">
+            <div class="msg-time">Today 2:14 PM</div>
+            <div class="msg-bubble msg-incoming">Hi! It's Sarah Chen's campaign. We want to best serve your needs. Please take 30 seconds to fill out this quick survey:</div>
+            <div class="msg-bubble msg-incoming" style="margin-top:2px"><a href="#" id="sms-link" style="color:var(--blue);text-decoration:underline;font-family:-apple-system,sans-serif;font-size:14px">https://form.run/sarahchen</a></div>
+            <div class="msg-delivered">Delivered</div>
+          </div>
+          <div class="msg-inputbar">
+            <div class="msg-inputbar-plus"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            <div class="msg-inputbar-field">Text Message</div>
+            <div class="msg-inputbar-send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="var(--blue)"/></svg></div>
+          </div>
+          <div class="sms-tap-indicator"><svg viewBox="0 0 24 24" width="36" height="36"><path fill="rgba(0,0,0,0.6)" d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.04.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.21 0-.69-.39-1.32-1.02-1.53z"/></svg></div>
+        </div>
+
+        <!-- Survey Form View (slides in after tap) -->
+        <div id="phone-form-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;background:#fff">
+          <div style="background:var(--blue-dark);padding:14px 16px;display:flex;align-items:center;gap:10px">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <span style="font-family:-apple-system,sans-serif;font-size:15px;font-weight:600;color:#fff">Voter Insight Survey</span>
+          </div>
+          <div style="height:4px;background:#eee"><div class="tf-bar" style="height:100%;background:var(--red);width:0%;transition:width 0.4s"></div></div>
+          <div style="flex:1;position:relative;padding:20px;overflow:hidden">
+            <div id="tf-q1" class="tf-question active" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">1 &rarr;</div><div class="tf-text">What's your First Name?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-first"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
+            <div id="tf-q2" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">2 &rarr;</div><div class="tf-text">And your Last Name?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-last"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
+            <div id="tf-q3" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">3 &rarr;</div><div class="tf-text">What zip code do you live in?</div><div class="tf-input-wrap"><div class="tf-input" id="tf-in-zip"></div><div class="tf-cursor"></div></div><div class="tf-ok">OK &check;</div></div>
+            <div id="tf-q4" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">4 &rarr;</div><div class="tf-text">What issues matter most?</div><div class="tf-options"><div class="tf-opt"><span class="tf-key">A</span> Economy & Inflation</div><div class="tf-opt" id="tf-opt-b"><span class="tf-key">B</span> Healthcare & Safety</div><div class="tf-opt"><span class="tf-key">C</span> Education & Schools</div></div></div>
+            <div id="tf-q5" class="tf-question" style="position:absolute;left:20px;right:20px;top:20px"><div class="tf-num">5 &rarr;</div><div class="tf-text">How likely are you to vote?</div><div class="tf-options"><div class="tf-opt" id="tf-opt-def"><span class="tf-key">A</span> Definitely voting</div><div class="tf-opt"><span class="tf-key">B</span> Probably voting</div><div class="tf-opt"><span class="tf-key">C</span> Not sure yet</div></div></div>
+            <div id="tf-done" class="tf-question" style="position:absolute;left:20px;right:20px;top:50%;transform:translateY(-50%)"><div class="tf-text" style="font-size:22px;text-align:center;color:var(--red);font-weight:700">Thanks!</div><p style="text-align:center;color:#888;font-size:12px;margin-top:6px">Your voice matters.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text on the right -->
+    <div class="survey-text">
+      <h3>REAL OUTREACH. REAL DATA. REAL INSIGHTS.</h3>
+      <p>Every voter response flows instantly into your dashboard&mdash;giving you instant, real-time toplines and actionable intelligence.</p>
+      <h4>WHAT YOU LEARN</h4>
+      <ul>
+        <li>The exact issues that decide this election</li>
+        <li>Where you're winning&mdash;and where you're losing</li>
+        <li>Who the undecided voters are&mdash;and how to convert them</li>
+        <li>The vulnerabilities in your opponent's support</li>
+        <li>Real voter intelligence&mdash;not guesses, not assumptions</li>
+      </ul>
+      <h4>HOW IT POWERS YOUR CAMPAIGN</h4>
+      <p>Real-time data is the engine behind every winning campaign. With ATP, every voter response flows instantly into your dashboard&mdash;fueling continuous analysis and immediate action.</p>
+      <p>This isn't static polling. <strong>It's a live intelligence system.</strong></p>
+      <p>Every data point actively shapes your campaign&mdash;refining your digital and social media, strengthening your messaging, powering your print and QR outreach, informing press releases, sharpening donor communications, optimizing your website, and driving AI search and summary dominance.</p>
+      <p>Nothing is wasted. Every move is informed. Every message is aligned with what voters actually care about.</p>
+      <p style="margin-top:24px;font-size:16px;color:var(--blue-dark)"><strong>This is how campaigns stop reacting&mdash;and start controlling the outcome.</strong></p>
+      <p style="margin-top:20px;font-family:var(--mono);font-size:11px;color:#999;letter-spacing:1px">ALL MMS OUTREACH IS TCPA &amp; 10DLC COMPLIANT</p>
+    </div>
+  </div>
+</div></section>
