@@ -117,7 +117,6 @@ Files that belong to the **candidate platform** (this repo):
 - `docs/` — engineering docs
 - `playground-blueprint.json` — Playground demo
 - `atp-candidate-intake.php` — top-level legacy copy of the intake plugin
-- `atp-demo-plugin/` — legacy v2 plugin folder (kept until v3 migration is verified everywhere)
 - `campaign-site/` (Sarah Chen demo), `personal-site/` (Michael
   Torres demo) — **foundational examples** of what a real candidate
   site looks like. Treat as reference templates, not throwaway
@@ -156,11 +155,11 @@ These are project-specific overrides on top of normal best practices.
    packages, no CDN scripts. Use WordPress core APIs (`wp_remote_*`,
    `wp_mail`, `openssl_sign`, etc.). Existing third-party scripts
    (GSAP CDN on the marketing pages) are grandfathered.
-4. **Two plugin folders, one canonical.**
-   `packages/atp-plugin-core/` is canonical (v3.1.0+). The legacy
-   `atp-demo-plugin/` (v2.1.0) is kept as a mirror for backwards
-   compatibility but should not be the primary edit target. Mirror
-   non-trivial changes to both during the deprecation window.
+4. **One canonical plugin folder.** `packages/atp-plugin-core/` is the
+   only WP plugin in this repo. The previous legacy `atp-demo-plugin/`
+   mirror was deleted on 2026-05-05 because installing it caused
+   fatal errors (its bootstrap drifted from canonical). Don't recreate
+   it.
 5. **Schema changes are big deals.** `v3-schema.json` and
    `v3-field-map.json` are contracts between the intake form and
    site generation. If you change them, you must also: update the AI

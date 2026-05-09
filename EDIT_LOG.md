@@ -76,6 +76,58 @@ notifications, build pipeline.
 
 ---
 
+## 2026-05-05 — Drive scope broadened + legacy folder deleted
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+### Why
+- Live ATP install showed "No subfolders here" in the Drive folder
+  picker. Root cause: OAuth scope was `drive.file`, which only
+  allows access to files the app creates or that are explicitly
+  shared with it. The picker calls `files.list` and got nothing
+  back. Broadened to `drive` (full access) so the picker can list
+  the user's existing folders.
+- Live ATP install also fataled with "Call to undefined function
+  atp_drive_oauth_get()" because the legacy v2.1.0 mirror at
+  `atp-demo-plugin/` had drifted: its includes/ had drive-client.php
+  but the bootstrap didn't `require_once` it. Deleted the legacy
+  folder entirely so this kind of bug can't happen again.
+
+### Done
+- `packages/atp-plugin-core/includes/drive-client.php`: scope
+  constant `drive.file` → `drive`. The user must **disconnect and
+  reconnect** in WP admin so Google issues a fresh refresh token
+  with the new scope.
+- `docs/google-drive-setup.md`: updated scope references.
+- **Deleted `atp-demo-plugin/` (the v2.1.0 legacy mirror)** — every
+  file. The canonical plugin is `packages/atp-plugin-core/`.
+- `AGENTS.md`: dropped legacy folder from the file list and
+  rewrote rule #4 ("Two plugin folders" → "One canonical plugin").
+
+### After this lands the user must
+1. Update the deployed plugin on americatrackingpolls.com
+   (zip `packages/atp-plugin-core/` and upload via WP Admin →
+   Plugins → Add New → Upload Plugin → activate, replacing the
+   prior install).
+2. WP Admin → ATP → White Label Settings → File Upload Storage →
+   click **Disconnect** (clears the old refresh token).
+3. Click **Connect Google Drive** again. Google's consent screen
+   will now show "Drive — see, edit, create, and delete all your
+   Drive files." Approve.
+4. Click **Browse my Drive…** — folders should now appear.
+5. Pick the destination folder, click **Pick this folder**, then
+   **Test Connection**.
+
+### Note about the OAuth state mismatch error
+Reported during this session. Most often a one-off WP transient
+hiccup (especially on hosts with object cache / aggressive WAFs
+like SiteGround). Retrying **Connect** usually clears it. If it
+persists, switch from transient-based state to user-meta-based
+state in a follow-up patch.
+
+---
+
 ## 2026-05-05 — Candidate signup form ([atp_cand_signup])
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

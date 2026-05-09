@@ -86,8 +86,8 @@ Do this once per environment (typically once for ATP's intake host).
    consent screen.
 6. Pick the Google account that owns (or has access to) the folder
    you want submissions mirrored into.
-7. Approve the requested scope (`drive.file` — only files this app
-   creates, plus the folder you pick).
+7. Approve the requested scope (`drive` — full Drive access; required
+   so the plugin can browse and pick destination folders).
 8. You're redirected back to the WP settings page. The status row
    should now show **"Connected as: your-email@example.com"**.
 
@@ -199,7 +199,7 @@ disconnect and reconnect as the folder's owner.
 
 ### "Folder lookup failed: insufficientScopes"
 The OAuth consent didn't include the Drive scope. Disconnect and
-reconnect — the plugin requests `drive.file` on every connect.
+reconnect — the plugin requests `drive` on every connect.
 
 ### Submissions go to WP media only, never to Drive
 Check, in order:

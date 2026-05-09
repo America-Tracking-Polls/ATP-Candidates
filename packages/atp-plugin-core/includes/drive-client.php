@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 const ATP_DRIVE_TOKEN_TRANSIENT = 'atp_drive_access_token';
 const ATP_DRIVE_STATE_TRANSIENT = 'atp_drive_oauth_state';
-const ATP_DRIVE_SCOPE           = 'https://www.googleapis.com/auth/drive.file';
+const ATP_DRIVE_SCOPE           = 'https://www.googleapis.com/auth/drive';
 const ATP_DRIVE_AUTHORIZE_URL   = 'https://accounts.google.com/o/oauth2/v2/auth';
 const ATP_DRIVE_TOKEN_URL       = 'https://oauth2.googleapis.com/token';
 const ATP_DRIVE_API_BASE        = 'https://www.googleapis.com/drive/v3';
