@@ -21,6 +21,11 @@
       }
     },
     {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/themes/twentytwentyfive/page-canvas.php",
+      "data": "<?php\n/* Template Name: Canvas */\n?><!doctype html>\n<html <?php language_attributes(); ?>>\n<head>\n<meta charset=\"<?php bloginfo( 'charset' ); ?>\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title><?php wp_title( '|', true, 'right' ); bloginfo( 'name' ); ?></title>\n<?php wp_head(); ?>\n</head>\n<body>\n<?php while ( have_posts() ) : the_post(); the_content(); endwhile; ?>\n<?php wp_footer(); ?>\n</body>\n</html>\n"
+    },
+    {
       "step": "installPlugin",
       "pluginData": {
         "resource": "git:directory",
@@ -31,6 +36,10 @@
       "options": {
         "activate": true
       }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; foreach ( ['marketing','marketing-brand-guide','marketing-demo-hub'] as $slug ) { $p = get_page_by_path( $slug ); if ( $p ) { update_post_meta( $p->ID, '_wp_page_template', 'page-canvas.php' ); } }"
     }
   ]
 }

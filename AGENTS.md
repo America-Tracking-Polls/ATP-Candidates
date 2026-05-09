@@ -23,26 +23,26 @@ at the top. Format is at the top of `EDIT_LOG.md`. No exceptions.
 ## Scope of this branch
 
 In scope:
-- `index.html`
-- `ATP-Homepage-Mockup.html`
-- `brand-guide.html`
-- `ATP-Logo-*.png`
-- `css/brand.css`
-- `js/brand-*.js`
-- `atp-marketing-plugin.php` — single-file WP wrapper plugin that
-  serves the static pages at `/marketing/*` URLs inside a WordPress
-  install. Used for Playground previews. Production marketing is
-  static — this plugin is optional.
-- `playground-blueprint.json` — Playground recipe that boots WP and
-  loads the wrapper plugin
+- `ATP-Homepage-Mockup.html`, `brand-guide.html`, `index.html` — original
+  static HTML pages (kept as canonical references / fallbacks)
+- `ATP-Logo-*.png` — brand assets
+- `css/brand.css`, `js/brand-*.js` — accessory page assets
+- `atp-marketing-plugin.php` — **the WP plugin**. Defines 13
+  shortcodes (`[atp_mkt_*]`), each pulling default content from
+  `templates/<file>` with WP-option overrides. Same pattern as the
+  candidate-platform plugin in the monorepo. Provides an admin page
+  for editing shortcodes.
+- `templates/` — default content for each shortcode (HTML/JS/CSS).
+  Source of truth when no admin override exists.
+- `playground-blueprint.json` — Playground recipe that boots WP,
+  writes a Canvas page template, installs the plugin (creating 3
+  marketing pages with shortcode markup), and lands on `/marketing/`
 - `AGENTS.md`, `EDIT_LOG.md`, `README.md`
 
 Out of scope (do not add):
-- Additional PHP files. The single wrapper plugin is the only PHP
-  allowed on this branch. If you need WP/PHP work that goes beyond
-  serving static pages, that belongs on the candidate-platform
-  branch — push back.
-- Intake form code
+- Additional PHP files outside the plugin entry. Helpers / sub-files
+  belong inside an `includes/` subdirectory if needed.
+- Intake form code (lives in the candidate-platform monorepo)
 - Per-client `sites/<slug>/` folders
 - Build scripts
 - Drive integration code

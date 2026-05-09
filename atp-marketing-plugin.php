@@ -2,140 +2,246 @@
 /**
  * Plugin Name: ATP Marketing Site
  * Plugin URI:  https://americatrackingpolls.com
- * Description: Wraps ATP's static marketing pages (homepage mockup, brand guide, demo hub) so they can be installed as a WordPress plugin and viewed inside WordPress Playground or any WP install. The pages themselves remain static HTML/CSS/JS — this plugin just routes WP URLs to them and rewrites relative asset paths to plugin URLs.
- * Version:     1.0.0
+ * Description: Shortcode-based renderer for ATP's marketing pages. The static
+ *              HTML in `templates/*.html` is the default content for each
+ *              shortcode; WP options override defaults so admins (or AI via
+ *              MCP) can edit any section independently. Mirrors the
+ *              candidate-platform plugin pattern.
+ * Version:     2.0.0
  * Author:      Mirror Factory / America Tracking Polls
  * Text Domain: atp-marketing
  *
- * Why this exists:
- *   The atp-website branch is a static marketing site. It works fine as a
- *   standalone repo + GitHub Pages. This plugin file is a lightweight
- *   adapter so the same files can also be loaded inside a WordPress
- *   Playground for demo/preview purposes — particularly to show the
- *   marketing site alongside the candidate-platform plugin in the same
- *   WP environment.
+ * Architecture
+ *   - 13 shortcodes ([atp_mkt_*]), one per logical section
+ *   - Each shortcode's default content lives in `templates/<file>`
+ *   - An admin can override any shortcode's content via Settings ->
+ *     ATP Marketing -> Edit Shortcodes, which writes to wp_options as
+ *     `atp_mkt_sc_<tag>`
+ *   - On activation: 3 WP pages are created with shortcode markup
+ *     (Marketing Home, Brand Guide, Demo Hub)
  *
- *   In production the marketing site is served as static files. This
- *   plugin is NOT required for ATP's live marketing site.
+ * @since 2.0.0  Refactored from static-HTML serve to shortcode library
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-const ATP_MKT_VERSION = '1.0.0';
+const ATP_MKT_VERSION = '2.0.0';
 
-/**
- * URL-key → static HTML filename in this plugin directory.
- */
-function atp_mkt_pages() {
+/* ─────────────────────────────────────────────────────────────────────────
+   Shortcode registry — tag => [ template, wrapOpen, wrapClose, label, desc ]
+   ───────────────────────────────────────────────────────────────────────── */
+
+function atp_mkt_registry() {
     return [
-        'home'  => 'ATP-Homepage-Mockup.html',
-        'brand' => 'brand-guide.html',
-        'hub'   => 'index.html',
+        'atp_mkt_styles'     => [ 'styles.html',   '<style>',   '</style>',  'Global styles',               'All CSS for the marketing site. Include once per page, before any section shortcodes.' ],
+        'atp_mkt_poll_bar'   => [ 'poll-bar.html', '',          '',          'Animated header strip',       '4-item rotating ticker at the top of the page.' ],
+        'atp_mkt_header'     => [ 'header.html',   '',          '',          'Top navigation header',       'ATP brand mark, primary nav, "Get Started" button.' ],
+        'atp_mkt_hero'       => [ 'hero.html',     '',          '',          'Hero section',                '"WIN YOUR ELECTION BEFORE ELECTION DAY" + body + video + Typeform area.' ],
+        'atp_mkt_about'      => [ 'about.html',    '',          '',          'About section',               '"5 coordinated multi-media channels" headline + body.' ],
+        'atp_mkt_survey'     => [ 'survey.html',   '',          '',          'Survey simulation',           'Schedule CTA, iPhone SMS-to-form mockup, "What You Learn / How It Powers Your Campaign".' ],
+        'atp_mkt_journey'    => [ 'journey.html',  '',          '',          'Strategic Path',              'Five-step journey: Intelligence, AEO Integration, Engagement, Analysis, Conversion.' ],
+        'atp_mkt_pipeline'   => [ 'pipeline.html', '',          '',          'Converting Data Into Action', 'Pipeline diagram: Web / Ads / QR Print / MMS / AEO branches.' ],
+        'atp_mkt_aeo'        => [ 'aeo.html',      '',          '',          'AEO / ChatGPT box',           '"Voting Line Reality" + animated ChatGPT response mockup.' ],
+        'atp_mkt_compliance' => [ 'compliance.html','',         '',          'Compliance & Trust',          'TCPA & 10DLC, AI Ethics Pledge, Data Privacy cards.' ],
+        'atp_mkt_intake'     => [ 'intake.html',   '',          '',          'Intake / consult CTA',        '"Get Started With ATP" + Typeform placeholder + phone/email/samples link.' ],
+        'atp_mkt_footer'     => [ 'footer.html',   '',          '',          'Site footer',                 'ATP brand strip with phone/email/samples + compliance links.' ],
+        'atp_mkt_scripts'    => [ 'scripts.js',    '<script>',  '</script>', 'Front-end scripts',           'GSAP animations + canvas chart + ticker JS. Include once per page, near </body>.' ],
     ];
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Rewrite rules: /marketing/, /marketing/brand/, /marketing/hub/
+   Shortcode renderer — pulls from option override or template file default
    ───────────────────────────────────────────────────────────────────────── */
 
-add_action( 'init', 'atp_mkt_register_rewrites' );
-function atp_mkt_register_rewrites() {
-    add_rewrite_rule( '^marketing/?$',       'index.php?atp_mkt=home',  'top' );
-    add_rewrite_rule( '^marketing/brand/?$', 'index.php?atp_mkt=brand', 'top' );
-    add_rewrite_rule( '^marketing/hub/?$',   'index.php?atp_mkt=hub',   'top' );
-}
+function atp_mkt_render_shortcode( $tag ) {
+    $reg = atp_mkt_registry();
+    if ( ! isset( $reg[ $tag ] ) ) return '';
+    $row    = $reg[ $tag ];
+    $file   = $row[0];
+    $open   = $row[1];
+    $close  = $row[2];
 
-add_filter( 'query_vars', function( $vars ) {
-    $vars[] = 'atp_mkt';
-    return $vars;
-} );
-
-register_activation_hook( __FILE__, function() {
-    atp_mkt_register_rewrites();
-    flush_rewrite_rules();
-} );
-register_deactivation_hook( __FILE__, function() {
-    flush_rewrite_rules();
-} );
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Render the static page for the matching key.
-   ───────────────────────────────────────────────────────────────────────── */
-
-add_action( 'template_redirect', 'atp_mkt_serve' );
-function atp_mkt_serve() {
-    $key = get_query_var( 'atp_mkt' );
-    if ( ! $key ) return;
-
-    $pages = atp_mkt_pages();
-    if ( ! isset( $pages[ $key ] ) ) return;
-
-    $file = __DIR__ . '/' . $pages[ $key ];
-    if ( ! is_readable( $file ) ) {
-        wp_die( 'ATP Marketing: file not found — ' . esc_html( $pages[ $key ] ) );
+    $stored = get_option( 'atp_mkt_sc_' . $tag, null );
+    if ( is_string( $stored ) && $stored !== '' ) {
+        $content = $stored;
+    } else {
+        $path = __DIR__ . '/templates/' . $file;
+        $content = is_readable( $path ) ? file_get_contents( $path ) : '';
     }
+    return $open . $content . $close;
+}
 
-    $html = file_get_contents( $file );
-    $base = rtrim( plugin_dir_url( __FILE__ ), '/' ) . '/';
-
-    // Rewrite relative href= and src= URLs to plugin URLs so CSS/JS/images load.
-    $html = preg_replace_callback(
-        '/(href|src)\s*=\s*"([^"]+)"/i',
-        function( $m ) use ( $base ) {
-            $attr = $m[1];
-            $url  = $m[2];
-            // Skip absolute URLs, anchors, data:, mailto:, tel:, root-relative.
-            if ( preg_match( '#^(https?:|//|#|data:|mailto:|tel:|/)#i', $url ) ) {
-                return $m[0];
-            }
-            return $attr . '="' . $base . $url . '"';
-        },
-        $html
-    );
-
-    nocache_headers();
-    header( 'Content-Type: text/html; charset=UTF-8' );
-    echo $html;
-    exit;
+add_action( 'init', 'atp_mkt_register_shortcodes' );
+function atp_mkt_register_shortcodes() {
+    foreach ( array_keys( atp_mkt_registry() ) as $tag ) {
+        add_shortcode( $tag, function() use ( $tag ) {
+            return atp_mkt_render_shortcode( $tag );
+        } );
+    }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Admin menu: a small landing page with links to the three views.
+   Activation: create marketing pages with shortcode markup
    ───────────────────────────────────────────────────────────────────────── */
 
-add_action( 'admin_menu', function() {
-    add_menu_page(
-        'ATP Marketing',
-        'ATP Marketing',
-        'manage_options',
-        'atp-marketing',
-        'atp_mkt_admin_page',
-        'dashicons-megaphone',
-        58
-    );
-} );
+register_activation_hook( __FILE__, 'atp_mkt_activate' );
+function atp_mkt_activate() {
+    foreach ( atp_mkt_default_pages() as $slug => $info ) {
+        if ( get_page_by_path( $slug ) ) continue;
+        $pid = wp_insert_post( [
+            'post_title'   => $info['title'],
+            'post_name'    => $slug,
+            'post_content' => $info['content'],
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+            'post_author'  => 1,
+        ] );
+        if ( $pid && ! is_wp_error( $pid ) && ! empty( $info['front_page'] ) ) {
+            update_option( 'show_on_front', 'page' );
+            update_option( 'page_on_front', $pid );
+        }
+    }
+}
+
+function atp_mkt_default_pages() {
+    return [
+        'marketing' => [
+            'title'      => 'ATP Marketing Home',
+            'front_page' => true,
+            'content'    => atp_mkt_compose_homepage(),
+        ],
+        'marketing-brand-guide' => [
+            'title'      => 'ATP Brand Guide',
+            'front_page' => false,
+            'content'    => '[atp_mkt_styles]<p style="padding:40px;font-family:sans-serif">Brand guide is not yet shortcoded — see <code>brand-guide.html</code> for the canonical version.</p>',
+        ],
+        'marketing-demo-hub' => [
+            'title'      => 'ATP Demo Hub',
+            'front_page' => false,
+            'content'    => '[atp_mkt_styles]<p style="padding:40px;font-family:sans-serif">Demo hub is not yet shortcoded — see <code>index.html</code> for the canonical version.</p>',
+        ],
+    ];
+}
+
+function atp_mkt_compose_homepage() {
+    return implode( "\n", [
+        '[atp_mkt_styles]',
+        '[atp_mkt_poll_bar]',
+        '[atp_mkt_header]',
+        '[atp_mkt_hero]',
+        '[atp_mkt_about]',
+        '[atp_mkt_survey]',
+        '[atp_mkt_journey]',
+        '[atp_mkt_pipeline]',
+        '[atp_mkt_aeo]',
+        '[atp_mkt_compliance]',
+        '[atp_mkt_intake]',
+        '[atp_mkt_footer]',
+        '[atp_mkt_scripts]',
+    ] );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Admin: shortcode library + per-shortcode editor
+   ───────────────────────────────────────────────────────────────────────── */
+
+add_action( 'admin_menu', 'atp_mkt_admin_menu' );
+function atp_mkt_admin_menu() {
+    add_menu_page( 'ATP Marketing', 'ATP Marketing', 'manage_options', 'atp-mkt', 'atp_mkt_admin_page', 'dashicons-megaphone', 58 );
+    add_submenu_page( 'atp-mkt', 'Edit Shortcodes', 'Edit Shortcodes', 'manage_options', 'atp-mkt-edit', 'atp_mkt_admin_edit_page' );
+}
 
 function atp_mkt_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) return;
+    $reg  = atp_mkt_registry();
+    $home = get_page_by_path( 'marketing' );
     ?>
-    <div class="wrap" style="max-width:780px">
+    <div class="wrap" style="max-width:880px">
         <h1>ATP Marketing Site</h1>
-        <p>This plugin makes the ATP marketing pages browsable inside WordPress.
-        It's primarily for previewing the site inside WordPress Playground —
-        in production the marketing site is served as static HTML/CSS/JS, no
-        plugin required.</p>
+        <p>Rendered by 13 shortcodes — one per section. Each shortcode's default content lives in <code>templates/&lt;file&gt;</code>; you can override any of them from the Edit Shortcodes screen.</p>
+        <p>
+            <?php if ( $home ) : ?>
+                <a href="<?php echo esc_url( get_permalink( $home->ID ) ); ?>" target="_blank" class="button button-primary">Open marketing home page</a>
+            <?php endif; ?>
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=atp-mkt-edit' ) ); ?>" class="button" style="margin-left:8px">Edit shortcodes</a>
+        </p>
 
-        <h2>Pages</h2>
-        <ul style="list-style:disc;padding-left:24px;line-height:1.9">
-            <li><a href="<?php echo esc_url( home_url( '/marketing/' ) ); ?>" target="_blank"><strong>Marketing Homepage</strong></a> — the main landing page (the one reviewed in the slide notes)</li>
-            <li><a href="<?php echo esc_url( home_url( '/marketing/brand/' ) ); ?>" target="_blank"><strong>Brand Guide</strong></a> — colors, typography, logo usage</li>
-            <li><a href="<?php echo esc_url( home_url( '/marketing/hub/' ) ); ?>" target="_blank"><strong>Demo Hub</strong></a> — original index landing</li>
-        </ul>
+        <h2>Shortcode library</h2>
+        <table class="widefat striped">
+            <thead><tr><th style="width:240px">Shortcode</th><th style="width:200px">Section</th><th>Description</th></tr></thead>
+            <tbody>
+            <?php foreach ( $reg as $tag => $row ) : ?>
+                <tr>
+                    <td><code>[<?php echo esc_html( $tag ); ?>]</code></td>
+                    <td><?php echo esc_html( $row[3] ); ?></td>
+                    <td><?php echo esc_html( $row[4] ); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
 
-        <h2>How this works</h2>
-        <p>The plugin registers three rewrite rules that map <code>/marketing/*</code> URLs to the static HTML files in this plugin's directory. When a request comes in, the plugin reads the HTML, rewrites relative asset paths (<code>css/brand.css</code>, <code>js/brand-charts.js</code>, ATP logos) to plugin URLs, and serves the result. No database content, no shortcodes, no theme dependency.</p>
+        <h2>Composing your own pages</h2>
+        <p>Drop any combination of shortcodes into a WordPress page. The default home page uses all 13 in canonical order. Build alternate landing pages with subsets — e.g. a one-pitch page that only renders <code>[atp_mkt_styles] [atp_mkt_hero] [atp_mkt_intake] [atp_mkt_footer] [atp_mkt_scripts]</code>.</p>
+        <p><strong>Important:</strong> always include <code>[atp_mkt_styles]</code> first and <code>[atp_mkt_scripts]</code> last on any page that uses these. Without them sections render unstyled and animations don't run.</p>
+    </div>
+    <?php
+}
 
-        <h2>Pretty permalinks required</h2>
-        <p>If pages are returning 404s, go to <a href="<?php echo esc_url( admin_url( 'options-permalink.php' ) ); ?>">Settings → Permalinks</a> and click <em>Save Changes</em> to regenerate rewrite rules.</p>
+function atp_mkt_admin_edit_page() {
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    $reg = atp_mkt_registry();
+    $sel = isset( $_GET['sc'] ) ? sanitize_key( $_GET['sc'] ) : '';
+    if ( ! isset( $reg[ $sel ] ) ) {
+        $sel = array_key_first( $reg );
+    }
+
+    if ( isset( $_POST['atp_mkt_save'] ) && check_admin_referer( 'atp_mkt_edit_' . $sel ) ) {
+        $val = wp_unslash( $_POST['atp_mkt_content'] ?? '' );
+        update_option( 'atp_mkt_sc_' . $sel, $val );
+        echo '<div class="notice notice-success is-dismissible"><p>Saved.</p></div>';
+    }
+    if ( isset( $_POST['atp_mkt_reset'] ) && check_admin_referer( 'atp_mkt_edit_' . $sel ) ) {
+        delete_option( 'atp_mkt_sc_' . $sel );
+        echo '<div class="notice notice-success is-dismissible"><p>Reverted to template default.</p></div>';
+    }
+
+    $stored      = get_option( 'atp_mkt_sc_' . $sel, null );
+    $is_override = is_string( $stored ) && $stored !== '';
+    $current     = $is_override ? $stored : @file_get_contents( __DIR__ . '/templates/' . $reg[ $sel ][0] );
+    ?>
+    <div class="wrap" style="max-width:1100px">
+        <h1>Edit shortcodes</h1>
+        <p>Pick a shortcode to edit. Saving writes to a WP option that overrides the template default. "Revert" deletes the override and falls back to <code>templates/<?php echo esc_html( $reg[ $sel ][0] ); ?></code>.</p>
+
+        <form method="get" style="margin:16px 0">
+            <input type="hidden" name="page" value="atp-mkt-edit">
+            <select name="sc" onchange="this.form.submit()">
+                <?php foreach ( $reg as $t => $row ) : ?>
+                    <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $t, $sel ); ?>>
+                        [<?php echo esc_html( $t ); ?>] — <?php echo esc_html( $row[3] ); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+
+        <p><strong>Status:</strong>
+            <?php if ( $is_override ) : ?>
+                <span style="color:#cc8400">⚑ overridden</span> — content below comes from the WP option, not the template file
+            <?php else : ?>
+                <span style="color:#1a7f37">✓ default</span> — content below comes from <code>templates/<?php echo esc_html( $reg[ $sel ][0] ); ?></code>
+            <?php endif; ?>
+        </p>
+
+        <form method="post">
+            <?php wp_nonce_field( 'atp_mkt_edit_' . $sel ); ?>
+            <textarea name="atp_mkt_content" rows="24" style="width:100%;font-family:Menlo,Monaco,monospace;font-size:12px"><?php echo esc_textarea( $current ); ?></textarea>
+            <p>
+                <button type="submit" name="atp_mkt_save" class="button button-primary">Save override</button>
+                <?php if ( $is_override ) : ?>
+                    <button type="submit" name="atp_mkt_reset" class="button" style="margin-left:8px"
+                            onclick="return confirm('Revert this shortcode to the template default and delete the override?');">Revert to default</button>
+                <?php endif; ?>
+            </p>
+        </form>
     </div>
     <?php
 }

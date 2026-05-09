@@ -24,6 +24,88 @@
 
 ---
 
+## 2026-05-05 — Refactor marketing site to shortcode library
+
+**Branch:** `atp-website`
+**Commits:** _pending push_
+**Plugin version:** 1.0.0 → 2.0.0
+
+User's instinct was right: shortcodes = editable, slottable, one
+unified pattern across both the marketing site and the candidate
+plugin. Refactored the wrapper-plugin (which served static HTML) into
+a real shortcode-based plugin that mirrors the candidate-platform
+pattern.
+
+### Architecture
+
+- 13 shortcodes (`[atp_mkt_*]`), one per logical section:
+  styles, poll_bar, header, hero, about, survey, journey, pipeline,
+  aeo, compliance, intake, footer, scripts
+- Each shortcode's default content lives in `templates/<file>`
+- WP options override defaults (key: `atp_mkt_sc_<tag>`) — admins
+  edit per-section without touching the rest, and can revert to
+  default
+- Plugin activation creates 3 WP pages: Marketing Home (composed of
+  all 13 shortcodes), Brand Guide, Demo Hub
+- Admin UI at WP Admin → ATP Marketing: shortcode library overview
+  + per-shortcode editor with Save / Revert
+- Same edit pattern as the candidate-platform plugin → one mental
+  model for both
+
+### Done
+
+- New `atp-marketing-plugin.php` (replaces the previous static-HTML
+  wrapper). Includes:
+  - Shortcode registry (`atp_mkt_registry()`) — tag → template,
+    wrapper open/close, label, description
+  - Generic renderer reading from option override or template file
+  - Activation hook: creates Marketing Home / Brand Guide / Demo Hub
+    pages with shortcode markup
+  - Admin pages: Library (overview) + Edit Shortcodes (textarea
+    editor per shortcode, with revert)
+- New `templates/` folder with 13 files extracted from
+  `ATP-Homepage-Mockup.html`:
+  - `styles.html` (277 lines, all CSS)
+  - `poll-bar.html`, `header.html`, `hero.html`, `about.html`,
+    `survey.html`, `journey.html`, `pipeline.html`, `aeo.html`,
+    `compliance.html`, `intake.html`, `footer.html`
+  - `scripts.js` (159 lines of GSAP + canvas + ticker JS)
+- Updated `playground-blueprint.json`:
+  - Writes a proper Canvas page template into the active theme that
+    includes `wp_head()` / `wp_footer()` so styles and scripts load
+  - Installs the plugin (which creates the marketing pages)
+  - Post-install: sets `_wp_page_template = page-canvas.php` on each
+    marketing page so they render full-bleed without theme chrome
+  - Lands on `/marketing/`
+- Updated `AGENTS.md` scope: now allows the plugin + templates/
+  directory (was "single PHP file only")
+- Updated `README.md` with the shortcode library, composition
+  guidance, and the new admin paths
+- Bumped plugin version 1.0.0 → 2.0.0
+
+### Why this matters
+The marketing site is now editable section-by-section through:
+- WP Admin (ATP Marketing → Edit Shortcodes)
+- WP REST API (any tool that can write to `atp_mkt_sc_*` options)
+- AI / MCP (when the WP MCP Adapter is wired up — same option
+  storage works)
+The original `ATP-Homepage-Mockup.html` is preserved as the canonical
+fallback / reference. If the plugin is ever removed, the static file
+still renders the site as it was.
+
+### Not yet shortcoded
+- Brand guide page (`brand-guide.html`) — still served as static.
+  Activation creates a placeholder WP page; full shortcoding deferred.
+- Demo hub (`index.html`) — same.
+
+These are easy follow-up commits if/when needed.
+
+### Skipped — needs input
+(unchanged from prior entries: hero MP4, Typeform embed, BIO/SLOGAN
+content source, WIN BEFORE ELECTION DAY graphic placement, etc.)
+
+---
+
 ## 2026-05-05 — Fix the three "missed/done wrong" landing-page items
 
 **Branch:** `atp-website`
