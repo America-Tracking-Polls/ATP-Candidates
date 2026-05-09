@@ -24,6 +24,43 @@
 
 ---
 
+## 2026-05-05 — Intake handoff: default emails, richer notification, bundle export
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+**Files:** `packages/atp-plugin-core/includes/intake/atp-candidate-intake.php`
+(mirrored to `atp-demo-plugin/includes/intake/`)
+
+User asked for the manual intake → site-build handoff to be much
+faster. Three concrete changes that compress the engineer's "steps
+1–5" into a one-click download.
+
+### Done
+
+- **Default notify emails** in `atp_get_settings()` — `alfonso@mirrorfactory.com`, `gary@americatrackingpolls.com`, `dan@americatrackingpolls.com`. Still editable in WP Admin → ATP → Intake Settings.
+- **Richer notification email** in `atp_send_notifications()`:
+  - Adds the suggested slug (`atp_intake_suggested_slug` — e.g. `sarah-chen-2026`) as a row in the summary table
+  - Three CTA buttons in the body: **View Submission**, **Download Bundle (zip)**, **Open Drive Folder** (when Drive is configured)
+  - Inline note explaining what's in the bundle
+- **New bundle export** at `wp_ajax_atp_export_bundle`:
+  - Generates a zip with **3 files**:
+    - `REFERENCE.md` — links + step-by-step engineer instructions
+    - `<slug>-v3.json` — the V3 JSON, ready to paste
+    - `<slug>-PROMPT.md` — `PROMPT-TEMPLATE.md` from the plugin with the V3 JSON inlined; ready to paste into Claude/ChatGPT
+  - Falls back to a plain-text concatenation if `ZipArchive` isn't available on the host
+- **Download button** on the candidate admin detail view: **⬇ Download Intake Bundle (zip)** is now the primary action; the old "Download JSON only" stays as a secondary button
+
+### What this changes about the manual flow
+Previous workflow steps 1–5 were: read email → manually navigate to WP admin → export JSON → invent slug → run `new-site.sh` → paste JSON → paste prompt template → save output. That's ~20 minutes.
+
+New workflow: **click the bundle link in the email → unzip → follow the REFERENCE.md instructions** (which also contain the suggested slug). The bundle includes the prompt with the V3 already inlined, so you paste one file into Claude. ~5 minutes.
+
+### Skipped — needs decision
+- The Drive subfolder URL in the email currently links to the parent folder (we don't yet persist per-submission subfolder IDs at upload time). Follow-up: store `_atp_drive_folder_id` post meta when the first file uploads, and link directly to that subfolder.
+- Vibe AI plugin (https://wordpress.org/plugins/vibe-ai/) for MCP integration on both sites. User identified this as the chosen MCP plugin. Not yet bundled / wired — addressed in next commit.
+
+---
+
 ## 2026-05-05 — Master plan diagrams
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

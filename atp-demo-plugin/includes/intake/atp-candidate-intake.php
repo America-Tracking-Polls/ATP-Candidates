@@ -196,7 +196,7 @@ function atp_get_settings(){
     return wp_parse_args(get_option('atp_settings',[]),[
         'logo_text'=>'America <span>Tracking</span> Polls',
         'logo_image'=>'',
-        'notify_emails'=>[],
+        'notify_emails'=>['alfonso@mirrorfactory.com','gary@americatrackingpolls.com','dan@americatrackingpolls.com'],
         'notify_subject'=>'New ATP Intake: {candidate_name}',
         'questions'=>atp_default_questions(),
     ]);
@@ -249,10 +249,11 @@ function atp_admin_single($id){
     $name=$data['display_name']??$data['legal_name']??'Candidate';
     $back=admin_url('admin.php?page=atp-candidates');
     $exp=wp_nonce_url(admin_url('admin-ajax.php?action=atp_export_single&id='.$id),'atp_export','nonce');
+    $bundle=wp_nonce_url(admin_url('admin-ajax.php?action=atp_export_bundle&id='.$id),'atp_export','nonce');
     $groups=['Source & Gateway'=>['filler_name','filler_email','filler_phone','filler_role','filing_url','ballotpedia_url','existing_website'],'Identity & Race'=>['org_type','legal_name','display_name','ballot_name','office','district','seat_number','state','party','election_year','election_date','election_type','position'],'Campaign Contact'=>['contact_name','contact_role','contact_email','contact_phone','contact_address','manager_name','manager_email','manager_phone','treasurer_name','treasurer_email','treasurer_phone','treasurer_address'],'Bio & Messaging'=>['ballotpedia_status','homepage_intro','bio_full','why_running','tagline','differentiator','key_messages','policy_passions','endorsements_about'],'Platform & Issues'=>['issue_categories','issue_positions','opponents_missing_issue','changed_position'],'Background & Credentials'=>['profession','current_role','previous_experience','education_1','education_2','education_3','military_branch','military_years'],'Visual Branding'=>['headshot','logo','additional_photos','color_primary','color_secondary','color_accent','visual_style','design_notes'],'Social Media'=>['facebook','twitter_x','instagram','youtube','tiktok','linkedin','social_other'],'Video'=>['video_main','video_other'],'Survey Page'=>['survey_page_wanted','primary_survey_focus','survey_page_label','survey_page_label_custom','survey_display','survey_intro_text','existing_survey_link'],'Legal & Compliance'=>['committee_name','paidfor_text','jurisdiction','committee_id','committee_address','campaign_phone','campaign_email','privacy_contact_email','privacy_contact_phone','privacy_contact_address','uses_cookies','will_send_texts','sms_categories','sms_optin_language','survey_follow_up','donations_by_text','third_party_analytics','shares_data','service_providers'],'Fundraising'=>['donation_needed','donation_platform','fundraising_platform_status','donation_url','donation_embed_code','donation_button_label','donation_button_custom','accept_text_donations','text_donation_processor','text_donation_accreditation'],'Domain Setup'=>['domain_status','domain_preferred','domain_primary','domain_redirects','domain_registrar','hosting_provider','domain_credentials','campaign_email_needed'],'Approval & Timeline'=>['approver_same','approver_name','approver_email','copy_help','launch_timeline','launch_date','comm_pref','referral_source','referral_source_other','open_notes'],'Grow Beyond Your Website'=>['additional_services','tier2_pages','additional_survey_focuses'],'Summary'=>['scope_acknowledgment','compliance_acknowledgment']];
     $v3=get_post_meta($id,'_v3_json',true);$v3_data=$v3?json_decode($v3,true):[];
     $sub_folder=$v3_data['visual_branding']['submission_folder']??'';
-    echo '<div class="wrap"><h1>'.esc_html($name).' <a href="'.esc_url($back).'" class="button" style="margin-left:16px;font-size:12px">← All</a> <a href="'.esc_url($exp).'" class="button button-primary" style="margin-left:8px">Download JSON</a></h1>';
+    echo '<div class="wrap"><h1>'.esc_html($name).' <a href="'.esc_url($back).'" class="button" style="margin-left:16px;font-size:12px">← All</a> <a href="'.esc_url($bundle).'" class="button button-primary" style="margin-left:8px">⬇ Download Intake Bundle (zip)</a> <a href="'.esc_url($exp).'" class="button" style="margin-left:8px">Download JSON only</a></h1>';
     if($sub_folder){echo '<p><a href="'.esc_url($sub_folder).'" target="_blank" class="button" style="margin:8px 0">📁 Open submission folder in Drive</a></p>';}
     $img_fields=['headshot','logo','additional_photos'];
     foreach($groups as $g=>$fields){
@@ -489,7 +490,11 @@ function atp_send_notifications($data,$pid){
     $office=$data['office']??'—';$state=$data['state']??'—';
     $subj=str_replace(['{candidate_name}','{office}','{state}'],[$name,$office,$state],$s['notify_subject']??'New ATP Intake: {candidate_name}');
     $view=admin_url('admin.php?page=atp-candidates&view='.$pid);
-    $pairs=[['Candidate',$name],['Office',$office],['State',$state],['Party',$data['party']??'—'],['Election',($data['election_type']??'').($data['election_date']?' — '.$data['election_date']:'')],['Filing URL',$data['filing_url']??'—'],['Committee',$data['committee_name']??'—'],['Survey Focus',$data['primary_survey_focus']??'—'],['Platform Status',$data['fundraising_platform_status']??'—'],['Contact Email',$data['contact_email']??$data['filler_email']??'—'],['Launch Timeline',$data['launch_timeline']??'—'],['Disclaimer',$data['paidfor_text']??'—']];
+    $slug=atp_intake_suggested_slug($data);
+    $drive=atp_intake_drive_folder_link($pid,$data);
+    $bundle_nonce=wp_create_nonce('atp_export');
+    $bundle=admin_url('admin-ajax.php?action=atp_export_bundle&id='.$pid.'&nonce='.$bundle_nonce);
+    $pairs=[['Candidate',$name],['Suggested slug',$slug],['Office',$office],['State',$state],['Party',$data['party']??'—'],['Election',($data['election_type']??'').($data['election_date']?' — '.$data['election_date']:'')],['Filing URL',$data['filing_url']??'—'],['Committee',$data['committee_name']??'—'],['Survey Focus',$data['primary_survey_focus']??'—'],['Platform Status',$data['fundraising_platform_status']??'—'],['Contact Email',$data['contact_email']??$data['filler_email']??'—'],['Launch Timeline',$data['launch_timeline']??'—'],['Disclaimer',$data['paidfor_text']??'—']];
     $rows='';foreach($pairs as[$l,$v]){if(!$v||$v==='—')continue;$rows.='<tr><td style="padding:8px 12px;border:1px solid #eee;background:#fff;color:#666;width:140px;font-size:13px">'.esc_html($l).'</td><td style="padding:8px 12px;border:1px solid #eee;font-size:13px;font-weight:600">'.esc_html($v).'</td></tr>';}
     $body='<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px">';
     $body.='<div style="background:#0e1235;padding:16px 24px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:12px">';
@@ -498,12 +503,120 @@ function atp_send_notifications($data,$pid){
     $body.='<div style="background:#f9f9f9;border:1px solid #ddd;border-top:none;padding:24px;border-radius:0 0 6px 6px">';
     $body.='<h2 style="color:#0e1235;margin:0 0 16px;font-size:18px">New Candidate Intake Submission</h2>';
     $body.='<table style="width:100%;border-collapse:collapse;margin-bottom:20px">'.$rows.'</table>';
-    $body.='<a href="'.esc_url($view).'" style="display:inline-block;background:#d42b2b;color:white;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px">View Full Submission →</a>';
+    $body.='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">';
+    $body.='<a href="'.esc_url($view).'" style="display:inline-block;background:#d42b2b;color:white;padding:12px 20px;border-radius:4px;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase">View Submission →</a>';
+    $body.='<a href="'.esc_url($bundle).'" style="display:inline-block;background:#0e1235;color:white;padding:12px 20px;border-radius:4px;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase">Download Bundle (zip)</a>';
+    if($drive)$body.='<a href="'.esc_url($drive).'" target="_blank" style="display:inline-block;background:#1a73e8;color:white;padding:12px 20px;border-radius:4px;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase">Open Drive Folder</a>';
+    $body.='</div>';
+    $body.='<p style="font-size:12px;color:#888;margin:0 0 20px">The <strong>Bundle</strong> is a .zip with three files for the engineer: a REFERENCE.md (links + instructions), the V3 JSON, and a ready-to-paste PROMPT.md (prompt template + V3 inlined). Drop the prompt file into Claude/ChatGPT to generate the candidate site.</p>';
     $body.='<h3 style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #eee;padding-top:16px;margin:0 0 8px">Full JSON Data</h3>';
     $body.='<pre style="background:#0e1235;color:#7eb8f7;padding:16px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-all">'.json_encode($data,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE).'</pre>';
     $body.='</div></body></html>';
     $h=['Content-Type: text/html; charset=UTF-8'];
     foreach($emails as $e){if(is_email(trim($e)))wp_mail(trim($e),$subj,$body,$h);}
+}
+
+/* ════════════════════════════════════════
+   INTAKE BUNDLE — slug + Drive helpers, ZIP export
+════════════════════════════════════════ */
+
+function atp_intake_suggested_slug($data){
+    $base=$data['display_name']??$data['legal_name']??'candidate';
+    $year=$data['election_date']?substr($data['election_date'],0,4):date('Y');
+    return sanitize_title($base.'-'.$year);
+}
+
+function atp_intake_drive_folder_link($pid,$data){
+    // Reconstruct the per-submission Drive subfolder URL based on the same naming
+    // rule used by atp_drive_upload(): YYYY-MM-DD_Candidate-Name_Office-Slug.
+    // We don't store the subfolder ID per-submission yet, so this links to the
+    // parent folder if we have it. (Future: persist sub-folder ID at upload time.)
+    $cfg=get_option('atp_drive_config',[]);
+    $parent=$cfg['folder_id']??'';
+    if(!$parent)return '';
+    return 'https://drive.google.com/drive/folders/'.rawurlencode($parent);
+}
+
+function atp_intake_collect($pid){
+    $raw=get_post_meta($pid);$data=[];
+    foreach($raw as $k=>$v){if($k[0]==='_'&&$k!=='_v3_json')continue;$data[$k]=maybe_unserialize($v[0]);}
+    $v3=get_post_meta($pid,'_v3_json',true);
+    if($v3)$data['_v3_json']=json_decode($v3,true);
+    return $data;
+}
+
+function atp_intake_build_reference($pid,$data){
+    $name=$data['display_name']??$data['legal_name']??'Candidate';
+    $slug=atp_intake_suggested_slug($data);
+    $office=$data['office']??'';
+    $state=$data['state']??'';
+    $view=admin_url('admin.php?page=atp-candidates&view='.$pid);
+    $drive=atp_intake_drive_folder_link($pid,$data);
+    $media=admin_url('upload.php?mode=grid&search='.rawurlencode($name));
+    $r ="# ATP Intake — $name\n\n";
+    $r.="**Suggested slug:** `$slug`\n";
+    $r.="**Office:** $office\n";
+    $r.="**State:** $state\n";
+    $r.="**WP submission ID:** $pid\n\n";
+    $r.="## Links\n\n";
+    $r.="- [View submission in WP admin]($view)\n";
+    $r.="- [Search WP media library for '".$name."']($media)\n";
+    if($drive)$r.="- [Open Drive folder (parent — find the dated subfolder for this submission)]($drive)\n";
+    $r.="\n## Bundle contents\n\n";
+    $r.="- `REFERENCE.md` — this file\n";
+    $r.="- `$slug-v3.json` — V3 JSON (intake answers)\n";
+    $r.="- `$slug-PROMPT.md` — prompt template + V3 inlined; paste into Claude/ChatGPT to generate the candidate site\n\n";
+    $r.="## Engineer steps\n\n";
+    $r.="1. Download all uploaded media (headshot/logo/photos) from Drive **and/or** the WP media library link above.\n";
+    $r.="2. Run `./scripts/new-site.sh $slug \"$name\" \"$office\"` from the monorepo.\n";
+    $r.="3. Save the bundle's `*-v3.json` as `sites/$slug/intake-v3.json`.\n";
+    $r.="4. Paste the bundle's `*-PROMPT.md` contents into Claude. Save its output as `sites/$slug/page-json.json`.\n";
+    $r.="5. Run `./scripts/build-site.sh $slug` and deploy `dist/$slug/atp-campaign-site/` to a fresh WP install.\n";
+    return $r;
+}
+
+function atp_intake_build_prompt($pid,$data){
+    $tpl_path=ATP_DEMO_DIR.'PROMPT-TEMPLATE.md';
+    $tpl=is_readable($tpl_path)?file_get_contents($tpl_path):"# (PROMPT-TEMPLATE.md not found in plugin)\n";
+    $v3=$data['_v3_json']??$data;
+    $json=json_encode($v3,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+    $out ="# Generation prompt — ".($data['display_name']??$data['legal_name']??'Candidate')."\n\n";
+    $out.="Paste everything below this line into Claude or ChatGPT.\n\n";
+    $out.="---\n\n";
+    $out.=$tpl;
+    $out.="\n\n## V3 JSON for this candidate\n\n```json\n".$json."\n```\n";
+    return $out;
+}
+
+add_action('wp_ajax_atp_export_bundle','atp_export_bundle');
+function atp_export_bundle(){
+    if(!current_user_can('manage_options'))wp_die('Unauthorized');
+    check_ajax_referer('atp_export','nonce');
+    $id=(int)$_GET['id'];if(!$id)wp_die('Missing id');
+    $data=atp_intake_collect($id);
+    $slug=atp_intake_suggested_slug($data);
+    $files=[
+        'REFERENCE.md'             => atp_intake_build_reference($id,$data),
+        $slug.'-v3.json'           => json_encode($data['_v3_json']??$data,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE),
+        $slug.'-PROMPT.md'         => atp_intake_build_prompt($id,$data),
+    ];
+    if(class_exists('ZipArchive')){
+        $tmp=wp_tempnam('atp-bundle-'.$slug);
+        $zip=new ZipArchive();
+        if($zip->open($tmp,ZipArchive::OVERWRITE)===true){
+            foreach($files as $n=>$c)$zip->addFromString($n,$c);
+            $zip->close();
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="'.$slug.'-intake-bundle.zip"');
+            header('Content-Length: '.filesize($tmp));
+            readfile($tmp);@unlink($tmp);exit;
+        }
+    }
+    // Fallback: tar-like text dump if ZipArchive unavailable on host.
+    header('Content-Type: text/plain; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="'.$slug.'-intake-bundle.txt"');
+    foreach($files as $n=>$c){echo "===== $n =====\n\n$c\n\n";}
+    exit;
 }
 
 /* ════════════════════════════════════════
