@@ -24,6 +24,31 @@
 
 ---
 
+## 2026-05-05 — Add Vibe AI as required plugin dependency
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+User picked Vibe AI (https://wordpress.org/plugins/vibe-ai/) as the
+canonical MCP plugin for both ATP marketing and candidate sites.
+Adding it as a declared dependency on the candidate-platform plugin
+and pre-installing it in the Playground blueprint.
+
+### Done
+- `Requires Plugins: vibe-ai` header added to
+  `packages/atp-plugin-core/atp-demo-plugin.php` and
+  `atp-demo-plugin/atp-demo-plugin.php`. WP 6.5+ will prompt to
+  install Vibe AI when our plugin is activated.
+- `playground-blueprint.json`: pre-installs `vibe-ai` from
+  wordpress.org before our plugin so Playground demos boot with
+  both plugins active.
+
+### Note
+The same change needs to land on the `atp-website` branch (and the
+shortcoded variant). Doing that next.
+
+---
+
 ## 2026-05-05 — Intake handoff: default emails, richer notification, bundle export
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

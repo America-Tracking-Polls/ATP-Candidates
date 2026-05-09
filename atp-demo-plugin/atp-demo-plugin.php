@@ -6,6 +6,7 @@
  * Version:     2.1.0
  * Author:      Mirror Factory / ROI Amplified
  * Text Domain: atp-demo
+ * Requires Plugins: vibe-ai
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
