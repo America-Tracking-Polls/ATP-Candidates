@@ -215,13 +215,19 @@ function atp_drive_list_folders( $parent_id = 'root', $token = null ) {
         $token = atp_drive_get_access_token();
         if ( is_wp_error( $token ) ) return $token;
     }
-    $q = sprintf(
+
+    $folders = [];
+    $seen_ids = [];
+
+    // 1) Folders that have $parent_id as a parent (My Drive structure +
+    //    children of any folder you've drilled into).
+    $q_parent = sprintf(
         "'%s' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
         str_replace( "'", "\\'", $parent_id )
     );
     $url = ATP_DRIVE_API_BASE . '/files?' . http_build_query( [
-        'q'                         => $q,
-        'fields'                    => 'files(id,name,parents)',
+        'q'                         => $q_parent,
+        'fields'                    => 'files(id,name,parents,shared,ownedByMe)',
         'orderBy'                   => 'name',
         'pageSize'                  => 200,
         'supportsAllDrives'         => 'true',
@@ -236,7 +242,40 @@ function atp_drive_list_folders( $parent_id = 'root', $token = null ) {
         return new WP_Error( 'atp_drive_list', wp_remote_retrieve_body( $resp ) );
     }
     $body = json_decode( wp_remote_retrieve_body( $resp ), true );
-    return $body['files'] ?? [];
+    foreach ( $body['files'] ?? [] as $f ) {
+        if ( isset( $seen_ids[ $f['id'] ] ) ) continue;
+        $seen_ids[ $f['id'] ] = 1;
+        $folders[] = $f;
+    }
+
+    // 2) At the root, also fetch "Shared with me" folders. They don't have
+    //    'root' as a parent so they wouldn't appear in the query above.
+    if ( $parent_id === 'root' ) {
+        $q_shared = "sharedWithMe = true and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        $url2 = ATP_DRIVE_API_BASE . '/files?' . http_build_query( [
+            'q'                         => $q_shared,
+            'fields'                    => 'files(id,name,parents,shared,ownedByMe)',
+            'orderBy'                   => 'name',
+            'pageSize'                  => 200,
+            'supportsAllDrives'         => 'true',
+            'includeItemsFromAllDrives' => 'true',
+        ] );
+        $resp2 = wp_remote_get( $url2, [
+            'timeout' => 20,
+            'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+        ] );
+        if ( ! is_wp_error( $resp2 ) && wp_remote_retrieve_response_code( $resp2 ) === 200 ) {
+            $body2 = json_decode( wp_remote_retrieve_body( $resp2 ), true );
+            foreach ( $body2['files'] ?? [] as $f ) {
+                if ( isset( $seen_ids[ $f['id'] ] ) ) continue;
+                $seen_ids[ $f['id'] ] = 1;
+                $f['_shared_with_me'] = true; // surfaces in the picker UI
+                $folders[] = $f;
+            }
+        }
+    }
+
+    return $folders;
 }
 
 function atp_drive_get_folder_meta( $folder_id, $token = null ) {
@@ -352,7 +391,11 @@ function atp_drive_ajax_browse() {
         wp_send_json_error( $folders->get_error_message() );
     }
     wp_send_json_success( array_values( array_map( function( $f ) {
-        return [ 'id' => $f['id'], 'name' => $f['name'] ];
+        return [
+            'id'              => $f['id'],
+            'name'            => $f['name'],
+            'shared_with_me'  => ! empty( $f['_shared_with_me'] ),
+        ];
     }, $folders ) ) );
 }
 

@@ -534,7 +534,9 @@ function atp_wl_render_settings() {
                         const li = document.createElement('li');
                         li.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee';
                         const left = document.createElement('span');
-                        left.innerHTML = '<span style="margin-right:8px">📁</span>' + escapeHtml(f.name);
+                        var icon = f.shared_with_me ? '🔗' : '📁';
+                        var badge = f.shared_with_me ? ' <span style="margin-left:6px;font-size:10px;color:#666;background:#eef;padding:2px 6px;border-radius:3px">Shared</span>' : '';
+                        left.innerHTML = '<span style="margin-right:8px">' + icon + '</span>' + escapeHtml(f.name) + badge;
                         const right = document.createElement('span');
                         const open = mkBtn('Open', function(){ stack.push({ id: f.id, name: f.name }); load(); });
                         const pick = mkBtn('Select', function(){
