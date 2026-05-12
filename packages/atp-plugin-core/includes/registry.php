@@ -1278,6 +1278,15 @@ HTML,
 HTML,
 ],
 
+[
+'tag'   => 'atp_cand_ai_context',
+'label' => 'Candidate Page — AI Context (Start Here)',
+'desc'  => 'Dynamic AI-readable site overview. When an AI assistant (Vibe AI / Claude / ChatGPT) is connected to this WP install via MCP, point it at this page first. Includes plugin version, candidate identity, V3 JSON snapshot, available shortcodes + their current override state, edit decision tree. Auto-generates from live state — no manual content. Same data also exposed at GET /wp-json/atp/v1/site-context for programmatic access.',
+'default' => <<<'HTML'
+<!-- This shortcode renders dynamically via atp_cand_render_ai_context() in includes/ai-context.php. Default registry HTML is not used; this entry exists so the shortcode appears in the admin Edit Shortcodes UI and the importer can offer an "AI Start Here" page. -->
+HTML,
+],
+
 ]], // end Candidate Page
 
 

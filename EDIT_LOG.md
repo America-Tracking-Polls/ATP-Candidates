@@ -24,6 +24,53 @@
 
 ---
 
+## 2026-05-12 — AI context infrastructure + atp-site-edit skill + candidate-site flow doc
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Gave Vibe AI (and any connected MCP client) a structured way to read
+site state before editing. Built the supporting Claude Code skill and
+the end-to-end candidate-site provisioning doc so a Mirror Factory
+engineer can drive the whole flow from intake to launch.
+
+### Done
+- New `includes/ai-context.php`:
+  - `atp_get_site_context()` returns plugin version + site role
+    (intake-host / candidate / unconfigured), candidate identity, V3
+    JSON snapshot, every registered shortcode with its override state,
+    every page on the site, and an edit-pattern decision tree.
+  - `[atp_cand_ai_context]` shortcode renders an HTML overview page
+    for humans.
+  - REST endpoint `GET /wp-json/atp/v1/site-context` (requires
+    `edit_posts`) returns the same data as JSON.
+- Registry + shortcodes.php wired `atp_cand_ai_context` as a PHP-handled
+  shortcode.
+- Importer adds a `candidate-ai-context` page (slug `ai-start-here`,
+  status `private`); fixed importer to honor the `status` field instead
+  of hard-coding `publish`.
+- Plugin bootstrap now requires `ai-context.php`; version bumped
+  3.5.0 → 3.6.0.
+- `.claude/skills/atp-site-edit/SKILL.md` — operating instructions for
+  any AI assistant connected to an ATP site: load site context first,
+  map requests to one of five edit categories (content / data patch /
+  template override / toggle / importer), follow hard rules (never edit
+  page content containing shortcodes, never delete overrides to test
+  core, never invent V3 fields, never touch wp-config / theme, always
+  verify candidate and report storage keys).
+- `docs/candidate-site-flow.md` — 7-phase end-to-end candidate-site
+  creation flow from ATP's POV: intake submission → notification routing
+  → SiteGround container + plugin install → connect Vibe AI in Claude
+  or ChatGPT → AI-driven page setup and overrides → review → domain /
+  launch → ongoing edits. Includes a copy-pasteable initial Claude
+  prompt for a new candidate site.
+
+### In progress / blocked
+- User still needs to ff-merge `claude/activate-drive-upload-P3yOj`
+  into `main` from a local clone (push proxy blocks pushes to `main`
+  from this session).
+
+---
+
 ## 2026-05-05 — Consolidate: marketing shortcodes fold into the core plugin
 
 **Branch:** `claude/activate-drive-upload-P3yOj`

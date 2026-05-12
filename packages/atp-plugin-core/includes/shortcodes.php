@@ -46,6 +46,7 @@ function atp_demo_register_shortcodes() {
         'atp_cand_endorsements' => 'atp_cand_render_endorsements',
         'atp_cand_social'       => 'atp_cand_render_social',
         'atp_cand_signup'       => 'atp_cand_render_signup',
+        'atp_cand_ai_context'   => 'atp_cand_render_ai_context',
     ];
 
     $registry = atp_demo_get_registry();

@@ -166,6 +166,17 @@ function atp_importer_page_sets() {
             'focus_kw'    => 'brand guide colors logo',
             'meta_desc'   => 'Visual identity for the campaign — colors, logo, headshot, and voice.',
         ],
+        'candidate-ai-context' => [
+            'title'       => 'AI Start Here',
+            'desc'        => 'Hidden page for AI agents (Vibe AI / Claude / ChatGPT). Auto-generates from live site state. Tell the AI to read this page first.',
+            'color'       => '#0e1235',
+            'shortcodes'  => [
+                '[atp_cand_ai_context]',
+            ],
+            'focus_kw'    => 'AI context site overview',
+            'meta_desc'   => 'AI assistant context page for this WordPress install.',
+            'status'      => 'private',
+        ],
     ];
 }
 
@@ -428,10 +439,13 @@ function atp_importer_handle_import() {
     $template      = $use_elementor ? 'elementor_canvas' : atp_importer_detect_canvas_template();
 
     // ── Insert page ───────────────────────────────────────────────────────────
+    $status = isset( $set['status'] ) && in_array( $set['status'], [ 'publish', 'draft', 'private' ], true )
+        ? $set['status']
+        : 'publish';
     $page_id = wp_insert_post( [
         'post_title'    => $set['title'],
         'post_content'  => $content,
-        'post_status'   => 'publish',
+        'post_status'   => $status,
         'post_type'     => 'page',
         'post_author'   => get_current_user_id(),
         'page_template' => $template,
