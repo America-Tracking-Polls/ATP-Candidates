@@ -24,6 +24,52 @@
 
 ---
 
+## 2026-05-13 — Handoff guide + AGENTS.md cross-reference
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+User asked for a single document covering everything we've built, the
+current state of each piece, what's tested vs. not tested, and what
+the next engineer (human or AI) should do. Written as `HANDOFF.md` at
+the repo root so it's immediately discoverable.
+
+### Done
+- `HANDOFF.md` (new, repo root):
+  - §1 product overview — one plugin / two install contexts
+  - §2 status table of every plugin component, doc, and integration
+    with ✅ / 🟡 / ❌ markers
+  - §3 Vibe AI integration explainer (declared dependency, REST endpoint,
+    `[atp_cand_ai_context]` shortcode, `atp-site-edit` skill, trust
+    model)
+  - §4 Google Drive integration state + concrete test plan:
+    - Cloud Console pre-flight (scope = `auth/drive` already, redirect
+      URIs, test users)
+    - Connect + folder-pick steps targeting
+      `Intake_Submissions_Live` (ID `1AmUatOOqqliQezIJZM2qqO6jt3M_dHZR`)
+    - Dummy submission under `Test Candidate / FL State Senate` with
+      full asset payload
+    - Expected subfolder name `YYYY-MM-DD_Test-Candidate_FL-State-Senate`
+    - Cleanup instructions
+    - Failure-mode triage (SG WAF, narrow scope, account access)
+  - §5 smoke-test checklist for 3.6.0
+  - §6 known blockers (SG WAF, Drive untested, push-to-main proxy,
+    stale CHANGELOG)
+  - §7 ordered next-actions list
+  - §8 doc index
+  - §9 open questions worth raising
+- `AGENTS.md` updated:
+  - Top-of-file callout pointing readers to `HANDOFF.md` first
+  - "Things that already exist" table extended with HANDOFF, override
+    system, candidate-site flow, atp-site-edit skill rows
+
+### In progress / blocked
+- Drive OAuth still not round-tripped on the live host (test plan now
+  documented in HANDOFF §4).
+- `CHANGELOG.md` is stale (last entry 3.2.0; current shipping 3.6.0).
+  Logged as a known blocker; not fixed in this commit.
+
+---
+
 ## 2026-05-12 — AI context infrastructure + atp-site-edit skill + candidate-site flow doc
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
