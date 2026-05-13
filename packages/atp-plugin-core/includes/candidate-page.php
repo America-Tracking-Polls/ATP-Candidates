@@ -83,13 +83,23 @@ function atp_cand_get_data() {
 /**
  * Replace all {{token}} placeholders in HTML with candidate data.
  * Tokens that don't match any key are replaced with empty string.
+ *
+ * @param string $html   Template HTML with {{token}} placeholders.
+ * @param array  $patch  Optional per-shortcode data patch (from
+ *                       atp_demo_get_data_patch). Patch keys win
+ *                       over V3 JSON keys with the same name.
  */
-function atp_cand_replace_tokens( $html ) {
+function atp_cand_replace_tokens( $html, $patch = [] ) {
     $data = atp_cand_get_data();
-    if ( empty( $data ) ) return $html;
+    if ( ! empty( $patch ) && is_array( $patch ) ) {
+        $data = array_merge( $data, $patch );
+    }
+    if ( empty( $data ) ) {
+        return preg_replace( '/\{\{[a-z_]+\}\}/', '', $html );
+    }
 
-    // Replace known tokens
     foreach ( $data as $key => $value ) {
+        if ( ! is_scalar( $value ) ) continue;
         $html = str_replace( '{{' . $key . '}}', esc_html( $value ), $html );
     }
 

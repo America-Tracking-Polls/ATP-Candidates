@@ -24,6 +24,99 @@
 
 ---
 
+## 2026-05-13 — Handoff guide + AGENTS.md cross-reference
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+User asked for a single document covering everything we've built, the
+current state of each piece, what's tested vs. not tested, and what
+the next engineer (human or AI) should do. Written as `HANDOFF.md` at
+the repo root so it's immediately discoverable.
+
+### Done
+- `HANDOFF.md` (new, repo root):
+  - §1 product overview — one plugin / two install contexts
+  - §2 status table of every plugin component, doc, and integration
+    with ✅ / 🟡 / ❌ markers
+  - §3 Vibe AI integration explainer (declared dependency, REST endpoint,
+    `[atp_cand_ai_context]` shortcode, `atp-site-edit` skill, trust
+    model)
+  - §4 Google Drive integration state + concrete test plan:
+    - Cloud Console pre-flight (scope = `auth/drive` already, redirect
+      URIs, test users)
+    - Connect + folder-pick steps targeting
+      `Intake_Submissions_Live` (ID `1AmUatOOqqliQezIJZM2qqO6jt3M_dHZR`)
+    - Dummy submission under `Test Candidate / FL State Senate` with
+      full asset payload
+    - Expected subfolder name `YYYY-MM-DD_Test-Candidate_FL-State-Senate`
+    - Cleanup instructions
+    - Failure-mode triage (SG WAF, narrow scope, account access)
+  - §5 smoke-test checklist for 3.6.0
+  - §6 known blockers (SG WAF, Drive untested, push-to-main proxy,
+    stale CHANGELOG)
+  - §7 ordered next-actions list
+  - §8 doc index
+  - §9 open questions worth raising
+- `AGENTS.md` updated:
+  - Top-of-file callout pointing readers to `HANDOFF.md` first
+  - "Things that already exist" table extended with HANDOFF, override
+    system, candidate-site flow, atp-site-edit skill rows
+
+### In progress / blocked
+- Drive OAuth still not round-tripped on the live host (test plan now
+  documented in HANDOFF §4).
+- `CHANGELOG.md` is stale (last entry 3.2.0; current shipping 3.6.0).
+  Logged as a known blocker; not fixed in this commit.
+
+---
+
+## 2026-05-12 — AI context infrastructure + atp-site-edit skill + candidate-site flow doc
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Gave Vibe AI (and any connected MCP client) a structured way to read
+site state before editing. Built the supporting Claude Code skill and
+the end-to-end candidate-site provisioning doc so a Mirror Factory
+engineer can drive the whole flow from intake to launch.
+
+### Done
+- New `includes/ai-context.php`:
+  - `atp_get_site_context()` returns plugin version + site role
+    (intake-host / candidate / unconfigured), candidate identity, V3
+    JSON snapshot, every registered shortcode with its override state,
+    every page on the site, and an edit-pattern decision tree.
+  - `[atp_cand_ai_context]` shortcode renders an HTML overview page
+    for humans.
+  - REST endpoint `GET /wp-json/atp/v1/site-context` (requires
+    `edit_posts`) returns the same data as JSON.
+- Registry + shortcodes.php wired `atp_cand_ai_context` as a PHP-handled
+  shortcode.
+- Importer adds a `candidate-ai-context` page (slug `ai-start-here`,
+  status `private`); fixed importer to honor the `status` field instead
+  of hard-coding `publish`.
+- Plugin bootstrap now requires `ai-context.php`; version bumped
+  3.5.0 → 3.6.0.
+- `.claude/skills/atp-site-edit/SKILL.md` — operating instructions for
+  any AI assistant connected to an ATP site: load site context first,
+  map requests to one of five edit categories (content / data patch /
+  template override / toggle / importer), follow hard rules (never edit
+  page content containing shortcodes, never delete overrides to test
+  core, never invent V3 fields, never touch wp-config / theme, always
+  verify candidate and report storage keys).
+- `docs/candidate-site-flow.md` — 7-phase end-to-end candidate-site
+  creation flow from ATP's POV: intake submission → notification routing
+  → SiteGround container + plugin install → connect Vibe AI in Claude
+  or ChatGPT → AI-driven page setup and overrides → review → domain /
+  launch → ongoing edits. Includes a copy-pasteable initial Claude
+  prompt for a new candidate site.
+
+### In progress / blocked
+- User still needs to ff-merge `claude/activate-drive-upload-P3yOj`
+  into `main` from a local clone (push proxy blocks pushes to `main`
+  from this session).
+
+---
+
 ## 2026-05-05 — Consolidate: marketing shortcodes fold into the core plugin
 
 **Branch:** `claude/activate-drive-upload-P3yOj`
@@ -73,6 +166,80 @@ notifications, build pipeline.
 - Decide whether to delete the `atp-website` branch and its
   workarounds (`atp-website-merged`, `atp-website-shortcoded`,
   `atp-website-vibe`) once the consolidation is verified.
+
+---
+
+## 2026-05-05 — Override system v2 + brand guide shortcode + plugin v3.5.0
+
+**Branch:** `claude/activate-drive-upload-P3yOj`
+**Commits:** _pending push_
+
+User asked for clean separation of concerns: JSON = data, template =
+presentation, with per-section override toggles and a way to preview
+core vs. override side-by-side without deleting the override. Built
+the infrastructure for all of it.
+
+### What landed
+
+**`shortcodes.php` — full override system**
+- `atp_demo_render_shortcode()` rewritten to support `source="core"` and `source="override"` attributes for preview
+- New `atp_demo_resolve_template($tag, $source)` — picks the template based on source param + per-site override + per-site disable toggle
+- New `atp_demo_get_data_patch($tag)` — loads per-shortcode JSON data patches from `atp_sc_<tag>_data`
+- Renderer always runs through token replacement at the end so any tokenized template stays JSON-driven regardless of whether template came from override or default
+
+**`candidate-page.php` — token replacer accepts a patch**
+- `atp_cand_replace_tokens($html, $patch=[])` — patch keys win over V3 JSON keys with the same name; everything else falls through to V3 source of truth
+- Non-scalar values are skipped (won't break on nested arrays)
+- Empty data still cleans up unmatched `{{tokens}}`
+
+**`admin.php` — full Edit Shortcodes UI**
+- Each shortcode card now exposes:
+  - Disable toggle ("Disable override (use core default)")
+  - Preview shortcode quick-copy chips: `[tag source="core"]`, `[tag source="override"]`
+  - Data-patch JSON textarea (collapsible details element)
+  - Status badges: "Override active" / "Override stored, disabled" / "Data patch"
+- Save persists template + data + toggle in one form submit
+- Reset clears all three
+
+**`marketing-shortcodes.php` — same system**
+- Marketing shortcodes (`atp_mkt_*`) get the same source attribute + disable toggle
+- Storage prefix is `atp_mkt_sc_*`
+- Marketing edit page UI includes the toggle + preview hints
+- (Token replacement is a no-op for marketing shortcodes today since the templates don't have `{{tokens}}` yet — adding tokens to marketing templates will Just Work, same data-patch flow)
+
+**New `[atp_cand_brand_guide]` shortcode**
+- Per-candidate brand guide page: pulls colors, headshot, logo from V3 JSON
+- Tokens: `{{display_name}}`, `{{tagline}}`, `{{color_primary}}`, `{{color_secondary}}`, `{{color_accent}}`, `{{headshot_link}}`, `{{logo_link}}`
+- Importer entry added — one click to create a Brand Guide page on a candidate site
+
+**`OVERRIDE-SYSTEM.md` — documentation**
+- Full write-up of the override architecture
+- Storage cheat sheet
+- Use-case walkthroughs (tweak copy, customize layout, partial data override, toggle for testing)
+- Renderer flow diagram
+- Lives at `packages/atp-plugin-core/OVERRIDE-SYSTEM.md` so it ships with every client install
+
+**Plugin version bump**
+- 3.2.0 → 3.5.0 (jumped past 3.3.0 + 3.4.0 because the in-flight intake-bundle + signup work hadn't been versioned yet; consolidating)
+
+### What was deferred (Phase B)
+
+Tokenizing the existing legacy heredoc templates in `registry.php`
+(hero, about, messages, etc.) — they currently bake content like
+"John Stacy" into the HTML. The override system supports them as-is
+(they just won't benefit from the data-patch path until tokenized).
+Better to do this incrementally — when an engineer touches a section
+they convert it. Trying to do all 14+ heredocs in one push is too
+risky.
+
+### Open issues NOT touched here
+
+- Image upload to the intake form failing on americatrackingpolls.com
+  — needs DevTools diagnostics or SiteGround WAF whitelist. Not a
+  code change; root cause is in the host-level WAF.
+- Drive shared-folder picker shipped in `8a35103` but the live site
+  needs a re-deploy + Drive disconnect/reconnect for it to take
+  effect.
 
 ---
 

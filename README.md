@@ -1,16 +1,46 @@
 # ATP Campaign Site Platform
 
-**Version:** 3.1.0
+**Version:** 3.5.0
 **By:** Mirror Factory / ROI Amplified
 **For:** America Tracking Polls (ATP)
+**Repo:** [America-Tracking-Polls/ATP-Candidates](https://github.com/America-Tracking-Polls/ATP-Candidates)
+**Plugin dependency:** [Vibe AI](https://wordpress.org/plugins/vibe-ai/) (declared via `Requires Plugins`)
+
+---
+
+## Quick links to the rest of the docs
+
+Before reading this README in full, know which doc to grab for which question:
+
+| If you want to know… | Read this |
+|---|---|
+| The big picture / why two kinds of WordPress installs | This README (you're here) |
+| How the system works at a system-architecture level + diagrams | `packages/atp-plugin-core/ARCHITECTURE.md` |
+| The override system (template + data + toggle + preview) | `packages/atp-plugin-core/OVERRIDE-SYSTEM.md` |
+| Five ASCII diagrams covering topology, edit lifecycle, release channels, customization lanes, site lifecycle | `MASTER-PLAN.md` |
+| Operating rules for any AI agent or new engineer | `AGENTS.md` |
+| What we shipped, when, and what broke | `EDIT_LOG.md` |
+| How to set up Drive OAuth | `docs/google-drive-setup.md` |
+| Plugin changelog (per-version notes) | `packages/atp-plugin-core/CHANGELOG.md` |
 
 ---
 
 ## What This Is
 
-A WordPress plugin system that generates complete campaign websites from a structured intake form. ATP staff fill out a 16-step form about a political candidate, the form produces a V3 JSON file, and that JSON drives the generation of a 7-page campaign website — homepage, issues, donate, contact, about, privacy policy, and cookie/SMS compliance policy.
+A WordPress plugin that generates complete campaign websites from a
+structured intake form. ATP staff (or candidates themselves) fill out
+a 16-step form. That submission produces a V3 JSON file. Mirror
+Factory takes the JSON + the AI prompt template and generates a
+7+1-page campaign site with full white-label branding.
 
-The system is built as a monorepo that manages multiple client sites from one codebase. Each client gets a self-contained WordPress plugin that can run independently.
+The system is **one plugin, one repo, one release pipeline**. Each
+WP install — whether ATP's own marketing site or any candidate's
+campaign site — runs the same plugin and uses only the shortcodes
+relevant to it.
+
+For a deeper architectural read with diagrams, see
+[`packages/atp-plugin-core/ARCHITECTURE.md`](packages/atp-plugin-core/ARCHITECTURE.md)
+and [`MASTER-PLAN.md`](MASTER-PLAN.md).
 
 ---
 
@@ -64,69 +94,176 @@ Invoice sent for second half payment
 
 ---
 
-## Repository Structure
+## Architecture in 60 seconds
 
 ```
-ATP-Demo/                           ← this repo (mirror-factory/ATP-Demo)
-├── packages/
-│   └── atp-plugin-core/            ← shared plugin code (ONE codebase)
-│       ├── atp-demo-plugin.php     ← main plugin file
-│       ├── includes/
-│       │   ├── registry.php        ← page templates (shortcode defaults)
-│       │   ├── shortcodes.php      ← shortcode rendering engine
-│       │   ├── admin.php           ← shortcode editor admin page
-│       │   ├── importer.php        ← one-click page creator
-│       │   ├── candidate-page.php  ← Page JSON import engine
-│       │   ├── whitelabel.php      ← custom login, admin bar, dashboard
-│       │   ├── site-config.php     ← reads client config on activation
-│       │   ├── file-upload.php     ← file upload (WP media / Google Drive)
-│       │   ├── setup-wizard.php    ← first-run onboarding
-│       │   ├── changelog.php       ← version history viewer
-│       │   ├── updater.php         ← GitHub auto-updater
-│       │   └── intake/
-│       │       └── atp-candidate-intake.php  ← the 16-step intake form
-│       ├── v3-schema.json          ← the JSON contract
-│       ├── v3-field-map.json       ← form field ID → JSON path mapping
-│       ├── PROMPT-TEMPLATE.md      ← AI generation prompt
-│       └── assets/                 ← logos, admin CSS
-│
-├── sites/
-│   └── john-stacy/                 ← CLIENT: John Stacy
-│       ├── site-config.json        ← client name, colors, domain, pages
-│       ├── intake-v3.json          ← completed intake data
-│       ├── page-json.json          ← generated site content (HTML per shortcode)
-│       └── overrides/              ← manual shortcode overrides (optional)
-│
-├── scripts/
-│   ├── new-site.sh                 ← scaffold a new client site
-│   └── build-site.sh              ← assemble deployable plugin for a client
-│
-├── docs/                           ← detailed documentation
-│   ├── json-schema.md              ← V3 JSON schema reference
-│   ├── pages.md                    ← page-by-page breakdown
-│   ├── deployment.md               ← deployment guide
-│   ├── editing.md                  ← how to edit via repo + AI
-│   └── launch-checklist.md         ← SOW acceptance checklist
-│
-├── .github/workflows/
-│   └── build-and-release.yml       ← auto-build client plugins on tag
-│
-└── playground-blueprint.json       ← WordPress Playground demo
+                  ONE plugin: packages/atp-plugin-core/   v3.5.0
+                  ───────────────────────────────────────────
+                  Deps: Vibe AI (auto-prompted on plugin activation)
+
+  ┌─────────────────────────┐    ┌─────────────────────────┐
+  │ ATP intake host         │    │ Each candidate site     │
+  │ americatrackingpolls.com│    │ sarahchen2026.com etc.  │
+  ├─────────────────────────┤    ├─────────────────────────┤
+  │ Active shortcodes:      │    │ Active shortcodes:      │
+  │  [atp_intake]           │    │  [atp_cand_styles]      │
+  │  [atp_mkt_*]   (13)     │    │  [atp_cand_hero]        │
+  │                         │    │  [atp_cand_about]       │
+  │ Drive: connected        │    │  [atp_cand_issues]      │
+  │ via OAuth, picks dest   │    │  [atp_cand_signup]      │
+  │ folder, uploads mirror  │    │  [atp_cand_brand_guide] │
+  │                         │    │  [atp_cand_*]    (16)   │
+  │ Intake submissions      │    │                         │
+  │ → email + bundle (zip)  │    │ Drive: not used         │
+  │ → assets in WP media +  │    │ Intake: shortcode       │
+  │   Drive subfolder       │    │   exists, never placed  │
+  └─────────────────────────┘    └─────────────────────────┘
+                  ▲                          ▲
+                  │   same plugin everywhere │
+                  └──────────────────────────┘
 ```
 
-### Separate Repo: ATP Website
-```
-CrazySwami/atp-website              ← ATP's own marketing site
-├── atp-website-plugin/             ← plugin for americatrackingpolls.com
-│   ├── includes/
-│   │   └── intake/                 ← intake form (same form, different context)
-│   └── ...
-└── ...
-```
+Each WP install loads the whole plugin and only renders the
+shortcodes its pages reference. The plugin has zero practical
+overhead for unused shortcodes.
 
 ---
 
-## The 7 Pages
+## The override system (data ↔ template separation)
+
+The plugin keeps **data (JSON)** separate from **presentation
+(HTML/CSS/JS)** — and lets each site override either or both per
+shortcode, with a toggle to revert to core defaults at any time. Full
+write-up is in
+[`packages/atp-plugin-core/OVERRIDE-SYSTEM.md`](packages/atp-plugin-core/OVERRIDE-SYSTEM.md).
+
+The mental model:
+
+```
+   DATA (V3 JSON)              TEMPLATE (HTML w/ {{tokens}})
+   ─────────────────           ─────────────────────────────
+   - display_name              - <section class="hero">
+   - tagline                       <h1>{{display_name}}</h1>
+   - color_primary             - card grid
+   - issue_positions           - JS animations
+   - links                     - layout
+                ──── + ──── = final rendered HTML
+```
+
+For any shortcode, an admin can store:
+
+| Storage | What it overrides |
+|---|---|
+| `wp_options.atp_sc_<tag>` | Template HTML |
+| `wp_options.atp_sc_<tag>_data` | JSON data patch (overrides specific {{tokens}}) |
+| `wp_options.atp_sc_<tag>_disabled` | Toggle: when truthy, ignore the override and render core default |
+
+Plus two preview attributes for testing without committing:
+
+```
+[atp_cand_hero source="core"]      ← force registry default (preview the upcoming version)
+[atp_cand_hero source="override"]  ← force stored override even if disabled
+```
+
+The renderer always runs `{{token}}` substitution last, so any
+tokenized template stays JSON-driven regardless of where the template
+came from.
+
+The four override states (plus disabled):
+
+| State | Template comes from | Data comes from |
+|---|---|---|
+| **Default** | Registry | V3 JSON |
+| **Template-only override** | Per-site override | V3 JSON |
+| **Data-only override** | Registry | V3 JSON ← patch |
+| **Full override** | Per-site override | V3 JSON ← patch |
+| **Disabled** | Registry (fall-through) | V3 JSON |
+
+Marketing shortcodes (`atp_mkt_*`) use the same system under the
+`atp_mkt_sc_*` storage prefix.
+
+---
+
+## Repository Structure
+
+```
+ATP-Candidates/                            ← github.com/America-Tracking-Polls/ATP-Candidates
+├── packages/
+│   └── atp-plugin-core/                   ← THE plugin (one codebase, v3.5.0)
+│       ├── atp-demo-plugin.php            ← entry; declares Vibe AI as Requires Plugins
+│       ├── ARCHITECTURE.md                ← system architecture + 3 diagrams
+│       ├── OVERRIDE-SYSTEM.md             ← override system write-up
+│       ├── CHANGELOG.md
+│       ├── PROMPT-TEMPLATE.md             ← AI generation prompt
+│       ├── v3-schema.json                 ← V3 JSON contract
+│       ├── v3-field-map.json              ← form field id → JSON path mapping
+│       ├── includes/
+│       │   ├── registry.php               ← shortcode defaults (atp_cand_*, atp_intake)
+│       │   ├── shortcodes.php             ← renderer: source attr + toggle + data patch
+│       │   ├── admin.php                  ← Edit Shortcodes UI w/ override controls
+│       │   ├── importer.php               ← one-click page creator (Home, Issues, Donate, Contact, About, Privacy, Cookie/TCPA, Sign Up, Brand Guide)
+│       │   ├── candidate-page.php         ← Page-JSON importer + atp_cand_replace_tokens()
+│       │   ├── marketing-shortcodes.php   ← atp_mkt_* registration + admin UI (templates from templates/marketing/)
+│       │   ├── signup.php                 ← [atp_cand_signup] + AJAX + email + atp_subscriber CPT
+│       │   ├── drive-client.php           ← Drive OAuth (drive scope, shared folders, user_meta state)
+│       │   ├── file-upload.php            ← upload router: always WP media + optional Drive mirror
+│       │   ├── whitelabel.php             ← brand settings + Drive admin UI
+│       │   ├── site-config.php            ← reads sites/<slug>/site-config.json on activation
+│       │   ├── setup-wizard.php           ← first-run onboarding
+│       │   ├── changelog.php              ← in-admin version history viewer
+│       │   ├── updater.php                ← GitHub auto-updater
+│       │   └── intake/
+│       │       └── atp-candidate-intake.php  ← 16-step intake form + bundle export
+│       ├── templates/
+│       │   └── marketing/                 ← 13 marketing section templates (.html / .js)
+│       └── assets/
+│           ├── images/                    ← 3 ATP logos
+│           └── marketing/                 ← brand css + brand-*.js
+│
+├── sites/
+│   └── john-stacy/                        ← Per-client config (one folder per candidate)
+│       ├── site-config.json
+│       ├── intake-v3.json
+│       └── page-json.json
+│
+├── scripts/
+│   ├── new-site.sh                        ← scaffold a new client site
+│   └── build-site.sh                      ← assemble deployable plugin for a client
+│
+├── docs/
+│   ├── google-drive-setup.md              ← Drive OAuth client setup steps
+│   ├── json-schema.md                     ← V3 JSON schema reference
+│   ├── pages.md, deployment.md, editing.md, launch-checklist.md
+│
+├── .github/workflows/
+│   └── build-and-release.yml              ← auto-build client plugins on tag
+│
+├── AGENTS.md                              ← operating rules for AI/human contributors
+├── EDIT_LOG.md                            ← running edit history
+├── MASTER-PLAN.md                         ← five architecture diagrams
+├── README.md                              ← this file
+├── CHANGELOG.md
+├── index.html                             ← ATP-branded onboarding landing for the intake host
+├── ATP-Logo-Standard.png                  ← logo referenced by index.html
+└── playground-blueprint.json              ← WordPress Playground recipe
+```
+
+### The `atp-website` branch (ATP marketing site)
+
+A separate branch (`atp-website`) carries the standalone marketing
+site files (HTML/CSS/JS for `americatrackingpolls.com` outside
+WordPress). Intended to be exported into its own repo when ATP wants
+to maintain it independently. Until then, the marketing **plugin**
+(at `packages/atp-plugin-core/includes/marketing-shortcodes.php` +
+`templates/marketing/`) is what runs on ATP's actual WP install.
+
+---
+
+## The 9 Pages
+
+> Originally 7. Expanded to 9 in v3.5.0 — added **Sign Up** (TCPA-compliant
+> email/SMS list builder) and **Brand Guide** (per-candidate visual reference,
+> JSON-driven). Both are creatable from WP Admin → ATP Demo → Import Pages.
 
 ### Page 1: Home
 
@@ -219,6 +356,34 @@ Currently part of the homepage (`atp_cand_about` section). Can be made standalon
 | `legal_compliance.campaign_email_legal` | [Campaign Email Address] |
 | `legal_compliance.campaign_phone_legal` | [Campaign Phone Number] |
 | `domain_setup.preferred_domain` | [Website URL] |
+
+### Page 8: Sign Up
+
+TCPA-compliant email/SMS signup form. One shortcode: `atp_cand_signup`.
+Captures Name (first/last), Email, Phone, SMS opt-in. Submissions land
+as `atp_subscriber` posts; campaign contact gets an email per submit.
+
+| JSON Source | What It Generates |
+|-------------|-------------------|
+| `identity.display_name` | Form heading + intro copy |
+| `legal_compliance.committee_name` | TCPA disclosure + paid-for-by |
+| `legal_compliance.paid_for_by` | Footer disclaimer |
+| `legal_compliance.campaign_email_legal` | Notification recipient (fallback to admin_email) |
+| `social_media.*` | Social icons row above the form (only platforms with URLs) |
+| `home_url('/privacy-policy/')` | Privacy link in TCPA opt-in copy |
+
+### Page 9: Brand Guide
+
+Per-candidate visual identity reference. One shortcode: `atp_cand_brand_guide`.
+Tokenized template — pulls everything from V3 JSON.
+
+| JSON Source | What It Generates |
+|-------------|-------------------|
+| `identity.display_name` | Page heading |
+| `bio_messaging.tagline` | Voice/tone reference paragraph |
+| `visual_branding.primary_color` / `secondary_color` / `accent_color` | Color swatches |
+| `visual_branding.headshot_link` | Headshot panel |
+| `visual_branding.logo_link` | Logo panel |
 
 ---
 

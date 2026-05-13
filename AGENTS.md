@@ -6,6 +6,11 @@ by humans who want to understand how AI agents are expected to behave
 here. It complements `README.md` and
 `packages/atp-plugin-core/ARCHITECTURE.md`.
 
+> **Before you start: read `HANDOFF.md` at the repo root.**
+> It's the single source of truth for what's shipped, what's still
+> being tested, and what to do next. If anything you're about to do
+> contradicts it, stop and ask.
+
 > **The single most important rule:**
 > Every change you make to this repo MUST be logged in `EDIT_LOG.md`
 > at the repo root in the same commit (or the commit immediately
@@ -219,7 +224,11 @@ covers it:
 | New-site scaffold | `scripts/new-site.sh` |
 | Per-client build | `scripts/build-site.sh` |
 | Architecture doc with diagrams | `packages/atp-plugin-core/ARCHITECTURE.md` |
-| Edit log (READ THIS FIRST) | `EDIT_LOG.md` |
+| Handoff guide (READ THIS FIRST) | `HANDOFF.md` |
+| Edit log (chronological history) | `EDIT_LOG.md` |
+| Candidate-site provisioning flow | `docs/candidate-site-flow.md` |
+| Override system (template + data + toggle) | `packages/atp-plugin-core/OVERRIDE-SYSTEM.md` |
+| AI editing skill for live sites | `.claude/skills/atp-site-edit/SKILL.md` |
 
 ---
 

@@ -1228,6 +1228,65 @@ HTML,
 HTML,
 ],
 
+[
+'tag'   => 'atp_cand_brand_guide',
+'label' => 'Candidate Page — Brand Guide',
+'desc'  => 'Per-candidate brand guide page: pulls colors, fonts, logo, headshot, voice from V3 JSON. Useful for staff + the candidate to align on visuals before launch. Tokens: {{display_name}}, {{tagline}}, {{color_primary}}, {{color_secondary}}, {{color_accent}}, {{headshot_link}}, {{logo_link}}.',
+'default' => <<<'HTML'
+<section class="cand-section cand-section-light" id="brand-guide">
+  <div class="cand-container">
+    <div class="cand-section-label">Brand Guide</div>
+    <h2 class="cand-section-title">{{display_name}} — visual identity</h2>
+    <p class="cand-section-subtitle" style="margin:0 auto 32px;max-width:680px">{{tagline}}</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:32px">
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:18px;background:#fff">
+        <div style="height:80px;border-radius:4px;background:{{color_primary}};margin-bottom:12px"></div>
+        <div style="font-weight:700;font-size:13px">Primary</div>
+        <div style="font-family:Menlo,Monaco,monospace;font-size:12px;color:#666">{{color_primary}}</div>
+      </div>
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:18px;background:#fff">
+        <div style="height:80px;border-radius:4px;background:{{color_secondary}};margin-bottom:12px"></div>
+        <div style="font-weight:700;font-size:13px">Secondary</div>
+        <div style="font-family:Menlo,Monaco,monospace;font-size:12px;color:#666">{{color_secondary}}</div>
+      </div>
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:18px;background:#fff">
+        <div style="height:80px;border-radius:4px;background:{{color_accent}};margin-bottom:12px"></div>
+        <div style="font-weight:700;font-size:13px">Accent</div>
+        <div style="font-family:Menlo,Monaco,monospace;font-size:12px;color:#666">{{color_accent}}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:18px;background:#fff;text-align:center">
+        <div style="font-size:11px;letter-spacing:1px;color:#888;text-transform:uppercase;margin-bottom:12px">Headshot</div>
+        <img src="{{headshot_link}}" alt="{{display_name}}" style="max-width:200px;height:auto;border-radius:6px">
+      </div>
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:18px;background:#fff;text-align:center">
+        <div style="font-size:11px;letter-spacing:1px;color:#888;text-transform:uppercase;margin-bottom:12px">Logo</div>
+        <img src="{{logo_link}}" alt="{{display_name}} logo" style="max-width:240px;height:auto">
+      </div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px">
+      <div style="font-size:11px;letter-spacing:1px;color:#888;text-transform:uppercase;margin-bottom:12px">Voice &amp; tone reference</div>
+      <p style="font-family:Merriweather,Georgia,serif;font-size:18px;line-height:1.6;margin:0">{{tagline}}</p>
+      <p style="font-size:14px;color:#666;line-height:1.6;margin:14px 0 0">Use this brand guide as the source of truth for any campaign collateral. Edit colors / logo / headshot in the candidate's V3 JSON to update everywhere.</p>
+    </div>
+  </div>
+</section>
+HTML,
+],
+
+[
+'tag'   => 'atp_cand_ai_context',
+'label' => 'Candidate Page — AI Context (Start Here)',
+'desc'  => 'Dynamic AI-readable site overview. When an AI assistant (Vibe AI / Claude / ChatGPT) is connected to this WP install via MCP, point it at this page first. Includes plugin version, candidate identity, V3 JSON snapshot, available shortcodes + their current override state, edit decision tree. Auto-generates from live state — no manual content. Same data also exposed at GET /wp-json/atp/v1/site-context for programmatic access.',
+'default' => <<<'HTML'
+<!-- This shortcode renders dynamically via atp_cand_render_ai_context() in includes/ai-context.php. Default registry HTML is not used; this entry exists so the shortcode appears in the admin Edit Shortcodes UI and the importer can offer an "AI Start Here" page. -->
+HTML,
+],
+
 ]], // end Candidate Page
 
 
