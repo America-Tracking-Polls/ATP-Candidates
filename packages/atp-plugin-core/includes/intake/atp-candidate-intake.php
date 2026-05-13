@@ -1086,11 +1086,11 @@ function checkGate(){
 }
 
 var UPLOADS={};
-function atpHandleDrop(e,fid){
+window.atpHandleDrop=function(e,fid){
   var files=e.dataTransfer.files;
-  atpHandleFiles(files,fid);
-}
-function atpHandleFiles(files,fid){
+  window.atpHandleFiles(files,fid);
+};
+window.atpHandleFiles=function(files,fid){
   var el=document.getElementById('upload_'+fid);
   var accept=(el.dataset.accept||'').split(',').map(function(s){return s.trim().toLowerCase();});
   var maxMB=parseInt(el.dataset.maxSize||'10');
@@ -1107,7 +1107,7 @@ function atpHandleFiles(files,fid){
     UPLOADS[fid].push(f);
     atpUploadFile(f,fid);
   }
-}
+};
 function atpUploadFile(file,fid){
   var fd=new FormData();
   fd.append('action','atp_upload_file');

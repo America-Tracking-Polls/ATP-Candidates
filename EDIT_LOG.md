@@ -24,6 +24,54 @@
 
 ---
 
+## 2026-05-13 — Fix: intake file upload silently failing (IIFE scope bug) — v3.6.1
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Live-site repro: tap file zone → pick image → no thumbnail, no upload,
+no error visible. Intake submits with zero files attached. Drive
+subfolder never gets created because there are no files to mirror.
+
+### Root cause
+
+The user-facing intake form's JS is wrapped in an IIFE
+(`(function(){...})()`, lines 973–1295). `atpHandleFiles` and
+`atpHandleDrop` were declared as bare `function name(){}` inside that
+closure, so they were not reachable from the inline `onchange=` /
+`ondrop=` attributes on the file input markup (lines 924, 929), which
+run in the global scope. The browser hits a `ReferenceError`, swallows
+it silently, and the form acts dead.
+
+Sibling helpers on the same page (`AG`, `AP`, `AK`, `AF`, `AD`, `AC`,
+`AR`) are explicitly assigned to `window.*` for exactly this reason —
+the file-upload pair was missed.
+
+### Done
+- `includes/intake/atp-candidate-intake.php`: `atpHandleDrop` and
+  `atpHandleFiles` switched from bare function declarations to
+  `window.atpHandleDrop = function(...)` and
+  `window.atpHandleFiles = function(...)`. Inline event handlers can
+  now resolve them. Internal callers (`atpUploadFile`,
+  `atpUpdateFileData`) stayed in the IIFE since they're only invoked
+  from inside.
+- Plugin version 3.6.0 → 3.6.1 (patch — bugfix only).
+
+### Verify
+After updating the plugin on the live site:
+1. Open intake form, tap a file zone, pick an image
+2. Confirm a thumbnail appears immediately
+3. Confirm progress bar runs then disappears (XHR success)
+4. Submit the form
+5. Confirm a subfolder under `Intake_Submissions_Live` named
+   `YYYY-MM-DD_Candidate-Name_Office-Slug` is created with the files
+   inside
+
+If step 2 still fails: open browser DevTools → Console — should now
+show a meaningful error (e.g. nonce mismatch, AJAX 403). Previously
+the error was a silent ReferenceError.
+
+---
+
 ## 2026-05-13 — Handoff guide + AGENTS.md cross-reference
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
