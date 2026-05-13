@@ -1,4 +1,5 @@
 dist/
+atp-plugin-core-*.zip
 
 node_modules/
 package.json
