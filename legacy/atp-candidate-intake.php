@@ -1,13 +1,29 @@
 <?php
 /**
- * Plugin Name:  ATP Candidate Intake
- * Plugin URI:   https://americatrackingpolls.com
- * Description:  America Tracking Polls — candidate intake form with settings, question editor, branding, email notifications, and admin backend.
- * Version:      3.0.0
- * Author:       Mirror Factory / ROI Amplified
- * Text Domain:  atp-intake
+ * LEGACY — DO NOT INSTALL AS A WORDPRESS PLUGIN.
+ *
+ * This file used to live at the repo root with a WP Plugin header
+ * (Plugin Name: ATP Candidate Intake). That made it the entry point
+ * WordPress picked when someone uploaded the whole repo ZIP through
+ * "Add New Plugin -> Upload" — installing an intake-only plugin
+ * instead of the canonical full plugin at packages/atp-plugin-core/.
+ *
+ * The Plugin header has been removed on purpose so WordPress will
+ * no longer detect this file as a plugin. The file is kept for
+ * reference / git history only. The canonical, currently-shipping
+ * intake form lives at
+ * packages/atp-plugin-core/includes/intake/atp-candidate-intake.php
+ * and is loaded by the ATP Campaign Site plugin.
+ *
+ * If you are trying to install the plugin on a WordPress site:
+ *   1. Run ./scripts/build-plugin-zip.sh from the repo root
+ *   2. Upload the produced atp-plugin-core-<version>.zip via
+ *      wp-admin -> Plugins -> Add New -> Upload Plugin
+ *
+ * See HANDOFF.md for the full install/deployment walkthrough.
  */
 if(!defined('ABSPATH'))exit;
+return; // Legacy reference only. Do not execute. Canonical code lives in packages/atp-plugin-core/.
 
 /* ════════════════════════════════════════
    DEFAULT QUESTIONS

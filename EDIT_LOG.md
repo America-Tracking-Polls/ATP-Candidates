@@ -24,6 +24,52 @@
 
 ---
 
+## 2026-05-13 — Cleanup: move legacy root-level intake into `legacy/`, add plugin-zip build script
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+The root-level `atp-candidate-intake.php` (the pre-consolidation
+standalone intake plugin) carried a `Plugin Name:` header. That made
+it the entry point WordPress detected when someone uploaded the
+GitHub repo ZIP via wp-admin's "Add New Plugin → Upload" — installing
+an intake-only plugin instead of the canonical full plugin at
+`packages/atp-plugin-core/`. Symptom: user saw "ATP Candidate" in
+settings but no White Label, no Edit Shortcodes, no Drive OAuth.
+
+### Done
+- Moved `atp-candidate-intake.php` → `legacy/atp-candidate-intake.php`.
+  Stripped the `Plugin Name:` header (replaced with a LEGACY notice)
+  and added an early `return;` so the file is inert even if someone
+  copies it back into `wp-content/plugins/`.
+- Added `legacy/README.md` explaining what the folder is for and
+  pointing at the canonical paths + the build script.
+- Added `scripts/build-plugin-zip.sh` — the supported way to produce
+  an installable plugin ZIP. Reads the version from the bootstrap's
+  `Version:` header, copies `packages/atp-plugin-core/` into a temp
+  dir under the name `atp-plugin-core/`, strips junk
+  (`.DS_Store`, `.swp`, `.git*`), and emits
+  `atp-plugin-core-<version>.zip` at the repo root.
+- `.gitignore`: added `atp-plugin-core-*.zip` so built artifacts
+  don't end up in git.
+- `AGENTS.md`: replaced the old "atp-candidate-intake.php — top-level
+  legacy copy" bullet with `legacy/` and `scripts/build-plugin-zip.sh`
+  entries, and called out that the repo ZIP must never be uploaded
+  directly.
+- `HANDOFF.md`: bumped header to 3.6.1; inserted two new ordered
+  next-steps for "build the plugin ZIP" and "install it on a WP
+  site," and renumbered subsequent steps. Step 11 (release tag) now
+  reads `v3.6.1` and references the ZIP as the release asset.
+
+### Verify
+- `./scripts/build-plugin-zip.sh` runs clean and produces a
+  `atp-plugin-core-3.6.1.zip` whose top-level folder is
+  `atp-plugin-core/` (verified locally — 265 KB).
+- Uploading that ZIP via wp-admin → Add New → Upload installs the
+  plugin at `wp-content/plugins/atp-plugin-core/` and the full menu
+  appears (ATP Demo → Edit Shortcodes / Import Pages / White Label).
+
+---
+
 ## 2026-05-13 — Fix: intake file upload silently failing (IIFE scope bug) — v3.6.1
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_

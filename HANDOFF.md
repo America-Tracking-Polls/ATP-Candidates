@@ -1,7 +1,7 @@
 # ATP Campaign Site Platform — Handoff Guide
 
 **Last updated:** 2026-05-13
-**Plugin version on `main`:** `3.6.0`
+**Plugin version on `main`:** `3.6.1`
 **Working branch this session:** `claude/activate-drive-upload-P3yOj`
 **Audience:** the next Mirror Factory engineer or AI agent picking this up.
 
@@ -362,20 +362,32 @@ infrastructure, Claude skill, candidate-site-flow doc).
 These are the things to do, in the order they should be done, by
 whoever picks this up next.
 
-1. **From your local clone:** `git pull` and verify `main` is at commit
-   `af6a92d` ("Add AI context infrastructure, atp-site-edit skill,
-   candidate-site flow doc"). If not, ff-merge from
-   `origin/claude/activate-drive-upload-P3yOj` per §6c.
-2. **Stand up a staging WP install** (Playground works for code path
+1. **From your local clone:** `git pull` and ff-merge the latest task
+   branch into `main` per §6c.
+2. **Build a clean plugin ZIP** — this is the one supported install
+   path. From the repo root:
+   ```
+   ./scripts/build-plugin-zip.sh
+   ```
+   produces `atp-plugin-core-<version>.zip` whose root folder is
+   `atp-plugin-core/`. **Do not** upload the GitHub repo ZIP directly
+   — that historically caused an intake-only plugin to install
+   instead of the canonical full plugin (see EDIT_LOG 2026-05-13).
+3. **Install on a WP site** — wp-admin → Plugins → Add New → Upload
+   → pick the ZIP from step 2 → Activate. If an older copy of the
+   plugin is already installed, deactivate + delete it first (this
+   removes the files but not the DB settings; your Drive OAuth
+   config in `wp_options` survives).
+4. **Stand up a staging WP install** (Playground works for code path
    verification but not for Drive / live integrations; for those you
    need a real host). Walk the §5 checklist.
-3. **Open the SG ticket** (§6a) in parallel with step 2 — turnaround is
+5. **Open the SG ticket** (§6a) in parallel with step 4 — turnaround is
    usually a day.
-4. **Cloud Console pre-flight** (in parallel with steps 2–3): verify
+6. **Cloud Console pre-flight** (in parallel with steps 4–5): verify
    the `ATP Intake` OAuth app has the broad Drive scope listed on its
    consent screen and that both redirect URIs (prod + any staging)
    are registered. See §4 step 1.
-5. **Once SG paths are whitelisted:** run the Drive test plan in §4
+7. **Once SG paths are whitelisted:** run the Drive test plan in §4
    end-to-end against the live intake host, using a dummy
    `Test Candidate / FL State Senate` submission with a full asset
    payload. Confirm the destination folder is
@@ -383,15 +395,17 @@ whoever picks this up next.
    and that the subfolder gets created with the
    `YYYY-MM-DD_Candidate-Name_Office-Slug` pattern. Delete the dummy
    submission + dummy subfolder afterward.
-6. **Connect Vibe AI from Claude or ChatGPT** to a candidate-site
+8. **Connect Vibe AI from Claude or ChatGPT** to a candidate-site
    staging install. Confirm the atp-site-edit skill is detected and
    the AI can load `/wp-json/atp/v1/site-context`.
-7. **First real candidate dry-run:** pick one intake submission and
+9. **First real candidate dry-run:** pick one intake submission and
    walk it through the 7-phase flow in `docs/candidate-site-flow.md`.
    Update the flow doc anywhere it's wrong or thin.
-8. **Backfill `CHANGELOG.md`** with 3.5.0 and 3.6.0 entries (§6d).
-9. **Cut a GitHub release** at tag `v3.6.0` so the auto-updater can
-   pick it up on candidate sites that are already running 3.5.0.
+10. **Backfill `CHANGELOG.md`** with 3.5.0, 3.6.0, and 3.6.1 entries
+    (§6d).
+11. **Cut a GitHub release** at tag `v3.6.1` (attach the ZIP from
+    step 2 as the release asset) so the auto-updater can pick it up
+    on candidate sites that are already running an earlier 3.x.
 
 ---
 

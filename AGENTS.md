@@ -121,7 +121,13 @@ Files that belong to the **candidate platform** (this repo):
 - `dist/` — build output (gitignored)
 - `docs/` — engineering docs
 - `playground-blueprint.json` — Playground demo
-- `atp-candidate-intake.php` — top-level legacy copy of the intake plugin
+- `legacy/` — historical files kept for reference only; **not loaded**.
+  This is where the old root-level `atp-candidate-intake.php` was
+  moved on 2026-05-13 because its Plugin header was causing repo-ZIP
+  uploads to install an intake-only plugin instead of the canonical
+  full plugin. See `legacy/README.md`.
+- `scripts/build-plugin-zip.sh` — the one supported way to produce an
+  installable plugin ZIP. Never upload the repo ZIP directly.
 - `campaign-site/` (Sarah Chen demo), `personal-site/` (Michael
   Torres demo) — **foundational examples** of what a real candidate
   site looks like. Treat as reference templates, not throwaway
