@@ -24,6 +24,41 @@
 
 ---
 
+## 2026-05-13 — Fix: strip stray Plugin Name header from intake sub-file — v3.6.2
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Live-site repro during plugin install: SG Security plugin emitted
+`Warning: Undefined array key "Name" in
+.../sg-security/core/Activity_Log/Activity_Log_Plugins.php on line 94`.
+
+### Root cause
+
+`packages/atp-plugin-core/includes/intake/atp-candidate-intake.php`
+still carried a full `Plugin Name: ATP Candidate Intake` header in
+its docblock — a holdover from when the intake form was its own
+standalone plugin pre-consolidation. The file is included internally
+via `require_once` by `atp-demo-plugin.php`; it is NOT a plugin
+entry point. But SG Security's Activity_Log_Plugins scanner walks
+nested files during plugin install/activate events, picked up that
+header, and tried to read fields off an incompletely-parsed plugin
+data array.
+
+### Done
+- Removed the `Plugin Name:` / `Plugin URI:` / `Version:` / `Author:`
+  / `Text Domain:` header docblock from
+  `includes/intake/atp-candidate-intake.php`. Replaced with a plain
+  docstring noting that this is an internal module, NOT a plugin
+  entry point, and that adding a plugin header here breaks scanners.
+- Plugin version 3.6.1 → 3.6.2.
+
+### Verify
+After updating to 3.6.2, re-install on the live site. The SG Security
+"Undefined array key 'Name'" warning should no longer appear during
+plugin install/activate.
+
+---
+
 ## 2026-05-13 — Cleanup: move legacy root-level intake into `legacy/`, add plugin-zip build script
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_

@@ -2,16 +2,16 @@
 /**
  * LEGACY — DO NOT INSTALL AS A WORDPRESS PLUGIN.
  *
- * This file used to live at the repo root with a WP Plugin header
- * (Plugin Name: ATP Candidate Intake). That made it the entry point
- * WordPress picked when someone uploaded the whole repo ZIP through
- * "Add New Plugin -> Upload" — installing an intake-only plugin
- * instead of the canonical full plugin at packages/atp-plugin-core/.
+ * This file used to live at the repo root with a WordPress plugin
+ * header. That made it the entry point WordPress picked when
+ * someone uploaded the whole repo ZIP through "Add New Plugin ->
+ * Upload" — installing an intake-only plugin instead of the
+ * canonical full plugin at packages/atp-plugin-core/.
  *
- * The Plugin header has been removed on purpose so WordPress will
- * no longer detect this file as a plugin. The file is kept for
- * reference / git history only. The canonical, currently-shipping
- * intake form lives at
+ * The header has been removed on purpose so WordPress (and any
+ * third-party plugin scanners) will no longer detect this file as
+ * a plugin. The file is kept for reference / git history only.
+ * The canonical, currently-shipping intake form lives at
  * packages/atp-plugin-core/includes/intake/atp-candidate-intake.php
  * and is loaded by the ATP Campaign Site plugin.
  *

@@ -1,11 +1,13 @@
 <?php
 /**
- * Plugin Name:  ATP Candidate Intake
- * Plugin URI:   https://americatrackingpolls.com
- * Description:  America Tracking Polls — candidate intake form with settings, question editor, branding, email notifications, and admin backend.
- * Version:      3.0.0
- * Author:       Mirror Factory / ROI Amplified
- * Text Domain:  atp-intake
+ * Candidate intake form — loaded by the ATP Campaign Site plugin.
+ *
+ * Internal module. Do NOT add a WordPress plugin header here; this
+ * file is included by ../../atp-demo-plugin.php via require_once and
+ * is not itself a plugin entry point. A stray plugin header on this
+ * file caused third-party scanners (SiteGround Security's activity
+ * log) to misdetect it as a plugin and emit "Undefined array key
+ * 'Name'" warnings during install.
  */
 if(!defined('ABSPATH'))exit;
 
