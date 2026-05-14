@@ -260,22 +260,40 @@ function atp_wl_render_settings() {
     }
 
     // ── Drive: OAuth callback (Google redirects here with ?code=&state=)
+    // Process the callback exactly once, stash the result in a transient,
+    // then redirect to a clean URL. Without the redirect, the callback
+    // query args (?atp_drive_oauth=callback&state=...&code=...) stay in
+    // the URL after subsequent form posts, causing the same error/success
+    // notice to render again on every page reload. See EDIT_LOG 2026-05-13.
     if ( ( $_GET['atp_drive_oauth'] ?? '' ) === 'callback' ) {
+        $uid    = get_current_user_id();
+        $notice = null;
         if ( ! empty( $_GET['error'] ) ) {
-            echo '<div class="notice notice-error is-dismissible"><p>Drive authorization failed: '
-                . esc_html( sanitize_text_field( $_GET['error'] ) ) . '</p></div>';
+            $notice = [ 'type' => 'error', 'msg' => 'Drive authorization failed: ' . sanitize_text_field( $_GET['error'] ) ];
         } elseif ( ! empty( $_GET['code'] ) ) {
             $r = atp_drive_handle_oauth_callback(
                 sanitize_text_field( $_GET['code'] ),
                 sanitize_text_field( $_GET['state'] ?? '' )
             );
             if ( is_wp_error( $r ) ) {
-                echo '<div class="notice notice-error is-dismissible"><p><strong>Connect failed:</strong> '
-                    . esc_html( $r->get_error_message() ) . '</p></div>';
+                $notice = [ 'type' => 'error', 'msg' => 'Connect failed: ' . $r->get_error_message() ];
             } else {
-                echo '<div class="notice notice-success is-dismissible"><p><strong>Google Drive connected.</strong> Now pick a destination folder below.</p></div>';
+                $notice = [ 'type' => 'success', 'msg' => 'Google Drive connected. Now pick a destination folder below.' ];
             }
         }
+        if ( $notice ) {
+            set_transient( 'atp_drive_notice_' . $uid, $notice, 30 );
+        }
+        wp_safe_redirect( admin_url( 'admin.php?page=atp-whitelabel' ) );
+        exit;
+    }
+
+    // Render any pending OAuth callback notice (one-shot — deleted after read).
+    $pending_notice = get_transient( 'atp_drive_notice_' . get_current_user_id() );
+    if ( $pending_notice ) {
+        delete_transient( 'atp_drive_notice_' . get_current_user_id() );
+        $cls = $pending_notice['type'] === 'success' ? 'notice-success' : 'notice-error';
+        echo '<div class="notice ' . esc_attr( $cls ) . ' is-dismissible"><p>' . esc_html( $pending_notice['msg'] ) . '</p></div>';
     }
 
     // ── Drive: Pick folder (POST from JS browser) ──────────────────────

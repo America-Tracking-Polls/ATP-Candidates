@@ -923,12 +923,13 @@ body.admin-bar .apg{top:89px}
       <div class="afc">
         <?php if($lbl):?><label class="afl"><?=$lbl?><?php if($opt):?><span class="ao">optional</span><?php endif;?></label><?php endif;?>
         <div class="atp-upload" id="upload_<?=$fid?>" data-field="<?=$fid?>" data-accept="<?=$accept?>" data-max-size="<?=$maxMB?>" data-max-files="<?=$maxFiles?>">
-          <div class="atp-upload-zone" onclick="document.getElementById('file_<?=$fid?>').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');atpHandleDrop(event,'<?=$fid?>')">
+          <div class="atp-upload-zone" data-atp-zone="<?=$fid?>">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:8px">Drop file<?=$maxFiles>1?'s':''?> here or <span style="color:var(--rd);cursor:pointer">browse</span></div>
             <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px"><?=$ph?></div>
           </div>
-          <input type="file" id="file_<?=$fid?>" accept="<?=$accept?>" <?=$maxFiles>1?'multiple':''?> style="display:none" onchange="atpHandleFiles(this.files,'<?=$fid?>')">
+          <input type="file" id="file_<?=$fid?>" accept="<?=$accept?>" <?=$maxFiles>1?'multiple':''?> style="display:none" data-atp-file="<?=$fid?>">
+          <div class="atp-upload-status" id="status_<?=$fid?>" style="display:none;font-size:12px;color:rgba(255,255,255,.6);margin-top:6px"></div>
           <div class="atp-upload-previews" id="previews_<?=$fid?>"></div>
           <div class="atp-upload-error" id="error_<?=$fid?>" style="display:none;color:#E60000;font-size:12px;margin-top:6px"></div>
         </div>
@@ -1088,28 +1089,44 @@ function checkGate(){
 }
 
 var UPLOADS={};
-window.atpHandleDrop=function(e,fid){
+function atpLog(){try{console.log.apply(console,['[atp-upload]'].concat([].slice.call(arguments)));}catch(_){}}
+function atpSetStatus(fid,msg,kind){
+  var s=document.getElementById('status_'+fid);
+  if(!s)return;
+  s.textContent=msg||'';
+  s.style.color=kind==='err'?'#E60000':(kind==='ok'?'#28a745':'rgba(255,255,255,.6)');
+  s.style.display=msg?'block':'none';
+}
+function atpHandleDrop(e,fid){
   var files=e.dataTransfer.files;
-  window.atpHandleFiles(files,fid);
-};
-window.atpHandleFiles=function(files,fid){
+  atpLog('drop',fid,'files=',files&&files.length);
+  atpHandleFiles(files,fid);
+}
+function atpHandleFiles(files,fid){
+  atpLog('handleFiles',fid,'count=',files?files.length:0);
   var el=document.getElementById('upload_'+fid);
-  var accept=(el.dataset.accept||'').split(',').map(function(s){return s.trim().toLowerCase();});
+  if(!el){atpLog('ABORT no upload_ el',fid);return;}
+  var rawAccept=(el.dataset.accept||'').trim();
+  var accept=rawAccept?rawAccept.split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean):[];
   var maxMB=parseInt(el.dataset.maxSize||'10');
   var maxFiles=parseInt(el.dataset.maxFiles||'1');
   var errEl=document.getElementById('error_'+fid);
-  errEl.style.display='none';
+  if(errEl){errEl.style.display='none';}
   if(!UPLOADS[fid])UPLOADS[fid]=[];
   for(var i=0;i<files.length;i++){
-    if(UPLOADS[fid].length>=maxFiles){errEl.textContent='Maximum '+maxFiles+' file'+(maxFiles>1?'s':'')+' allowed.';errEl.style.display='block';break;}
+    if(UPLOADS[fid].length>=maxFiles){var m='Maximum '+maxFiles+' file'+(maxFiles>1?'s':'')+' allowed.';if(errEl){errEl.textContent=m;errEl.style.display='block';}atpSetStatus(fid,m,'err');break;}
     var f=files[i];
-    var ext='.'+f.name.split('.').pop().toLowerCase();
-    if(accept.length&&!accept.includes(ext)){errEl.textContent=f.name+': file type not accepted. Use '+accept.join(', ');errEl.style.display='block';continue;}
-    if(f.size>maxMB*1024*1024){errEl.textContent=f.name+': exceeds '+maxMB+' MB limit.';errEl.style.display='block';continue;}
+    var ext='.'+(f.name.split('.').pop()||'').toLowerCase();
+    if(accept.length&&accept.indexOf(ext)===-1){var m2=f.name+': file type not accepted. Use '+accept.join(', ');if(errEl){errEl.textContent=m2;errEl.style.display='block';}atpSetStatus(fid,m2,'err');continue;}
+    if(f.size>maxMB*1024*1024){var m3=f.name+': exceeds '+maxMB+' MB limit.';if(errEl){errEl.textContent=m3;errEl.style.display='block';}atpSetStatus(fid,m3,'err');continue;}
     UPLOADS[fid].push(f);
+    atpSetStatus(fid,'Selected '+f.name+' — uploading…');
+    atpLog('accepted',f.name,f.size,'-> upload');
     atpUploadFile(f,fid);
   }
-};
+}
+window.atpHandleDrop=atpHandleDrop;
+window.atpHandleFiles=atpHandleFiles;
 function atpUploadFile(file,fid){
   var fd=new FormData();
   fd.append('action','atp_upload_file');
@@ -1140,20 +1157,42 @@ function atpUploadFile(file,fid){
   xhr.upload.onprogress=function(e){if(e.lengthComputable)bar.style.width=(e.loaded/e.total*100)+'%';};
   xhr.onload=function(){
     progress.remove();
+    atpLog('xhr.onload',fid,'status=',xhr.status,'len=',(xhr.responseText||'').length);
     try{
       var r=JSON.parse(xhr.responseText);
       if(r.success){
         file._url=r.data.url;file._id=r.data.id;
         atpUpdateFileData(fid);
+        atpSetStatus(fid,'Uploaded '+file.name,'ok');
+        atpLog('success',fid,r.data&&r.data.url);
       } else {
         thumb.style.borderColor='#E60000';
         var errEl=document.getElementById('error_'+fid);
-        errEl.textContent='Upload failed: '+(r.data||'unknown error');errEl.style.display='block';
+        var emsg='Upload failed: '+(r.data||'unknown error');
+        if(errEl){errEl.textContent=emsg;errEl.style.display='block';}
+        atpSetStatus(fid,emsg,'err');
+        atpLog('server-error',fid,r.data);
       }
-    }catch(e){thumb.style.borderColor='#E60000';}
+    }catch(e){
+      thumb.style.borderColor='#E60000';
+      var errEl=document.getElementById('error_'+fid);
+      var emsg='Upload failed (HTTP '+xhr.status+'). The server response was not JSON — usually a WAF or PHP error. Check Network tab.';
+      if(errEl){errEl.textContent=emsg;errEl.style.display='block';}
+      atpSetStatus(fid,emsg,'err');
+      atpLog('parse-error',fid,'status=',xhr.status,'body=',(xhr.responseText||'').slice(0,200));
+    }
   };
-  xhr.onerror=function(){progress.remove();thumb.style.borderColor='#E60000';};
+  xhr.onerror=function(){
+    progress.remove();
+    thumb.style.borderColor='#E60000';
+    var errEl=document.getElementById('error_'+fid);
+    var emsg='Upload failed: network error reaching '+AJ+'. WAF, firewall, or offline?';
+    if(errEl){errEl.textContent=emsg;errEl.style.display='block';}
+    atpSetStatus(fid,emsg,'err');
+    atpLog('xhr.onerror',fid);
+  };
   xhr.open('POST',AJ);xhr.send(fd);
+  atpLog('xhr.send',fid,file.name,file.size);
 }
 function atpUpdateFileData(fid){
   var files=(UPLOADS[fid]||[]).filter(function(f){return f._url;});
@@ -1294,6 +1333,29 @@ document.addEventListener('keydown',e=>{
     t+=.016;requestAnimationFrame(frame);
   }
   frame();
+})();
+
+// Bind file-upload event listeners via addEventListener instead of inline
+// attributes. Inline onchange/ondrop attributes execute in the global scope,
+// so they break under (a) IIFE-scoped function declarations, (b) JS minifiers
+// that rename identifiers, and (c) CSPs that block inline event handlers.
+// addEventListener avoids all three.
+(function atpInitUploads(){
+  function bind(){
+    var zones=document.querySelectorAll('[data-atp-zone]');
+    atpLog('init: found',zones.length,'upload zone(s)');
+    zones.forEach(function(z){
+      var fid=z.getAttribute('data-atp-zone');
+      var input=document.querySelector('[data-atp-file="'+fid+'"]');
+      if(!input){atpLog('init: no input for',fid);return;}
+      z.addEventListener('click',function(){input.click();});
+      z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('drag');});
+      z.addEventListener('dragleave',function(){z.classList.remove('drag');});
+      z.addEventListener('drop',function(e){e.preventDefault();z.classList.remove('drag');atpHandleDrop(e,fid);});
+      input.addEventListener('change',function(){atpLog('change',fid,'files=',input.files&&input.files.length);atpHandleFiles(input.files,fid);});
+    });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bind);}else{bind();}
 })();
 })();
 </script>

@@ -24,6 +24,88 @@
 
 ---
 
+## 2026-05-13 — Intake uploads: addEventListener wiring + visible diagnostics + OAuth notice fix — v3.6.3
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Real-world test (Art Vandelay / NY City Council 8, submission 4406):
+form submits and emails fine, JSON saves, admin dashboard shows the
+candidate, bundle downloads — but the **Step 7 file uploads have no
+visual confirmation, nothing lands in WP Media, no Drive subfolder
+fires**. REFERENCE.md correctly flagged the symptom but the cause was
+not the legacy install — it was that the inline `onchange=` / `ondrop=`
+attributes on the file inputs were still vulnerable to scope/cache/
+minifier issues even with `window.atpHandleFiles` defined in 3.6.1.
+
+### Done — file upload robustness
+- **Removed all inline event attributes** on the upload markup
+  (`onclick`, `ondragover`, `ondragleave`, `ondrop`, `onchange`).
+  Replaced with `data-atp-zone="<fid>"` on the drop zone and
+  `data-atp-file="<fid>"` on the hidden `<input type="file">`.
+- **Added `atpInitUploads()` IIFE** at the bottom of the form's JS.
+  Runs on `DOMContentLoaded` (or immediately if already loaded),
+  walks every `[data-atp-zone]`, and binds `click` / `dragover` /
+  `dragleave` / `drop` / `change` via `addEventListener`. No global
+  scope dependency, no inline-handler scope risk, immune to JS
+  minifier identifier renaming, compatible with strict CSPs.
+- Kept `window.atpHandleDrop` / `window.atpHandleFiles` aliases for
+  backward compatibility (any cached HTML still calling them will
+  still work until cache clears).
+- **`accept` filter robustness fix**: previously when `data-accept`
+  was empty, `''.split(',')` returned `['']` — a one-element array
+  treated as truthy by the length check, which then rejected EVERY
+  file because `[''].includes('.jpg')` is false. Now `.trim()` and
+  `.filter(Boolean)` first, then `.indexOf()` for the check.
+- **Visible diagnostic line** (`<div id="status_<fid>">`) above each
+  upload area shows the live state: "Selected foo.jpg — uploading…"
+  → "Uploaded foo.jpg" (green) or a precise error message (red).
+- **Browser console logging** (`atpLog()` prefixed `[atp-upload]`) at
+  every step: init, change/drop fired, file accepted/rejected, XHR
+  send, XHR onload status, success/error path. So even without a
+  visible status, devtools shows exactly where the chain breaks.
+- **Better error surfacing in `xhr.onload`**: if the server returns
+  non-JSON (e.g., a SiteGround WAF 403 page), the previous code
+  silently set the thumbnail border red. Now it shows
+  `Upload failed (HTTP <status>). The server response was not JSON —
+  usually a WAF or PHP error.`
+- **Better `xhr.onerror` message**: now names the endpoint and
+  suggests WAF/firewall/offline as the cause.
+
+### Done — White Label admin notice fix
+The "OAuth state token mismatch" red banner stayed visible on the
+White Label Settings page even after subsequent successful operations
+because the Google callback query args (`?atp_drive_oauth=callback&
+state=...&code=...`) stayed in the URL after every form post,
+re-rendering the same error notice.
+
+- After processing the OAuth callback, the success/error message is
+  now stashed in a 30-second user-scoped transient
+  (`atp_drive_notice_<uid>`) and the page redirects to a clean
+  `admin.php?page=atp-whitelabel` URL.
+- On the clean page, the notice is read from the transient ONCE
+  (`delete_transient` immediately after `get`) and rendered. No more
+  sticky banners.
+
+### Plugin version
+3.6.2 → 3.6.3.
+
+### Verify on americatrackingpolls.com
+1. Re-install the 3.6.3 ZIP (`./scripts/build-plugin-zip.sh`).
+2. Open the intake form, get to Step 7 (Visual Branding), tap a file
+   zone, pick an image. Expected sequence:
+   - Status line below the zone: `Selected <name> — uploading…` (gray)
+   - Thumbnail appears with a progress bar
+   - On success: status flips to `Uploaded <name>` (green)
+   - On failure: status shows a specific error (red)
+3. Browser console (F12 → Console) should show
+   `[atp-upload]` lines for every step.
+4. Submit the form; check WP Media Library for the file; check Drive
+   `Intake_Submissions_Live` for the subfolder.
+5. On the White Label page, after a successful folder pick or test,
+   the OAuth mismatch banner should no longer appear.
+
+---
+
 ## 2026-05-13 — Fix: strip stray Plugin Name header from intake sub-file — v3.6.2
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
