@@ -1,0 +1,43 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/candidate-intake-form/",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "latest"
+  },
+  "phpExtensionBundles": ["kitchen-sink"],
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "vibe-ai"
+      },
+      "options": { "activate": true }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "git:directory",
+        "url": "https://github.com/America-Tracking-Polls/ATP-Candidates",
+        "ref": "refs/heads/claude/activate-drive-upload-P3yOj",
+        "path": "packages/atp-plugin-core"
+      },
+      "options": { "activate": true }
+    },
+    {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/themes/twentytwentyfive/page-canvas.php",
+      "data": "<?php\n/* Template Name: Canvas */\nwhile ( have_posts() ) : the_post();\n\tthe_content();\nendwhile;\n"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; $pid = wp_insert_post(array('post_title' => 'Candidate Intake Form', 'post_name' => 'candidate-intake-form', 'post_content' => '[atp_intake]', 'post_status' => 'publish', 'post_type' => 'page', 'post_author' => 1, 'page_template' => 'page-canvas.php')); if (!is_wp_error($pid)) { update_post_meta($pid, '_wp_page_template', 'page-canvas.php'); update_post_meta($pid, '_atp_hide_title', '1'); } update_option('permalink_structure', '/%postname%/'); flush_rewrite_rules(); ?>"
+    }
+  ]
+}
