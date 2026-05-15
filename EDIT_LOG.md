@@ -24,6 +24,87 @@
 
 ---
 
+## 2026-05-13 — Stop John Stacy / Rockwall content bleeding into real candidate sites — v3.6.4 + SYSTEM-RUNDOWN.md
+
+**Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_
+
+Real-world test (George Costanza / NYC Parks / "Serenity Now"): hero, about,
+donate, community input, and footer-legal all rendered George correctly,
+but stats block, "What I've Delivered," issues page, endorsements, video,
+get-involved, social links, and footer connect area all bled the example
+John Stacy / Rockwall County content baked into the registry heredocs.
+
+### Root cause
+
+Two failure modes:
+
+1. **Prompt under-coverage.** `PROMPT-TEMPLATE.md` only asked the LLM
+   to generate Page JSON for 8 shortcodes (`nav`, `hero`, `about`,
+   `issues`, `endorsements`, `donate`, `social`, `footer`). The home
+   page actually lays out 14, so `stats`, `messages`, `video`,
+   `volunteer`, `survey`, and the page-specific shortcodes fell back
+   to registry defaults — which contain literal John Stacy / Rockwall
+   example content meant only as a reference, never to ship.
+
+2. **PHP-renderer fallbacks** in `candidate-page.php` for
+   `atp_cand_issues`, `atp_cand_endorsements`, and `atp_cand_social`
+   returned `atp_demo_get_default(<tag>)` when V3 JSON had no data
+   for that section. The defaults are still John Stacy heredocs, so
+   any candidate without endorsements / social URLs / issue cards
+   ended up with John Stacy's.
+
+### Done — `candidate-page.php`
+- `atp_cand_render_issues()`: empty V3 → return empty string (was: John Stacy default)
+- `atp_cand_render_endorsements()` (both empty branches): empty V3 → return empty string
+- `atp_cand_render_social()`: empty V3 → return empty string
+Sections disappear cleanly instead of leaking the example candidate.
+
+### Done — `PROMPT-TEMPLATE.md`
+- Rewrote Rules section 1 to require all 14 home-page shortcodes,
+  each spelled out with what it should contain
+- Added explicit rule: "Never use names, places, jurisdictions, or
+  specific facts from any candidate other than the one in the V3
+  JSON I'm giving you"
+- Added rule that empty V3 sections must output `""` (not skipped),
+  so the Candidate Page admin records the empty override and the
+  PHP renderer skip path fires
+- Added rule that the nav MUST use the candidate's `display_name`,
+  not a generic placeholder
+- Added rule that CTA buttons point to real V3 URLs, not `#`
+- Added rule against inventing issues or endorsements not in V3
+
+### Done — new doc `docs/SYSTEM-RUNDOWN.md`
+End-to-end engineer / LLM reference covering the entire pipeline
+in one document. 17 sections: big-picture flow, four data layers,
+V3 JSON contract, the intake form, Drive mirror, AI generation,
+admin pages, 9 standard pages + Tier 2 status, override system,
+Vibe AI integration, testing, common operations, debugging, repo
+map, versioning, glossary. Closing note tells an LLM which files
+to load next for full context (this doc + v3-schema.json + PROMPT-TEMPLATE.md).
+
+### Plugin version
+3.6.3 → 3.6.4.
+
+### Verify on a fresh site
+1. Re-run the George Costanza intake → generate Page JSON with the
+   updated PROMPT.md → paste into a fresh candidate site
+2. Confirm: no occurrences of "John Stacy", "Rockwall", "Trip 21",
+   "Sheriff Terry Garrett", "Fate Resident", or "$50M" on any page
+3. Empty sections (no endorsements / no social URLs) render as
+   blank space instead of John Stacy's
+
+### Still on the to-do list
+- Heredoc defaults in `registry.php` still contain John Stacy
+  example content. They're now only reachable via `source="core"`
+  preview attr or via the `_disabled` toggle — not from normal
+  rendering of a candidate site without overrides. Future cleanup
+  could tokenize the defaults with `{{display_name}}` style tokens
+  so that even un-overridden, the defaults at least name THE
+  candidate instead of a different one. Not blocking real-world
+  use because the prompt now covers all 14 shortcodes.
+
+---
+
 ## 2026-05-13 — Intake uploads: addEventListener wiring + visible diagnostics + OAuth notice fix — v3.6.3
 
 **Branch:** `claude/activate-drive-upload-P3yOj` &nbsp; **Commits:** _pending push_

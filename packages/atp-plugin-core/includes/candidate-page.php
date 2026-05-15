@@ -157,10 +157,12 @@ function atp_cand_render_issues( $atts = [] ) {
         }
     }
 
-    // If still nothing, return the default template HTML with token replacement
+    // If still nothing, render nothing (avoid bleeding the example
+    // candidate's hardcoded heredoc defaults into a real campaign site).
+    // Override the [atp_cand_issues] shortcode in wp-admin → ATP Demo →
+    // Edit Shortcodes if you want a placeholder section here.
     if ( empty( $cards ) ) {
-        $html = atp_demo_get_default( 'atp_cand_issues' );
-        return atp_cand_replace_tokens( $html );
+        return '';
     }
 
     $differentiator = esc_html( $data['differentiator'] ?? '' );
@@ -201,10 +203,11 @@ function atp_cand_render_issues( $atts = [] ) {
 function atp_cand_render_endorsements( $atts = [] ) {
     $data = atp_cand_get_data();
 
+    // No V3 endorsements? Render nothing instead of the example
+    // candidate's heredoc default. Override the shortcode in
+    // wp-admin → ATP Demo → Edit Shortcodes to add custom HTML.
     if ( empty( $data['endorsements'] ) ) {
-        // No data — return default template
-        $html = atp_demo_get_default( 'atp_cand_endorsements' );
-        return atp_cand_replace_tokens( $html );
+        return '';
     }
 
     $lines = preg_split( '/\n+/', trim( $data['endorsements'] ) );
@@ -238,8 +241,8 @@ function atp_cand_render_endorsements( $atts = [] ) {
     }
 
     if ( empty( $items ) ) {
-        $html = atp_demo_get_default( 'atp_cand_endorsements' );
-        return atp_cand_replace_tokens( $html );
+        // Same empty-V3 guard as the primary endorsements path above.
+        return '';
     }
 
     $out  = '<section class="cand-section cand-section-light" id="endorsements">' . "\n";
@@ -292,9 +295,9 @@ function atp_cand_render_social( $atts = [] ) {
     }
 
     if ( empty( $links ) ) {
-        // No social data — return default template with token replacement
-        $html = atp_demo_get_default( 'atp_cand_social' );
-        return atp_cand_replace_tokens( $html );
+        // No V3 social data — render nothing instead of the example
+        // candidate's hardcoded Facebook/X/Instagram defaults.
+        return '';
     }
 
     $out  = '<section class="cand-section cand-section-cream" id="connect">' . "\n";
