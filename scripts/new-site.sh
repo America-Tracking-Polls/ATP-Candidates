@@ -48,7 +48,8 @@ config = {
         {'title': 'Candidate Intake Form', 'slug': 'intake', 'shortcodes': ['atp_intake']}
     ],
     'intake_json': 'intake-v3.json',
-    'github_repo': 'mirror-factory/ATP-Demo',
+    'github_repo': 'America-Tracking-Polls/ATP-Candidates',
+    'release_asset': 'atp-campaign-site-$SLUG.zip',
     'deploy_branch': 'main'
 }
 print(json.dumps(config, indent=2))

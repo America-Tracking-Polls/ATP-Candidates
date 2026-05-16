@@ -11,59 +11,69 @@ on:
         required: true
         default: 'all'
 
+permissions:
+  contents: write
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Auto-populated from sites/ directory
-        client: ${{ fromJSON(needs.list-clients.outputs.clients) }}
-    needs: list-clients
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build plugin for ${{ matrix.client }}
-        run: ./scripts/build-site.sh ${{ matrix.client }}
-
-      - name: Create ZIP
-        run: |
-          cd dist/${{ matrix.client }}
-          zip -r ../../atp-campaign-site-${{ matrix.client }}.zip atp-campaign-site/
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: atp-${{ matrix.client }}
-          path: atp-campaign-site-${{ matrix.client }}.zip
-
   list-clients:
     runs-on: ubuntu-latest
     outputs:
       clients: ${{ steps.list.outputs.clients }}
     steps:
       - uses: actions/checkout@v4
+
       - id: list
+        shell: bash
         run: |
-          if [ "${{ github.event.inputs.client }}" = "all" ] || [ -z "${{ github.event.inputs.client }}" ]; then
-            CLIENTS=$(ls -d sites/*/ | xargs -I{} basename {} | jq -R . | jq -s .)
-          else
-            CLIENTS='["${{ github.event.inputs.client }}"]'
+          set -euo pipefail
+
+          REQUESTED="${{ github.event.inputs.client }}"
+          if [ -z "$REQUESTED" ]; then
+            REQUESTED="all"
           fi
+
+          if [ "$REQUESTED" = "all" ]; then
+            CLIENTS=$(find sites -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | jq -R . | jq -s -c .)
+          else
+            if [ ! -d "sites/$REQUESTED" ]; then
+              echo "Unknown client: $REQUESTED" >&2
+              exit 1
+            fi
+            CLIENTS=$(printf '%s\n' "$REQUESTED" | jq -R . | jq -s -c .)
+          fi
+
           echo "clients=$CLIENTS" >> "$GITHUB_OUTPUT"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: list-clients
+    strategy:
+      fail-fast: false
+      matrix:
+        client: ${{ fromJSON(needs.list-clients.outputs.clients) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build plugin for ${{ matrix.client }}
+        run: ./scripts/build-site.sh "${{ matrix.client }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atp-campaign-site-${{ matrix.client }}
+          path: dist/atp-campaign-site-${{ matrix.client }}.zip
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     needs: build
-    permissions:
-      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*.zip
           generate_release_notes: true

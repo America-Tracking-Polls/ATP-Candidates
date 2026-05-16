@@ -59,6 +59,7 @@
 
   "intake_json": "intake-v3.json",
 
-  "github_repo": "mirror-factory/ATP-Demo",
+  "github_repo": "America-Tracking-Polls/ATP-Candidates",
+  "release_asset": "atp-campaign-site-john-stacy.zip",
   "deploy_branch": "main"
 }

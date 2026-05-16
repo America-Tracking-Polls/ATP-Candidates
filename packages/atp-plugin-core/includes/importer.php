@@ -41,7 +41,7 @@ function atp_importer_page_sets() {
         ],
         'candidate-page' => [
             'title'       => 'Candidate Landing Page',
-            'desc'        => 'Full campaign website with 12 sections. Uses John Stacy example content as showcase.',
+            'desc'        => 'Full campaign landing page with the standard candidate sections.',
             'color'       => '#0B1C33',
             'shortcodes'  => [
                 '[atp_cand_styles]',
@@ -72,8 +72,8 @@ function atp_importer_page_sets() {
                 '[atp_cand_issues_page]',
                 '[atp_cand_footer]',
             ],
-            'focus_kw'    => 'john stacy issues rockwall county',
-            'meta_desc'   => 'Where Commissioner John Stacy stands on growth, roads, taxes, and responsible development in Rockwall County.',
+            'focus_kw'    => 'candidate issues and answers',
+            'meta_desc'   => 'Where the campaign stands on the issues that matter to voters.',
         ],
         'candidate-privacy' => [
             'title'       => 'Privacy Policy',
@@ -86,7 +86,7 @@ function atp_importer_page_sets() {
                 '[atp_cand_footer]',
             ],
             'focus_kw'    => 'privacy policy campaign',
-            'meta_desc'   => 'Privacy policy for John Stacy for Rockwall County Commissioner Precinct 4.',
+            'meta_desc'   => 'Privacy policy for this campaign website.',
         ],
         'candidate-donate' => [
             'title'       => 'Donate',
@@ -98,8 +98,8 @@ function atp_importer_page_sets() {
                 '[atp_cand_donate_page]',
                 '[atp_cand_footer]',
             ],
-            'focus_kw'    => 'donate john stacy commissioner',
-            'meta_desc'   => 'Support John Stacy for Rockwall County Commissioner Precinct 4. Donate online securely.',
+            'focus_kw'    => 'donate campaign',
+            'meta_desc'   => 'Support the campaign and donate online securely.',
         ],
         'candidate-about' => [
             'title'       => 'About',
@@ -111,8 +111,8 @@ function atp_importer_page_sets() {
                 '[atp_cand_about]',
                 '[atp_cand_footer]',
             ],
-            'focus_kw'    => 'about john stacy commissioner rockwall',
-            'meta_desc'   => 'About Commissioner John Stacy — biography, credentials, education, community service, and awards.',
+            'focus_kw'    => 'about the candidate',
+            'meta_desc'   => 'Learn more about the candidate, biography, credentials, community service, and priorities.',
         ],
         'candidate-contact' => [
             'title'       => 'Contact',
@@ -124,8 +124,8 @@ function atp_importer_page_sets() {
                 '[atp_cand_contact]',
                 '[atp_cand_footer]',
             ],
-            'focus_kw'    => 'contact commissioner john stacy rockwall',
-            'meta_desc'   => 'Contact Commissioner John Stacy — phone, email, office address, or book a meeting via Calendly.',
+            'focus_kw'    => 'contact campaign',
+            'meta_desc'   => 'Contact the campaign by phone, email, office address, or scheduling link.',
         ],
         'candidate-cookies' => [
             'title'       => 'Cookie & TCPA Policy',
@@ -138,7 +138,7 @@ function atp_importer_page_sets() {
                 '[atp_cand_footer]',
             ],
             'focus_kw'    => 'cookie policy TCPA DLC10',
-            'meta_desc'   => 'Cookie, tracking, and TCPA/DLC10 policy for Commissioner John Stacy website.',
+            'meta_desc'   => 'Cookie, tracking, SMS, TCPA, and 10DLC policy for this campaign website.',
         ],
         'candidate-signup' => [
             'title'       => 'Sign Up',
@@ -424,7 +424,12 @@ function atp_importer_handle_import() {
     $set = $page_sets[ $slug ];
 
     // ── Duplicate check ───────────────────────────────────────────────────────
-    if ( atp_importer_page_exists( $set['title'] ) ) {
+    $existing_id = atp_importer_page_exists( $set['title'] );
+    $reuse_stock_privacy_page = $existing_id
+        && $slug === 'candidate-privacy'
+        && ! atp_importer_page_has_atp_content( $existing_id );
+
+    if ( $existing_id && ! $reuse_stock_privacy_page ) {
         return '<div class="notice notice-warning"><p>A page titled <strong>'
             . esc_html( $set['title'] )
             . '</strong> already exists. Import skipped.</p></div>';
@@ -438,18 +443,26 @@ function atp_importer_handle_import() {
     $use_elementor = defined( 'ELEMENTOR_VERSION' );
     $template      = $use_elementor ? 'elementor_canvas' : atp_importer_detect_canvas_template();
 
-    // ── Insert page ───────────────────────────────────────────────────────────
+    // ── Insert or update page ─────────────────────────────────────────────────
     $status = isset( $set['status'] ) && in_array( $set['status'], [ 'publish', 'draft', 'private' ], true )
         ? $set['status']
         : 'publish';
-    $page_id = wp_insert_post( [
+
+    $page_args = [
         'post_title'    => $set['title'],
         'post_content'  => $content,
         'post_status'   => $status,
         'post_type'     => 'page',
         'post_author'   => get_current_user_id(),
         'page_template' => $template,
-    ], true );
+    ];
+
+    if ( $reuse_stock_privacy_page ) {
+        $page_args['ID'] = $existing_id;
+        $page_id = wp_update_post( $page_args, true );
+    } else {
+        $page_id = wp_insert_post( $page_args, true );
+    }
 
     if ( is_wp_error( $page_id ) ) {
         return '<div class="notice notice-error"><p>Failed to create page: '
@@ -463,6 +476,7 @@ function atp_importer_handle_import() {
 
     // ── Hide the page title (no "ATP Homepage" heading) ──────────────────────
     update_post_meta( $page_id, '_atp_hide_title', '1' );
+    update_post_meta( $page_id, '_atp_importer_page_set', $slug );
 
     // ── SEO metadata (Yoast / generic) ────────────────────────────────────────
     atp_importer_set_seo_meta( $page_id, $set['focus_kw'], $set['meta_desc'] );
@@ -480,7 +494,9 @@ function atp_importer_handle_import() {
     $tpl_note  = $use_elementor ? ' (Elementor Canvas)' : ( $template ? " ($template)" : '' );
 
     return '<div class="notice notice-success is-dismissible"><p>'
-        . '<strong>' . esc_html( $set['title'] ) . '</strong> imported and published' . $tpl_note . '.'
+        . '<strong>' . esc_html( $set['title'] ) . '</strong> '
+        . ( $reuse_stock_privacy_page ? 'updated and published' : 'imported and published' )
+        . $tpl_note . '.'
         . $image_note
         . ' &nbsp; <a href="' . esc_url( $edit_link ) . '">Edit page</a>'
         . ' | <a href="' . esc_url( $view_link ) . '" target="_blank">View page</a>'
@@ -513,6 +529,23 @@ function atp_importer_page_exists( $title ) {
     );
 
     return $id ? (int) $id : false;
+}
+
+/**
+ * Determine whether an existing page was created or already controlled by ATP.
+ */
+function atp_importer_page_has_atp_content( $page_id ) {
+    $page_id = (int) $page_id;
+    if ( ! $page_id ) return false;
+
+    if ( get_post_meta( $page_id, '_atp_importer_page_set', true ) ) {
+        return true;
+    }
+
+    $post = get_post( $page_id );
+    if ( ! $post ) return false;
+
+    return str_contains( (string) $post->post_content, '[atp_' );
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

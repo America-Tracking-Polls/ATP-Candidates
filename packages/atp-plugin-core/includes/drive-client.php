@@ -246,6 +246,31 @@ function atp_drive_list_folders( $parent_id = 'root', $token = null ) {
     $folders = [];
     $seen_ids = [];
 
+    // At root, include Workspace Shared Drives as selectable/browsable roots.
+    if ( $parent_id === 'root' ) {
+        $drives_url = ATP_DRIVE_API_BASE . '/drives?' . http_build_query( [
+            'fields'   => 'drives(id,name)',
+            'pageSize' => 100,
+        ] );
+        $drives_resp = wp_remote_get( $drives_url, [
+            'timeout' => 20,
+            'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+        ] );
+        if ( ! is_wp_error( $drives_resp ) && wp_remote_retrieve_response_code( $drives_resp ) === 200 ) {
+            $drives_body = json_decode( wp_remote_retrieve_body( $drives_resp ), true );
+            foreach ( $drives_body['drives'] ?? [] as $drive ) {
+                if ( empty( $drive['id'] ) || isset( $seen_ids[ $drive['id'] ] ) ) continue;
+                $seen_ids[ $drive['id'] ] = 1;
+                $folders[] = [
+                    'id' => $drive['id'],
+                    'name' => $drive['name'],
+                    '_shared_drive_root' => true,
+                    'driveId' => $drive['id'],
+                ];
+            }
+        }
+    }
+
     // 1) Folders that have $parent_id as a parent (My Drive structure +
     //    children of any folder you've drilled into).
     $q_parent = sprintf(
@@ -254,7 +279,7 @@ function atp_drive_list_folders( $parent_id = 'root', $token = null ) {
     );
     $url = ATP_DRIVE_API_BASE . '/files?' . http_build_query( [
         'q'                         => $q_parent,
-        'fields'                    => 'files(id,name,parents,shared,ownedByMe)',
+        'fields'                    => 'files(id,name,parents,shared,ownedByMe,driveId,capabilities/canAddChildren)',
         'orderBy'                   => 'name',
         'pageSize'                  => 200,
         'supportsAllDrives'         => 'true',
@@ -281,7 +306,7 @@ function atp_drive_list_folders( $parent_id = 'root', $token = null ) {
         $q_shared = "sharedWithMe = true and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
         $url2 = ATP_DRIVE_API_BASE . '/files?' . http_build_query( [
             'q'                         => $q_shared,
-            'fields'                    => 'files(id,name,parents,shared,ownedByMe)',
+            'fields'                    => 'files(id,name,parents,shared,ownedByMe,driveId,capabilities/canAddChildren)',
             'orderBy'                   => 'name',
             'pageSize'                  => 200,
             'supportsAllDrives'         => 'true',
@@ -310,13 +335,29 @@ function atp_drive_get_folder_meta( $folder_id, $token = null ) {
         $token = atp_drive_get_access_token();
         if ( is_wp_error( $token ) ) return $token;
     }
-    $url = ATP_DRIVE_API_BASE . '/files/' . rawurlencode( $folder_id ) . '?fields=id,name,mimeType,parents&supportsAllDrives=true';
+    $url = ATP_DRIVE_API_BASE . '/files/' . rawurlencode( $folder_id ) . '?fields=id,name,mimeType,parents,driveId,capabilities/canAddChildren&supportsAllDrives=true';
     $resp = wp_remote_get( $url, [
         'timeout' => 15,
         'headers' => [ 'Authorization' => 'Bearer ' . $token ],
     ] );
     if ( is_wp_error( $resp ) ) return $resp;
     if ( wp_remote_retrieve_response_code( $resp ) !== 200 ) {
+        $drive_url = ATP_DRIVE_API_BASE . '/drives/' . rawurlencode( $folder_id ) . '?fields=id,name';
+        $drive_resp = wp_remote_get( $drive_url, [
+            'timeout' => 15,
+            'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+        ] );
+        if ( ! is_wp_error( $drive_resp ) && wp_remote_retrieve_response_code( $drive_resp ) === 200 ) {
+            $drive = json_decode( wp_remote_retrieve_body( $drive_resp ), true );
+            return [
+                'id' => $drive['id'] ?? $folder_id,
+                'name' => $drive['name'] ?? $folder_id,
+                'mimeType' => 'application/vnd.google-apps.folder',
+                'driveId' => $drive['id'] ?? $folder_id,
+                '_shared_drive_root' => true,
+                'capabilities' => [ 'canAddChildren' => true ],
+            ];
+        }
         return new WP_Error( 'atp_drive_meta', wp_remote_retrieve_body( $resp ) );
     }
     return json_decode( wp_remote_retrieve_body( $resp ), true );
@@ -422,6 +463,8 @@ function atp_drive_ajax_browse() {
             'id'              => $f['id'],
             'name'            => $f['name'],
             'shared_with_me'  => ! empty( $f['_shared_with_me'] ),
+            'shared_drive'    => ! empty( $f['_shared_drive_root'] ) || ! empty( $f['driveId'] ),
+            'can_add_children'=> $f['capabilities']['canAddChildren'] ?? true,
         ];
     }, $folders ) ) );
 }
@@ -442,10 +485,18 @@ function atp_drive_test_connection() {
 
     $info = atp_drive_get_folder_meta( $folder_id, $token );
     if ( is_wp_error( $info ) ) return $info;
+    if ( isset( $info['capabilities']['canAddChildren'] ) && ! $info['capabilities']['canAddChildren'] ) {
+        return new WP_Error( 'atp_drive_no_write', 'Connected account can see the selected folder but cannot add files or folders there.' );
+    }
 
-    $tmp = wp_tempnam( 'atp-drive-test' );
-    file_put_contents( $tmp, 'ATP Drive connection test ' . gmdate( 'c' ) );
-    $upload = atp_drive_upload_file( $tmp, 'atp-drive-test-' . time() . '.txt', 'text/plain', $folder_id, $token );
+    $test_folder_name = 'ATP_Drive_Test_' . time();
+    $test_folder_id = atp_drive_find_or_create_folder( $folder_id, $test_folder_name, $token );
+    if ( is_wp_error( $test_folder_id ) ) return $test_folder_id;
+
+    $tmp = wp_tempnam( 'atp-drive-test-image' );
+    $png = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=' );
+    file_put_contents( $tmp, $png );
+    $upload = atp_drive_upload_file( $tmp, 'atp-drive-test-' . time() . '.png', 'image/png', $test_folder_id, $token );
     @unlink( $tmp );
     if ( is_wp_error( $upload ) ) return $upload;
 
@@ -454,9 +505,15 @@ function atp_drive_test_connection() {
         'timeout' => 20,
         'headers' => [ 'Authorization' => 'Bearer ' . $token ],
     ] );
+    wp_remote_request( ATP_DRIVE_API_BASE . '/files/' . rawurlencode( $test_folder_id ) . '?supportsAllDrives=true', [
+        'method'  => 'DELETE',
+        'timeout' => 20,
+        'headers' => [ 'Authorization' => 'Bearer ' . $token ],
+    ] );
 
     return [
-        'message' => 'OK — authenticated, folder reachable, test file uploaded and removed.',
+        'message' => 'OK — authenticated, folder reachable, test subfolder created, image upload verified, and cleanup attempted.',
         'folder'  => $info['name'] ?? $folder_id,
+        'drive_type' => ! empty( $info['driveId'] ) || ! empty( $info['_shared_drive_root'] ) ? 'Shared Drive' : 'My Drive',
     ];
 }

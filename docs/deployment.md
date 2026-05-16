@@ -25,7 +25,10 @@ cp /path/to/intake-output.json sites/client-slug/intake-v3.json
 ./scripts/build-site.sh client-slug
 ```
 
-Output: `dist/client-slug/atp-campaign-site/`
+Output:
+
+- `dist/client-slug/atp-campaign-site/` — expanded plugin folder
+- `dist/atp-campaign-site-client-slug.zip` — uploadable WordPress plugin zip
 
 ## Step 2: Generate Page JSON
 
@@ -36,7 +39,7 @@ Take the intake JSON and run it through the AI prompt:
 3. Paste the client's `intake-v3.json` where indicated
 4. AI outputs Page JSON — save it as `sites/client-slug/page-json.json`
 
-The Page JSON is a single file with one key per shortcode section, each containing the final HTML. This file is the source of truth for all content on the site. It gets bundled into the plugin during the build step.
+The Page JSON is a single file with one key per shortcode section, each containing the final HTML. Save it at `sites/client-slug/page-json.json`. During `build-site.sh`, this file is bundled into the plugin and expanded into `page-overrides/{shortcode}.html`, so the content loads automatically when the plugin activates.
 
 Also generate the legal pages (privacy policy + cookie policy) by including them in the same prompt or running the legal prompt from `README.md` Quick Start section. The generated HTML goes into the `atp_cand_privacy` and `atp_cand_cookies` keys in `page-json.json`.
 
@@ -49,9 +52,10 @@ Also generate the legal pages (privacy policy + cookie policy) by including them
 
 ## Step 4: Install the Plugin
 
-1. Zip the `dist/client-slug/atp-campaign-site/` folder
-2. Go to WP Admin → Plugins → Add New → Upload Plugin
-3. Upload the zip → Install → Activate
+1. Go to WP Admin → Plugins → Add New → Upload Plugin
+2. Upload `dist/atp-campaign-site-client-slug.zip`
+3. Install → Activate
+4. WordPress may prompt to install the required Vibe AI plugin. Install/activate it if the site will use AI-assisted editing.
 
 ## Step 5: Run Setup Wizard
 
@@ -68,6 +72,38 @@ The `page-json.json` file is bundled into the plugin during the build step. When
 If you need to make changes after activation, either:
 - Edit `sites/client-slug/page-json.json` in the repo, rebuild, and update the plugin
 - Or use the Shortcode Editor in the WP admin for quick fixes
+
+## GitHub Release Updates
+
+Each client plugin includes its own `site-config.json` with:
+
+```json
+{
+  "github_repo": "America-Tracking-Polls/ATP-Candidates",
+  "release_asset": "atp-campaign-site-client-slug.zip"
+}
+```
+
+That means all client plugins can update from the same GitHub release, while each installed site downloads only its own zip asset.
+
+To release updates:
+
+```bash
+git checkout main
+git pull
+git tag v3.6.5
+git push origin v3.6.5
+```
+
+GitHub Actions builds every folder in `sites/` and attaches one zip per client to the release. A client site then sees the update in WP Admin → Dashboard → Updates / Plugins, using the asset named in its bundled `site-config.json`.
+
+For a manual one-client build without a release:
+
+1. Go to GitHub → Actions → Build & Release Client Plugins.
+2. Click **Run workflow**.
+3. Enter the client slug or `all`.
+4. Download the build artifact.
+5. Upload the zip to the client WordPress site.
 
 ## Step 8: Import Media
 

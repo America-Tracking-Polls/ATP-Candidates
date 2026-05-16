@@ -39,6 +39,28 @@ if [ -f "$SITE_DIR/intake-v3.json" ]; then
   cp "$SITE_DIR/intake-v3.json" "$DIST_DIR/intake-v3.json"
 fi
 
+# Copy Page JSON and expand it into page-overrides if it exists.
+# The runtime loader reads page-overrides/{shortcode_tag}.html on init,
+# so this makes AI-generated Page JSON deploy automatically on activation.
+if [ -f "$SITE_DIR/page-json.json" ]; then
+  cp "$SITE_DIR/page-json.json" "$DIST_DIR/page-json.json"
+  mkdir -p "$DIST_DIR/page-overrides"
+  python3 - "$SITE_DIR/page-json.json" "$DIST_DIR/page-overrides" <<'PY'
+import json
+import pathlib
+import sys
+
+source = pathlib.Path(sys.argv[1])
+target = pathlib.Path(sys.argv[2])
+data = json.loads(source.read_text())
+
+for key, value in data.items():
+    if key.startswith("_") or key == "atp_cand_styles" or not isinstance(value, str):
+        continue
+    (target / f"{key}.html").write_text(value)
+PY
+fi
+
 # Copy page overrides if they exist
 if [ -d "$SITE_DIR/page-overrides" ] && [ "$(ls -A "$SITE_DIR/page-overrides" 2>/dev/null)" ]; then
   mkdir -p "$DIST_DIR/page-overrides"
@@ -47,8 +69,29 @@ fi
 
 # Update plugin header with client name
 CLIENT_NAME=$(python3 -c "import json;print(json.load(open('$SITE_DIR/site-config.json'))['client_name'])")
-sed -i "s/Plugin Name:.*/Plugin Name: ATP Campaign Site — $CLIENT_NAME/" "$DIST_DIR/atp-demo-plugin.php"
+python3 - "$DIST_DIR/atp-demo-plugin.php" "$CLIENT_NAME" <<'PY'
+import pathlib
+import sys
+
+plugin = pathlib.Path(sys.argv[1])
+client_name = sys.argv[2]
+text = plugin.read_text()
+lines = []
+for line in text.splitlines():
+    if line.startswith(" * Plugin Name:"):
+        lines.append(f" * Plugin Name: ATP Campaign Site — {client_name}")
+    else:
+        lines.append(line)
+plugin.write_text("\n".join(lines) + "\n")
+PY
 
 echo "Build complete: $DIST_DIR"
 echo "Contents:"
 ls -la "$DIST_DIR"
+
+if command -v zip >/dev/null 2>&1; then
+  ZIP_PATH="dist/atp-campaign-site-$CLIENT.zip"
+  rm -f "$ZIP_PATH"
+  (cd "dist/$CLIENT" && zip -qr "../atp-campaign-site-$CLIENT.zip" atp-campaign-site/)
+  echo "ZIP complete: $ZIP_PATH"
+fi
