@@ -74,11 +74,11 @@ class ATP_Demo_GitHub_Updater {
 
 	/**
 	 * How long (in seconds) to cache the API response.
-	 * Default: 12 hours.
+	 * Default: 15 minutes.
 	 *
 	 * @var int
 	 */
-	private $cache_duration = 43200;
+	private $cache_duration = 900;
 
 	/**
 	 * Cached release data fetched during this request.
