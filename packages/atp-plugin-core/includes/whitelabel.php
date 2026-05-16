@@ -301,9 +301,16 @@ function atp_wl_render_settings() {
         $fid   = sanitize_text_field( $_POST['drive_pick_folder_id']   ?? '' );
         $fname = sanitize_text_field( $_POST['drive_pick_folder_name'] ?? '' );
         if ( $fid ) {
-            update_option( 'atp_drive_config', [ 'folder_id' => $fid, 'folder_name' => $fname ] );
+            $meta = function_exists( 'atp_drive_get_folder_meta' ) ? atp_drive_get_folder_meta( $fid ) : [];
+            $drive_type = ( is_array( $meta ) && ( ! empty( $meta['driveId'] ) || ! empty( $meta['_shared_drive_root'] ) ) ) ? 'shared_drive' : 'my_drive';
+            update_option( 'atp_drive_config', [
+                'folder_id' => $fid,
+                'folder_name' => $fname,
+                'drive_type' => $drive_type,
+                'drive_id' => is_array( $meta ) ? ( $meta['driveId'] ?? '' ) : '',
+            ] );
             echo '<div class="notice notice-success is-dismissible"><p><strong>Folder selected:</strong> '
-                . esc_html( $fname ?: $fid ) . '</p></div>';
+                . esc_html( $fname ?: $fid ) . ' <code>' . esc_html( $drive_type ) . '</code></p></div>';
         }
     }
 
@@ -320,7 +327,8 @@ function atp_wl_render_settings() {
         } else {
             echo '<div class="notice notice-success is-dismissible"><p><strong>Drive test passed.</strong> '
                 . esc_html( $test_result['message'] ) . ' Folder: <code>'
-                . esc_html( $test_result['folder'] ) . '</code></p></div>';
+                . esc_html( $test_result['folder'] ) . '</code> Type: <code>'
+                . esc_html( $test_result['drive_type'] ?? 'Unknown' ) . '</code></p></div>';
         }
     }
 
@@ -453,9 +461,10 @@ function atp_wl_render_settings() {
                                 </p>
                                 <p>
                                     Picked folder:
-                                    <?php if ( ! empty( $cfg['folder_id'] ) ) : ?>
+                                <?php if ( ! empty( $cfg['folder_id'] ) ) : ?>
                                         <strong><?php echo esc_html( $cfg['folder_name'] ?: $cfg['folder_id'] ); ?></strong>
                                         <code style="font-size:11px;color:#666">(<?php echo esc_html( $cfg['folder_id'] ); ?>)</code>
+                                        <code style="font-size:11px;color:#666"><?php echo esc_html( $cfg['drive_type'] ?? 'my_drive' ); ?></code>
                                     <?php else : ?>
                                         <em>none yet — pick one below</em>
                                     <?php endif; ?>
@@ -552,8 +561,8 @@ function atp_wl_render_settings() {
                         const li = document.createElement('li');
                         li.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee';
                         const left = document.createElement('span');
-                        var icon = f.shared_with_me ? '🔗' : '📁';
-                        var badge = f.shared_with_me ? ' <span style="margin-left:6px;font-size:10px;color:#666;background:#eef;padding:2px 6px;border-radius:3px">Shared</span>' : '';
+                        var icon = f.shared_drive ? '🏢' : (f.shared_with_me ? '🔗' : '📁');
+                        var badge = f.shared_drive ? ' <span style="margin-left:6px;font-size:10px;color:#666;background:#eaf6ef;padding:2px 6px;border-radius:3px">Shared Drive</span>' : (f.shared_with_me ? ' <span style="margin-left:6px;font-size:10px;color:#666;background:#eef;padding:2px 6px;border-radius:3px">Shared</span>' : '');
                         left.innerHTML = '<span style="margin-right:8px">' + icon + '</span>' + escapeHtml(f.name) + badge;
                         const right = document.createElement('span');
                         const open = mkBtn('Open', function(){ stack.push({ id: f.id, name: f.name }); load(); });

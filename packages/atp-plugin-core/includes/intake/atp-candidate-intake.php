@@ -247,6 +247,8 @@ function atp_admin_list(){
 ════════════════════════════════════════ */
 function atp_admin_single($id){
     $post=get_post($id);if(!$post||$post->post_type!=='atp_candidate'){echo '<div class="wrap"><p>Not found.</p></div>';return;}
+    $retry_notice=get_transient('atp_drive_retry_notice_'.get_current_user_id());
+    if($retry_notice)delete_transient('atp_drive_retry_notice_'.get_current_user_id());
     $raw=get_post_meta($id);$data=[];foreach($raw as $k=>$v){$data[$k]=maybe_unserialize($v[0]);}
     $name=$data['display_name']??$data['legal_name']??'Candidate';
     $back=admin_url('admin.php?page=atp-candidates');
@@ -254,9 +256,31 @@ function atp_admin_single($id){
     $bundle=wp_nonce_url(admin_url('admin-ajax.php?action=atp_export_bundle&id='.$id),'atp_export','nonce');
     $groups=['Source & Gateway'=>['filler_name','filler_email','filler_phone','filler_role','filing_url','ballotpedia_url','existing_website'],'Identity & Race'=>['org_type','legal_name','display_name','ballot_name','office','district','seat_number','state','party','election_year','election_date','election_type','position'],'Campaign Contact'=>['contact_name','contact_role','contact_email','contact_phone','contact_address','manager_name','manager_email','manager_phone','treasurer_name','treasurer_email','treasurer_phone','treasurer_address'],'Bio & Messaging'=>['ballotpedia_status','homepage_intro','bio_full','why_running','tagline','differentiator','key_messages','policy_passions','endorsements_about'],'Platform & Issues'=>['issue_categories','issue_positions','opponents_missing_issue','changed_position'],'Background & Credentials'=>['profession','current_role','previous_experience','education_1','education_2','education_3','military_branch','military_years'],'Visual Branding'=>['headshot','logo','additional_photos','color_primary','color_secondary','color_accent','visual_style','design_notes'],'Social Media'=>['facebook','twitter_x','instagram','youtube','tiktok','linkedin','social_other'],'Video'=>['video_main','video_other'],'Survey Page'=>['survey_page_wanted','primary_survey_focus','survey_page_label','survey_page_label_custom','survey_display','survey_intro_text','existing_survey_link'],'Legal & Compliance'=>['committee_name','paidfor_text','jurisdiction','committee_id','committee_address','campaign_phone','campaign_email','privacy_contact_email','privacy_contact_phone','privacy_contact_address','uses_cookies','will_send_texts','sms_categories','sms_optin_language','survey_follow_up','donations_by_text','third_party_analytics','shares_data','service_providers'],'Fundraising'=>['donation_needed','donation_platform','fundraising_platform_status','donation_url','donation_embed_code','donation_button_label','donation_button_custom','accept_text_donations','text_donation_processor','text_donation_accreditation'],'Domain Setup'=>['domain_status','domain_preferred','domain_primary','domain_redirects','domain_registrar','hosting_provider','domain_credentials','campaign_email_needed'],'Approval & Timeline'=>['approver_same','approver_name','approver_email','copy_help','launch_timeline','launch_date','comm_pref','referral_source','referral_source_other','open_notes'],'Grow Beyond Your Website'=>['additional_services','tier2_pages','additional_survey_focuses'],'Summary'=>['scope_acknowledgment','compliance_acknowledgment']];
     $v3=get_post_meta($id,'_v3_json',true);$v3_data=$v3?json_decode($v3,true):[];
-    $sub_folder=$v3_data['visual_branding']['submission_folder']??'';
+    $sub_folder=get_post_meta($id,'_atp_drive_subfolder_url',true)?:($v3_data['visual_branding']['submission_folder']??'');
+    $drive_files_json=get_post_meta($id,'_atp_drive_files',true);
+    $drive_files=$drive_files_json?json_decode($drive_files_json,true):[];
+    $retry=wp_nonce_url(admin_url('admin-post.php?action=atp_retry_drive_mirror&id='.$id),'atp_retry_drive_mirror_'.$id,'nonce');
     echo '<div class="wrap"><h1>'.esc_html($name).' <a href="'.esc_url($back).'" class="button" style="margin-left:16px;font-size:12px">← All</a> <a href="'.esc_url($bundle).'" class="button button-primary" style="margin-left:8px">⬇ Download Intake Bundle (zip)</a> <a href="'.esc_url($exp).'" class="button" style="margin-left:8px">Download JSON only</a></h1>';
-    if($sub_folder){echo '<p><a href="'.esc_url($sub_folder).'" target="_blank" class="button" style="margin:8px 0">📁 Open submission folder in Drive</a></p>';}
+    if($retry_notice){
+        $cls=$retry_notice['status']==='drive_retry_success'?'notice-success':'notice-error';
+        echo '<div class="notice '.esc_attr($cls).' is-dismissible"><p>'.esc_html($retry_notice['msg']).'</p></div>';
+    }
+    echo '<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:14px 16px;margin:12px 0 18px;max-width:900px">';
+    echo '<strong>Google Drive mirror</strong><br>';
+    if($sub_folder){echo '<a href="'.esc_url($sub_folder).'" target="_blank" class="button" style="margin:8px 8px 0 0">📁 Open submission folder in Drive</a>';}
+    echo '<a href="'.esc_url($retry).'" class="button" style="margin:8px 0 0" onclick="return confirm(\'Retry Drive mirroring for this submission? This may create or update files in the selected Drive folder.\')">Retry Drive mirror</a>';
+    if(!empty($drive_files)&&is_array($drive_files)){
+        echo '<ul style="margin:10px 0 0 18px">';
+        foreach($drive_files as $df){
+            $label=esc_html(($df['field']??'file').': '.($df['name']??($df['id']??'')));
+            $url=$df['url']??'';
+            echo '<li>'.($url?'<a href="'.esc_url($url).'" target="_blank">'.$label.'</a>':$label).'</li>';
+        }
+        echo '</ul>';
+    } else {
+        echo '<p style="margin:8px 0 0;color:#666">No Drive file metadata stored yet. Use retry after Drive is connected and a destination folder is selected.</p>';
+    }
+    echo '</div>';
     $img_fields=['headshot','logo','additional_photos'];
     foreach($groups as $g=>$fields){
         $rows='';foreach($fields as $f){
@@ -451,6 +475,78 @@ function atp_post_notifications(){
     wp_redirect(admin_url('admin.php?page=atp-settings&tab=notifications&saved=1'));exit;
 }
 
+add_action('admin_post_atp_retry_drive_mirror','atp_post_retry_drive_mirror');
+function atp_post_retry_drive_mirror(){
+    $id=(int)($_GET['id']??0);
+    if(!$id||!current_user_can('manage_options'))wp_die('Unauthorized');
+    check_admin_referer('atp_retry_drive_mirror_'.$id,'nonce');
+    $result=atp_retry_drive_mirror_for_submission($id);
+    $status=is_wp_error($result)?'drive_retry_error':'drive_retry_success';
+    $msg=is_wp_error($result)?$result->get_error_message():'Drive mirror retried: '.count($result['files']).' file(s) uploaded.';
+    set_transient('atp_drive_retry_notice_'.get_current_user_id(),['status'=>$status,'msg'=>$msg],60);
+    wp_safe_redirect(admin_url('admin.php?page=atp-candidates&view='.$id));exit;
+}
+
+function atp_retry_drive_mirror_for_submission($id){
+    if(!function_exists('atp_drive_upload'))return new WP_Error('atp_drive_missing','Drive upload functions are not loaded.');
+    if(!function_exists('atp_drive_is_configured')||!atp_drive_is_configured())return new WP_Error('atp_drive_not_configured','Google Drive is not connected or no destination folder is selected.');
+    $post=get_post($id);
+    if(!$post||$post->post_type!=='atp_candidate')return new WP_Error('atp_drive_bad_submission','Submission not found.');
+
+    $candidate=get_post_meta($id,'display_name',true)?:get_post_meta($id,'legal_name',true)?:$post->post_title;
+    $office=get_post_meta($id,'office',true)?:'';
+    $fields=['headshot'=>get_post_meta($id,'headshot',true),'logo'=>get_post_meta($id,'logo',true)];
+    $additional=get_post_meta($id,'additional_photos',true);
+    if(is_array($additional)){
+        foreach($additional as $i=>$url)$fields['additional_photos_'.$i]=$url;
+    } elseif($additional){
+        $fields['additional_photos']=$additional;
+    }
+
+    $files=[];
+    $sub_folder='';
+    foreach($fields as $field=>$url){
+        if(!$url||!filter_var($url,FILTER_VALIDATE_URL))continue;
+        $attachment_id=attachment_url_to_postid($url);
+        if(!$attachment_id)continue;
+        $path=get_attached_file($attachment_id);
+        if(!$path||!is_readable($path))continue;
+        $base_field=preg_replace('/_\d+$/','',$field);
+        $mime=get_post_mime_type($attachment_id)?:'application/octet-stream';
+        $fake=[
+            'name'=>basename($path),
+            'type'=>$mime,
+            'tmp_name'=>$path,
+            'size'=>filesize($path),
+        ];
+        $drive=atp_drive_upload($fake,$base_field,$candidate,$office,$path);
+        if(is_wp_error($drive))return $drive;
+        $sub_folder=$drive['sub_folder']??$sub_folder;
+        $files[]=[
+            'field'=>$base_field,
+            'name'=>$drive['name']??basename($path),
+            'id'=>$drive['id']??'',
+            'url'=>$drive['url']??'',
+            'sub_folder'=>$drive['sub_folder']??'',
+        ];
+    }
+
+    if(empty($files))return new WP_Error('atp_drive_no_files','No readable Media Library files found to mirror.');
+    if($sub_folder)update_post_meta($id,'_atp_drive_subfolder_url',esc_url_raw($sub_folder));
+    update_post_meta($id,'_atp_drive_files',wp_slash(json_encode($files,JSON_UNESCAPED_UNICODE)));
+
+    $v3=get_post_meta($id,'_v3_json',true);
+    $v3_data=$v3?json_decode(wp_unslash($v3),true):[];
+    if(is_array($v3_data)){
+        if(!isset($v3_data['visual_branding'])||!is_array($v3_data['visual_branding']))$v3_data['visual_branding']=[];
+        if($sub_folder)$v3_data['visual_branding']['submission_folder']=$sub_folder;
+        $v3_data['visual_branding']['drive_files']=$files;
+        update_post_meta($id,'_v3_json',wp_slash(json_encode($v3_data,JSON_UNESCAPED_UNICODE)));
+    }
+
+    return ['sub_folder'=>$sub_folder,'files'=>$files];
+}
+
 /* ════════════════════════════════════════
    AJAX: SAVE QUESTIONS
 ════════════════════════════════════════ */
@@ -476,9 +572,22 @@ function atp_ajax_save(){
     $name=sanitize_text_field($raw['display_name']??$raw['legal_name']??'New Candidate');
     $pid=wp_insert_post(['post_title'=>$name,'post_type'=>'atp_candidate','post_status'=>'publish']);
     if(is_wp_error($pid))wp_send_json_error($pid->get_error_message());
-    foreach($raw as $k=>$v){$k=sanitize_key($k);is_array($v)?update_post_meta($pid,$k,array_map('sanitize_textarea_field',$v)):update_post_meta($pid,$k,sanitize_textarea_field((string)$v));}
+    foreach($raw as $k=>$v){
+        $k=sanitize_key($k);
+        if($k==='drive_uploads_json'){
+            update_post_meta($pid,'_atp_drive_uploads_json',sanitize_textarea_field((string)$v));
+            continue;
+        }
+        is_array($v)?update_post_meta($pid,$k,array_map('sanitize_textarea_field',$v)):update_post_meta($pid,$k,sanitize_textarea_field((string)$v));
+    }
     $v3=json_decode(wp_unslash($_POST['v3_json']??''),true);
-    if($v3)update_post_meta($pid,'_v3_json',wp_slash(json_encode($v3,JSON_UNESCAPED_UNICODE)));
+    if($v3){
+        update_post_meta($pid,'_v3_json',wp_slash(json_encode($v3,JSON_UNESCAPED_UNICODE)));
+        $sub=$v3['visual_branding']['submission_folder']??'';
+        $files=$v3['visual_branding']['drive_files']??[];
+        if($sub)update_post_meta($pid,'_atp_drive_subfolder_url',esc_url_raw($sub));
+        if(is_array($files)&&!empty($files))update_post_meta($pid,'_atp_drive_files',wp_slash(json_encode($files,JSON_UNESCAPED_UNICODE)));
+    }
     atp_send_notifications($raw,$pid);
     wp_send_json_success(['post_id'=>$pid,'name'=>$name]);
 }
@@ -656,8 +765,8 @@ function atp_intake_build_reference($pid,$data){
     $r.="   This produces `dist/$slug/atp-campaign-site/` — a deployable WP plugin zip.\n";
     $r.="7. **Provision WP.** Spin up a fresh WordPress install for the candidate (SiteGround, etc.).\n";
     $r.="8. **Install + activate** the built plugin (`atp-campaign-site`). Vibe AI will be auto-prompted as a dependency.\n";
-    $r.="9. **Import pages.** WP Admin → ATP Demo → Import Pages — click Import on Home, Issues, Donate, Contact, About, Privacy, Cookie/TCPA, Sign Up.\n";
-    $r.="10. **Upload media.** WP Admin → Media → Add New — upload the assets you pulled in step 1. Then in *ATP Demo → Page JSON* re-point any image references to the new media library URLs.\n";
+    $r.="9. **Import pages.** WP Admin → ATP Demo → Import Pages — click Import on Candidate Landing Page, Issues, Donate, Contact, About, Privacy, Cookie/TCPA, Sign Up, and Brand Guide.\n";
+    $r.="10. **Upload media.** WP Admin → Media → Add New — upload the assets you pulled in step 1. Then in *ATP Demo → Candidate Page* re-point any image references to the new media library URLs.\n";
     $r.="11. **Configure white label.** WP Admin → ATP → White Label Settings — set client name, logo, colors. Drive integration is optional on a candidate site.\n";
     $r.="12. **Configure domain + SSL** with the host. Done.\n\n";
 
@@ -673,11 +782,15 @@ function atp_intake_build_prompt($pid,$data){
     $tpl=is_readable($tpl_path)?file_get_contents($tpl_path):"# (PROMPT-TEMPLATE.md not found in plugin)\n";
     $v3=$data['_v3_json']??$data;
     $json=json_encode($v3,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+    if(strpos($tpl,'{INTAKE_JSON}')!==false){
+        $tpl=str_replace('{INTAKE_JSON}',$json,$tpl);
+    } else {
+        $tpl.="\n\n## V3 JSON for this candidate\n\n```json\n".$json."\n```\n";
+    }
     $out ="# Generation prompt — ".($data['display_name']??$data['legal_name']??'Candidate')."\n\n";
     $out.="Paste everything below this line into Claude or ChatGPT.\n\n";
     $out.="---\n\n";
     $out.=$tpl;
-    $out.="\n\n## V3 JSON for this candidate\n\n```json\n".$json."\n```\n";
     return $out;
 }
 
@@ -1161,7 +1274,7 @@ function atpUploadFile(file,fid){
     try{
       var r=JSON.parse(xhr.responseText);
       if(r.success){
-        file._url=r.data.url;file._id=r.data.id;
+        file._url=r.data.url;file._id=r.data.id;file._drive=r.data.drive||null;
         atpUpdateFileData(fid);
         atpSetStatus(fid,'Uploaded '+file.name,'ok');
         atpLog('success',fid,r.data&&r.data.url);
@@ -1200,6 +1313,19 @@ function atpUpdateFileData(fid){
   var maxFiles=parseInt(el.dataset.maxFiles||'1');
   if(maxFiles===1){D[fid]=files.length?files[0]._url:'';}
   else{D[fid]=files.map(function(f){return f._url;});}
+  var driveFiles=[];
+  Object.keys(UPLOADS).forEach(function(field){
+    (UPLOADS[field]||[]).forEach(function(f){
+      if(f._drive){
+        driveFiles.push({field:field,name:f._drive.name||f.name,id:f._drive.id||'',url:f._drive.url||'',sub_folder:f._drive.sub_folder||''});
+      }
+    });
+  });
+  if(driveFiles.length){
+    D.drive_uploads_json=JSON.stringify(driveFiles);
+    var folderMatch=driveFiles.find(function(f){return f.sub_folder;});
+    D.atp_drive_subfolder_url=folderMatch?folderMatch.sub_folder:'';
+  }
   sv();
 }
 
@@ -1214,7 +1340,7 @@ function buildV3(){
     bio_messaging:{ballotpedia_survey_status:D.ballotpedia_status||'',homepage_intro:D.homepage_intro||'',full_bio:D.bio_full||'',why_running:D.why_running||'',tagline:D.tagline||'',differentiator:D.differentiator||'',key_messages:D.key_messages||'',policy_passions:D.policy_passions||'',endorsements_list:D.endorsements_about||''},
     platform_issues:{issue_categories:Array.isArray(D.issue_categories)?D.issue_categories:[],positions:D.issue_positions||'',opponents_missing_issue:D.opponents_missing_issue||'',evolved_position:D.changed_position||''},
     background:{current_profession:D.profession||'',current_role_title:D.current_role||'',previous_experience:D.previous_experience||'',education_1:D.education_1||'',education_2:D.education_2||'',education_3:D.education_3||'',military_branch:D.military_branch||'',military_years:D.military_years||''},
-    visual_branding:{headshot_link:D.headshot||'',logo_link:D.logo||'',additional_photos_link:Array.isArray(D.additional_photos)?D.additional_photos:(D.additional_photos?[D.additional_photos]:[]),primary_color:D.color_primary||'',secondary_color:D.color_secondary||'',accent_color:D.color_accent||'',visual_style:D.visual_style||'',design_notes:D.design_notes||''},
+    visual_branding:{headshot_link:D.headshot||'',logo_link:D.logo||'',additional_photos_link:Array.isArray(D.additional_photos)?D.additional_photos:(D.additional_photos?[D.additional_photos]:[]),submission_folder:D.atp_drive_subfolder_url||'',drive_files:D.drive_uploads_json?JSON.parse(D.drive_uploads_json):[],primary_color:D.color_primary||'',secondary_color:D.color_secondary||'',accent_color:D.color_accent||'',visual_style:D.visual_style||'',design_notes:D.design_notes||''},
     social_media:{facebook:D.facebook||'',x_twitter:D.twitter_x||'',instagram:D.instagram||'',youtube:D.youtube||'',tiktok:D.tiktok||'',linkedin:D.linkedin||'',other_platform:D.social_other||''},
     video:{main_video_url:D.video_main||'',other_video_assets:D.video_other||''},
     survey:{include_survey_page:D.survey_page_wanted||'',primary_focus:D.primary_survey_focus||'',page_name:D.survey_page_label||'',custom_page_label:D.survey_page_label_custom||'',placement:D.survey_display||'',intro_text:D.survey_intro_text||'',existing_survey_link:D.existing_survey_link||''},

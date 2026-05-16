@@ -23,6 +23,21 @@ function atp_demo_admin_assets( $hook ) {
     wp_enqueue_style( 'atp-demo-admin', ATP_DEMO_URL . 'assets/css/admin.css', [], ATP_DEMO_VERSION );
 }
 
+function atp_demo_admin_preview_doc( $tag ) {
+    $shortcode = '[' . $tag . ']';
+    $html      = function_exists( 'shortcode_exists' ) && shortcode_exists( $tag ) ? do_shortcode( $shortcode ) : '';
+    if ( $html === '' && function_exists( 'atp_demo_resolve_template' ) ) {
+        $html = atp_demo_resolve_template( $tag );
+    }
+    $html      = str_replace( '{ATP_PLUGIN_URL}', ATP_DEMO_URL, $html );
+
+    return '<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>'
+        . 'html,body{margin:0;padding:0;background:#fff;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}'
+        . 'body{min-height:220px;overflow:auto;}'
+        . 'img,video,iframe{max-width:100%;height:auto;}'
+        . '</style></head><body>' . $html . '</body></html>';
+}
+
 function atp_demo_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) return;
 
@@ -157,8 +172,26 @@ function atp_demo_admin_page() {
         <!-- ══════════════════════════════════════════════════════════════════
              SHORTCODE EDITOR — all groups
         ════════════════════════════════════════════════════════════════════ -->
-        <h2 class="atp-editor-heading">Shortcode Editor</h2>
-        <p class="atp-editor-subheading">Click any tag to copy it. Edit the HTML, save, then paste into AI to refine and paste back.</p>
+        <div class="atp-editor-intro">
+            <div>
+                <h2 class="atp-editor-heading">Shortcode Editor</h2>
+                <p class="atp-editor-subheading">Edit one shortcode at a time without forking the whole page.</p>
+            </div>
+            <div class="atp-override-guide" aria-label="Override system summary">
+                <div>
+                    <strong>Template</strong>
+                    <span>Saved HTML overrides the plugin default unless the override is disabled.</span>
+                </div>
+                <div>
+                    <strong>Data</strong>
+                    <span>Optional JSON patches replace only matching {{tokens}}; V3 JSON still fills the rest.</span>
+                </div>
+                <div>
+                    <strong>Preview</strong>
+                    <span>Use <code>source="core"</code> or <code>source="override"</code> to compare on a test page.</span>
+                </div>
+            </div>
+        </div>
 
         <?php foreach ( $registry as $group ) : ?>
         <div class="atp-group">
@@ -168,18 +201,21 @@ function atp_demo_admin_page() {
                 $stored       = get_option( 'atp_sc_' . $sc['tag'] );
                 $stored_data  = get_option( 'atp_sc_' . $sc['tag'] . '_data', '' );
                 $is_disabled  = (bool) get_option( 'atp_sc_' . $sc['tag'] . '_disabled', false );
-                $is_modified  = $stored !== false && $stored !== '';
+                $is_modified  = function_exists( 'atp_demo_option_exists' )
+                    ? atp_demo_option_exists( 'atp_sc_' . $sc['tag'] )
+                    : ( $stored !== false && $stored !== '' );
                 $has_data     = is_string( $stored_data ) && $stored_data !== '';
                 $display      = $is_modified ? $stored : $sc['default'];
+                $preview_doc  = atp_demo_admin_preview_doc( $sc['tag'] );
             ?>
             <div class="atp-sc-card" id="sc-<?php echo esc_attr( $sc['tag'] ); ?>">
 
                 <div class="atp-sc-card-header">
                     <div class="atp-sc-card-meta">
                         <span class="atp-sc-label"><?php echo esc_html( $sc['label'] ); ?></span>
-                        <?php if ( $is_modified && ! $is_disabled ) : ?><span class="atp-badge-modified" style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Override active</span><?php endif; ?>
-                        <?php if ( $is_modified && $is_disabled ) : ?><span style="background:#e2e3e5;color:#41464b;border:1px solid #d3d6d8;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Override stored, disabled</span><?php endif; ?>
-                        <?php if ( $has_data ) : ?><span style="background:#cfe2ff;color:#084298;border:1px solid #b6d4fe;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px">Data patch</span><?php endif; ?>
+                        <?php if ( $is_modified && ! $is_disabled ) : ?><span class="atp-status-badge atp-status-badge--active">Override active</span><?php endif; ?>
+                        <?php if ( $is_modified && $is_disabled ) : ?><span class="atp-status-badge atp-status-badge--muted">Override stored, disabled</span><?php endif; ?>
+                        <?php if ( $has_data ) : ?><span class="atp-status-badge atp-status-badge--data">Data patch</span><?php endif; ?>
                     </div>
                     <p class="atp-sc-desc"><?php echo esc_html( $sc['desc'] ); ?></p>
                     <div class="atp-sc-tag-row">
@@ -187,10 +223,10 @@ function atp_demo_admin_page() {
                               data-copy="[<?php echo esc_attr( $sc['tag'] ); ?>]"
                               title="Click to copy">[<?php echo esc_html( $sc['tag'] ); ?>]</code>
                         <span class="atp-tag-hint">↑ click to copy</span>
-                        <span style="margin-left:auto;font-size:11px;color:#666">Preview:
-                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;core&quot;]" style="cursor:pointer">core</code>
-                            ·
-                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;override&quot;]" style="cursor:pointer">override</code>
+                        <span class="atp-preview-shortcodes">
+                            Compare:
+                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;core&quot;]">core</code>
+                            <code class="atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;override&quot;]">override</code>
                         </span>
                     </div>
                 </div>
@@ -199,14 +235,21 @@ function atp_demo_admin_page() {
                     <?php wp_nonce_field( 'atp_demo_save' ); ?>
                     <input type="hidden" name="atp_sc_tag" value="<?php echo esc_attr( $sc['tag'] ); ?>">
 
-                    <div class="atp-textarea-wrap">
+                    <div class="atp-editor-grid">
+                    <section class="atp-editor-panel atp-template-panel atp-textarea-wrap">
+                        <div class="atp-panel-heading">
+                            <div>
+                                <h4>Template override</h4>
+                                <p>HTML, CSS, or JS saved here becomes this site&apos;s version of the shortcode.</p>
+                            </div>
+                            <label class="atp-toggle-row">
+                                <input type="checkbox" name="atp_sc_disabled" value="1" <?php checked( $is_disabled ); ?>>
+                                Disable override
+                            </label>
+                        </div>
                         <div class="atp-textarea-toolbar">
                             <span class="atp-toolbar-hint">HTML template · {{tokens}} pull from V3 JSON</span>
                             <div class="atp-toolbar-btns">
-                                <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-right:8px">
-                                    <input type="checkbox" name="atp_sc_disabled" value="1" <?php checked( $is_disabled ); ?>>
-                                    Disable override (use core default)
-                                </label>
                                 <button type="button" class="atp-copy-code-btn button">⎘ Copy Code</button>
                                 <button type="submit" name="atp_save_sc" class="button button-primary">Save</button>
                                 <?php if ( $is_modified || $has_data || $is_disabled ) : ?>
@@ -217,16 +260,38 @@ function atp_demo_admin_page() {
                         </div>
                         <textarea name="atp_sc_content" class="atp-sc-textarea" rows="14"
                                   spellcheck="false"><?php echo esc_textarea( $display ); ?></textarea>
+                    </section>
+
+                    <section class="atp-editor-panel atp-preview-panel">
+                        <div class="atp-panel-heading">
+                            <div>
+                                <h4>Rendered preview</h4>
+                                <p>Shows the currently active shortcode output. Scripts are blocked in this preview.</p>
+                            </div>
+                        </div>
+                        <iframe
+                            class="atp-sc-preview-frame"
+                            title="Preview of [<?php echo esc_attr( $sc['tag'] ); ?>]"
+                            sandbox=""
+                            loading="lazy"
+                            srcdoc="<?php echo esc_attr( $preview_doc ); ?>"></iframe>
+                        <p class="atp-preview-note">CSS or script-only shortcodes may render as a blank frame here; use the preview shortcodes to compare them on a test page.</p>
+                        <div class="atp-preview-actions">
+                            <button type="button" class="button atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?>]">Copy active</button>
+                            <button type="button" class="button atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;core&quot;]">Copy core preview</button>
+                            <button type="button" class="button atp-copy-btn" data-copy="[<?php echo esc_attr( $sc['tag'] ); ?> source=&quot;override&quot;]">Copy override preview</button>
+                        </div>
+                    </section>
                     </div>
 
-                    <details style="margin-top:8px;padding:8px 10px;background:#f6f7f9;border:1px solid #e0e0e0;border-radius:4px">
-                        <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#555">Data patch (optional JSON) — overrides specific {{tokens}} for this shortcode only</summary>
-                        <p style="font-size:11px;color:#666;margin:8px 0 6px">
+                    <details class="atp-data-patch">
+                        <summary>Data patch (optional JSON) — override specific {{tokens}} for this shortcode only</summary>
+                        <p>
                             Paste a JSON object like <code>{"display_name":"Sarah J. Chen","tagline":"For District 5"}</code>.
                             Keys you specify here win over the V3 JSON; anything you leave out falls through to the V3 source of truth.
                             Leave empty to use V3 JSON only.
                         </p>
-                        <textarea name="atp_sc_data" rows="6" style="width:100%;font-family:Menlo,Monaco,monospace;font-size:11px"
+                        <textarea name="atp_sc_data" rows="6" class="atp-data-textarea"
                                   spellcheck="false"><?php echo esc_textarea( $stored_data ); ?></textarea>
                     </details>
                 </form>

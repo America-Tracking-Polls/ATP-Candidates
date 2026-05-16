@@ -90,15 +90,27 @@ function atp_demo_render_shortcode( $atts, $content, $tag ) {
  *   - per-site override option, falling back to the registry default
  */
 function atp_demo_resolve_template( $tag, $source = '' ) {
-    $override = get_option( 'atp_sc_' . $tag, '' );
+    $option   = 'atp_sc_' . $tag;
+    $override = get_option( $option, '' );
     $default  = atp_demo_get_default( $tag );
     $disabled = (bool) get_option( 'atp_sc_' . $tag . '_disabled', false );
+    $has_override = atp_demo_option_exists( $option );
 
     if ( $source === 'core' )     return $default;
-    if ( $source === 'override' ) return $override !== '' ? $override : $default;
+    if ( $source === 'override' ) return $has_override ? $override : $default;
 
-    if ( $disabled || $override === '' ) return $default;
+    if ( $disabled || ! $has_override ) return $default;
     return $override;
+}
+
+function atp_demo_option_exists( $option_name ) {
+    global $wpdb;
+    return $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT option_id FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+            $option_name
+        )
+    ) !== null;
 }
 
 /**

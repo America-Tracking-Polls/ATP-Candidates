@@ -58,7 +58,8 @@ html{scroll-behavior:smooth}
 /* ── Nav ── */
 .cand-nav{position:sticky;top:0;z-index:1000;background:var(--navy);border-bottom:4px solid var(--red)}
 .cand-nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);gap:20px}
-.cand-nav-brand{display:flex;align-items:center;gap:12px}
+.cand-nav-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.cand-nav-logo{display:block;max-width:180px;max-height:44px;width:auto;height:auto;object-fit:contain;flex-shrink:0}
 .cand-nav-name{font-family:var(--font-head);font-size:18px;font-weight:700;color:#fff!important;letter-spacing:-.01em}
 .cand-nav-badge{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);background:rgba(230,0,0,.15);padding:4px 10px;border-radius:2px}
 .cand-nav-links{display:flex;align-items:center;gap:6px}
@@ -261,6 +262,7 @@ html{scroll-behavior:smooth}
   .cand-endorsements-grid{grid-template-columns:1fr}
   .cand-nav-links{display:none}
   .cand-nav-toggle{display:block}
+  .cand-nav-logo{max-width:150px;max-height:40px}
   .cand-section{padding:56px 0}
   .cand-section-title{font-size:28px}
   .cand-donate-title{font-size:28px}
@@ -270,6 +272,7 @@ html{scroll-behavior:smooth}
   .cand-stats-grid{grid-template-columns:1fr 1fr}
   .cand-hero-title{font-size:26px}
   .cand-container{padding:0 16px}
+  .cand-nav-logo{max-width:128px}
 }
 </style>
 HTML,
@@ -278,7 +281,7 @@ HTML,
 [
 'tag'   => 'atp_cand_nav',
 'label' => 'Candidate Page — Navigation',
-'desc'  => 'Sticky nav with candidate name, office badge, page links, and donate CTA. Includes scroll progress bar and mobile menu.',
+'desc'  => 'Sticky nav with optional submitted campaign logo, candidate name, office badge, page links, and donate CTA. Includes scroll progress bar and mobile menu.',
 'default' => <<<'HTML'
 <div class="cand-page">
 <div class="cand-progress" id="cand-scroll-progress"></div>

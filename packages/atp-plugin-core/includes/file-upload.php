@@ -47,17 +47,22 @@ function atp_handle_file_upload() {
     // Optionally also mirror into Google Drive.
     $storage = get_option( 'atp_upload_storage', 'wordpress' );
     if ( $storage === 'google_drive' && atp_drive_is_configured() ) {
-        $drive_result = atp_drive_upload( $file, $field, $candidate, $office );
+        error_log( '[ATP Drive] mirror start: field=' . $field . ' candidate=' . $candidate . ' file=' . ( $file['name'] ?? '' ) );
+        $drive_result = atp_drive_upload( $file, $field, $candidate, $office, $wp_result['path'] ?? '' );
         if ( is_wp_error( $drive_result ) ) {
             error_log( '[ATP Drive] mirror upload failed: ' . $drive_result->get_error_message() );
         } else {
+            error_log( '[ATP Drive] mirror uploaded: file_id=' . ( $drive_result['id'] ?? '' ) . ' folder=' . ( $drive_result['sub_folder'] ?? '' ) );
             $wp_result['drive']      = $drive_result;
             $wp_result['drive_url']  = $drive_result['url']        ?? '';
             $wp_result['sub_folder'] = $drive_result['sub_folder'] ?? '';
             $wp_result['storage']    = 'wordpress+drive';
         }
+    } elseif ( $storage === 'google_drive' ) {
+        error_log( '[ATP Drive] mirror skipped: Google Drive storage selected, but Drive is not connected or no destination folder is picked.' );
     }
 
+    unset( $wp_result['path'] );
     wp_send_json_success( $wp_result );
 }
 
@@ -104,6 +109,7 @@ function atp_wordpress_upload( $file, $field, $candidate ) {
 
     return [
         'url'    => $upload['url'],
+        'path'   => $upload['file'],
         'id'     => $attachment_id,
         'name'   => $file['name'],
         'size'   => $file['size'],
@@ -117,7 +123,7 @@ function atp_wordpress_upload( $file, $field, $candidate ) {
  *
  * @return array|WP_Error  ['url','id','sub_folder'] or error.
  */
-function atp_drive_upload( $file, $field, $candidate, $office ) {
+function atp_drive_upload( $file, $field, $candidate, $office, $source_path = '' ) {
     $config           = get_option( 'atp_drive_config', [] );
     $parent_folder_id = $config['folder_id'] ?? '';
     if ( ! $parent_folder_id ) {
@@ -135,11 +141,13 @@ function atp_drive_upload( $file, $field, $candidate, $office ) {
 
     $sub_folder_id = atp_drive_find_or_create_folder( $parent_folder_id, $folder_name, $token );
     if ( is_wp_error( $sub_folder_id ) ) return $sub_folder_id;
+    error_log( '[ATP Drive] submission folder ready: ' . $folder_name . ' (' . $sub_folder_id . ')' );
 
     $upload_name = sanitize_file_name( $field . '_' . $file['name'] );
     $mime        = ! empty( $file['type'] ) ? $file['type'] : 'application/octet-stream';
+    $upload_path = $source_path && is_readable( $source_path ) ? $source_path : ( $file['tmp_name'] ?? '' );
 
-    $result = atp_drive_upload_file( $file['tmp_name'], $upload_name, $mime, $sub_folder_id, $token );
+    $result = atp_drive_upload_file( $upload_path, $upload_name, $mime, $sub_folder_id, $token );
     if ( is_wp_error( $result ) ) return $result;
 
     return [

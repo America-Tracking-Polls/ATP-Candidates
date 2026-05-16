@@ -28,7 +28,7 @@ class ATP_Demo_GitHub_Updater {
 	 *
 	 * @var string
 	 */
-	private $github_repo = 'mirror-factory/atp-demo';
+	private $github_repo = 'America-Tracking-Polls/ATP-Candidates';
 
 	/**
 	 * Subdirectory inside the repo that contains the plugin.
@@ -36,6 +36,13 @@ class ATP_Demo_GitHub_Updater {
 	 * @var string
 	 */
 	private $github_plugin_dir = 'atp-demo-plugin';
+
+	/**
+	 * Optional release asset name for this installed client site.
+	 *
+	 * @var string
+	 */
+	private $release_asset_name = '';
 
 	/**
 	 * Plugin slug used by WordPress (folder/file.php).
@@ -87,6 +94,29 @@ class ATP_Demo_GitHub_Updater {
 		$this->plugin_slug    = plugin_basename( ATP_DEMO_DIR . 'atp-demo-plugin.php' );
 		$this->plugin_dir_name = dirname( $this->plugin_slug ); // 'atp-demo-plugin'
 		$this->current_version = defined( 'ATP_DEMO_VERSION' ) ? ATP_DEMO_VERSION : '0.0.0';
+
+		$config = $this->get_site_config();
+		if ( ! empty( $config['github_repo'] ) ) {
+			$this->github_repo = sanitize_text_field( $config['github_repo'] );
+		}
+		if ( ! empty( $config['release_asset'] ) ) {
+			$this->release_asset_name = sanitize_file_name( $config['release_asset'] );
+		}
+	}
+
+	/**
+	 * Load bundled per-client config when present.
+	 *
+	 * @return array
+	 */
+	private function get_site_config() {
+		$path = ATP_DEMO_DIR . 'site-config.json';
+		if ( ! is_readable( $path ) ) {
+			return array();
+		}
+
+		$config = json_decode( file_get_contents( $path ), true );
+		return is_array( $config ) ? $config : array();
 	}
 
 	/**
@@ -180,10 +210,35 @@ class ATP_Demo_GitHub_Updater {
 	 * @return string
 	 */
 	private function get_download_url( $release ) {
-		// Prefer an uploaded .zip asset (e.g. atp-demo-plugin.zip).
-		if ( ! empty( $release->assets ) && is_array( $release->assets ) ) {
+		// Prefer the exact per-client asset bundled in site-config.json.
+		if ( $this->release_asset_name && ! empty( $release->assets ) && is_array( $release->assets ) ) {
 			foreach ( $release->assets as $asset ) {
-				if ( isset( $asset->browser_download_url ) && '.zip' === substr( $asset->name, -4 ) ) {
+				if (
+					isset( $asset->name, $asset->browser_download_url )
+					&& $asset->name === $this->release_asset_name
+				) {
+					return $asset->browser_download_url;
+				}
+			}
+		}
+
+		// Prefer an uploaded .zip asset only when a release has a single zip.
+		if ( ! empty( $release->assets ) && is_array( $release->assets ) ) {
+			$zips = array_filter(
+				$release->assets,
+				function ( $asset ) {
+					return isset( $asset->name, $asset->browser_download_url ) && '.zip' === substr( $asset->name, -4 );
+				}
+			);
+			if ( count( $zips ) === 1 ) {
+				$asset = array_values( $zips )[0];
+				return $asset->browser_download_url;
+			}
+			foreach ( $release->assets as $asset ) {
+				if (
+					isset( $asset->name, $asset->browser_download_url )
+					&& $asset->name === $this->plugin_dir_name . '.zip'
+				) {
 					return $asset->browser_download_url;
 				}
 			}

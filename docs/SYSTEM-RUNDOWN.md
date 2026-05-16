@@ -83,9 +83,9 @@ and every individual candidate site.
 │                                                                  │
 │ 11. Visit the front-end. Each page renders the candidate's       │
 │     content because shortcodes resolve their override from       │
-│     `wp_options.atp_sc_<tag>` or fall back to the registry       │
-│     default. Token replacement substitutes V3 JSON values into   │
-│     `{{display_name}}`-style placeholders.                       │
+│     `wp_options.atp_sc_<tag>` or fall back to a dynamic/tokenized │
+│     shortcode where appropriate. Token replacement substitutes    │
+│     V3 JSON values into `{{display_name}}`-style placeholders.   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -104,13 +104,15 @@ of four sources, resolved at render time:
 | **Registry default** | `packages/atp-plugin-core/includes/registry.php` (heredoc strings) | Whoever wrote the plugin | Only when (a) no override is stored or (b) `atp_sc_<tag>_disabled = 1` |
 
 **Critical implication:** registry defaults are SAFETY NETS, not
-intended runtime content for a real candidate. The defaults contain
-example John-Stacy-for-Rockwall-County content. If a real candidate's
-Page JSON omits a shortcode, the John Stacy default renders. The
-prompt in `PROMPT-TEMPLATE.md` is responsible for making sure the
-LLM generates content for **all** home-page shortcodes (the prompt
-was updated in 3.6.4 to enforce this; older prompts only required 8
-of the 14 home-page shortcodes, leaving 6 to leak defaults).
+intended runtime content for a real candidate. The defaults still
+contain example John-Stacy-for-Rockwall-County content, but the
+Page JSON importer now only accepts the known candidate shortcode
+keys, clears missing expected keys, reports unknown keys, and allows
+intentional blank overrides for optional sections. The prompt in
+`PROMPT-TEMPLATE.md` is responsible for making sure the LLM generates
+content for every standard shortcode that needs a candidate-specific
+override: all home-page sections plus the full Issues, Donate,
+Contact, Privacy, and Cookie/TCPA subpage sections.
 
 For PHP-rendered shortcodes that depend on V3 arrays
 (`atp_cand_issues`, `atp_cand_endorsements`, `atp_cand_social`),
@@ -240,17 +242,19 @@ fenced code block. The engineer pastes the entire file into Claude
 or ChatGPT — no manual JSON merging.
 
 **Expected LLM output:** a single JSON object with keys for every
-home-page shortcode (14 of them, as of 3.6.4 prompt), plus
+AI-authored shortcode (18 of them, as of the 3.6.4 prompt), plus
 `_sections_order`, `_candidate`, `_generated` metadata. Each value
 is HTML using the CSS classes defined in the `atp_cand_styles`
-shortcode (see prompt for the class list).
+shortcode (see prompt for the class list). Optional sections with no
+source material can be an empty string, which intentionally renders
+nothing instead of falling back to defaults.
 
 **Failure modes to watch for:**
 - LLM returns invalid JSON (missing comma, unescaped quote) →
   Candidate Page admin will reject the paste; ask LLM to fix
-- LLM omits a shortcode key → that shortcode falls back to the
-  registry default. The 3.6.4 prompt rules require all 14 to be
-  generated to prevent example-candidate content from leaking
+- LLM omits a shortcode key → Candidate Page admin clears that
+  expected override and reports the missing key. Rerun or fix the
+  Page JSON before launch.
 - LLM hallucinates a different jurisdiction or candidate's facts
   → rare with current prompt but rerun if it happens; do NOT paste
   hallucinated content into a real candidate's site
@@ -270,29 +274,31 @@ the candidate's WP install. Future automation (see `HANDOFF.md`
 |---|---|---|
 | **Dashboard** | `admin.php?page=atp-demo-shortcodes` | Top-level shortcode browser + status |
 | **Edit Shortcodes** | same as above, scroll list | Edit individual shortcode templates, save overrides, toggle on/off, add per-shortcode JSON data patches, preview core vs override |
-| **Candidate Page** | `admin.php?page=atp-cand-page` | **Paste the LLM-generated Page JSON here.** This is THE main workflow step on a new candidate site. The plugin parses it and writes one `atp_sc_<tag>` row per key |
-| **Import Pages** | `admin.php?page=atp-importer` | **Create the 9 standard pages.** Click "Import" on each card to create that WordPress page with the right shortcodes laid out |
+| **Candidate Page** | `admin.php?page=atp-candidate-page` | **Paste the LLM-generated Page JSON here.** This is THE main workflow step on a new candidate site. The plugin parses it and writes one `atp_sc_<tag>` row per key |
+| **Import Pages** | `admin.php?page=atp-import-pages` | **Create the standard pages.** Click "Import" on each card to create that WordPress page with the right shortcodes laid out |
 | **White Label** | `admin.php?page=atp-whitelabel` | Drive OAuth + brand settings (logo, colors). One-time per site |
 | **ATP Candidates** | `edit.php?post_type=atp_candidate` | Submissions list (intake host only). Each row = one form submission. Drill in to view all fields, download bundle, export JSON |
 | **Edit Form** | `admin.php?page=atp-intake-questions` | Customize the 16-step intake form fields (intake host only) |
 
 ---
 
-## 9. The 9 standard pages (Tier 1)
+## 9. The standard pages (Tier 1)
 
 The Import Pages screen creates these:
 
 | # | Page title | URL slug | Shortcodes laid out (in order) |
 |---|---|---|---|
-| 1 | Candidate Landing Page | `home` (or set as front page) | styles, nav, hero, stats, about, messages, issues, endorsements, video, volunteer, survey, donate, social, footer |
-| 2 | Issues & Answers | `issues` | styles, nav, issues_page, footer |
-| 3 | About | `about` | styles, nav, about_page, footer |
+| 1 | Candidate Landing Page | `candidate-landing-page` (or set as front page) | styles, nav, hero, stats, about, messages, issues, endorsements, video, volunteer, survey, donate, social, footer |
+| 2 | Issues & Answers | `issues-answers` | styles, nav, issues_page, footer |
+| 3 | About | `about` | styles, nav, about, footer |
 | 4 | Donate | `donate` | styles, nav, donate_page, footer |
 | 5 | Contact | `contact` | styles, nav, contact, footer |
 | 6 | Sign Up | `sign-up` | styles, nav, signup, footer |
-| 7 | Brand Guide | `brand-guide` | brand_guide |
-| 8 | Privacy Policy | `privacy-policy` | privacy |
-| 9 | Cookie & TCPA Policy | `cookie-policy` | cookies |
+| 7 | Brand Guide | `brand-guide` | styles, nav, brand_guide, footer |
+| 8 | Privacy Policy | `privacy-policy` | styles, nav, privacy, footer |
+| 9 | Cookie & TCPA Policy | `cookie-tcpa-policy` | styles, nav, cookies, footer |
+| 10 | Candidate Intake Form | `candidate-intake-form` | intake |
+| 11 | AI Start Here | `ai-start-here` | ai_context (private) |
 
 **Tier 2 pages** (Media Kit, Endorsements page, Events Calendar,
 Press/Blog, Polling Locator, FAQ) — not built into the importer.
@@ -452,7 +458,7 @@ changes → confirm → merge to main → cut release
 |---|---|---|
 | Upload form does nothing on click | JS scope/wiring issue (pre-3.6.3) — fixed in 3.6.3 with `addEventListener` | `includes/intake/atp-candidate-intake.php` lines ~1090–1210 |
 | Upload fails with 403 in console | SiteGround Anti-Bot AI WAF | SG support ticket; whitelist `POST /wp-admin/admin-ajax.php` for `action=atp_upload_file` |
-| Site renders other candidate's content | Page JSON missing keys (LLM didn't generate all shortcodes) OR V3 has no data for PHP-rendered shortcodes (pre-3.6.4 these fell back to John Stacy default) | `includes/candidate-page.php` for PHP renderers, `PROMPT-TEMPLATE.md` for LLM coverage |
+| Site renders other candidate's content | Stale installed plugin, disabled override, or a manually forced `source="core"` shortcode. Current Page JSON imports clear missing keys and PHP renderers honor imported overrides first. | `includes/candidate-page.php`, `includes/shortcodes.php`, `PROMPT-TEMPLATE.md` |
 | Drive folder empty after submit | (a) WP didn't receive the upload (see row 1), or (b) Drive mirror not configured | `includes/file-upload.php` + wp-admin → White Label |
 | OAuth state mismatch banner persists | Callback query args sticking in URL — fixed in 3.6.3 with transient + redirect | `includes/whitelabel.php` callback handler |
 | Plugin install fails with "no valid plugins found" | Wrong ZIP — you uploaded the GitHub repo ZIP instead of the build-script output | Run `./scripts/build-plugin-zip.sh` |
@@ -526,10 +532,12 @@ new shortcode / new admin feature. Patch = bugfix.
 2. Add a CHANGELOG entry
 3. Commit with a clear message
 4. Push to main
-5. (Future) Tag a GitHub release with `v<version>` and attach
-   the `atp-plugin-core-<version>.zip` produced by the build script.
-   The plugin's auto-updater (`includes/updater.php`) reads GitHub
-   releases and prompts every candidate site to update.
+5. Tag a GitHub release with `v<version>` and push the tag.
+   GitHub Actions builds every folder in `sites/` and attaches one
+   `atp-campaign-site-<client-slug>.zip` asset per client. Each
+   installed client plugin reads its bundled `site-config.json`
+   `release_asset` value, so WordPress updates download the correct
+   client zip from the shared release.
 
 ---
 

@@ -613,16 +613,23 @@ Each client's content lives in one JSON file. The AI can read any of them, edit 
 ```bash
 ./scripts/build-site.sh client-slug
 # Output: dist/client-slug/atp-campaign-site/
-# Zip and deploy to their WordPress
+# Uploadable zip: dist/atp-campaign-site-client-slug.zip
 ```
 
 ### Update all clients
 
-Edit `packages/atp-plugin-core/` → commit → tag → GitHub Action builds all client plugins.
+Edit `packages/atp-plugin-core/` → commit → tag → GitHub Actions builds all client plugins and attaches one zip per client to the release.
+
+```bash
+git tag v3.6.5
+git push origin v3.6.5
+```
+
+Each client site's bundled `site-config.json` names its own release asset, for example `atp-campaign-site-john-stacy.zip`, so WordPress updates download the correct client zip from the shared GitHub release.
 
 ### Give a client their site
 
-Zip `dist/client-slug/atp-campaign-site/` — it's a self-contained WordPress plugin. No dependency on the monorepo, Mirror Factory, or ATP.
+Upload `dist/atp-campaign-site-client-slug.zip` in WP Admin → Plugins → Add New → Upload Plugin. It is a self-contained WordPress plugin. The installed site does not need the monorepo.
 
 ---
 

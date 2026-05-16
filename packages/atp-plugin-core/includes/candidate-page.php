@@ -27,6 +27,36 @@ define( 'ATP_CAND_SOURCE',  'atp_cand_source' );   // 'post' | 'json'
 define( 'ATP_CAND_POST_ID', 'atp_cand_post_id' );  // int — CPT post ID
 define( 'ATP_CAND_JSON',    'atp_cand_json' );      // string — raw JSON blob
 
+/**
+ * Shortcode overrides expected from AI-generated Page JSON.
+ *
+ * Keep this in sync with PROMPT-TEMPLATE.md and the standard page importer.
+ * Dynamic PHP-rendered shortcodes such as atp_cand_signup, atp_cand_brand_guide,
+ * and atp_cand_ai_context intentionally stay out of this list.
+ */
+function atp_cand_page_json_tags() {
+    return [
+        'atp_cand_nav',
+        'atp_cand_hero',
+        'atp_cand_stats',
+        'atp_cand_about',
+        'atp_cand_messages',
+        'atp_cand_issues',
+        'atp_cand_endorsements',
+        'atp_cand_video',
+        'atp_cand_volunteer',
+        'atp_cand_survey',
+        'atp_cand_donate',
+        'atp_cand_social',
+        'atp_cand_footer',
+        'atp_cand_issues_page',
+        'atp_cand_donate_page',
+        'atp_cand_contact',
+        'atp_cand_privacy',
+        'atp_cand_cookies',
+    ];
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Token replacement — the core engine
    ───────────────────────────────────────────────────────────────────────── */
@@ -47,6 +77,13 @@ function atp_cand_get_data() {
             $raw = get_post_meta( $pid );
             $data = [];
             foreach ( $raw as $k => $v ) {
+                if ( $k === '_v3_json' ) {
+                    $v3 = json_decode( wp_unslash( $v[0] ), true );
+                    if ( is_array( $v3 ) ) {
+                        $data = array_merge( $data, atp_cand_flatten_v3_data( $v3 ) );
+                    }
+                    continue;
+                }
                 if ( str_starts_with( $k, '_' ) ) continue; // skip WP internals
                 $val = maybe_unserialize( $v[0] );
                 $data[ $k ] = is_array( $val ) ? implode( ', ', $val ) : (string) $val;
@@ -61,15 +98,7 @@ function atp_cand_get_data() {
         if ( $json_str ) {
             $parsed = json_decode( $json_str, true );
             if ( is_array( $parsed ) ) {
-                $data = [];
-                foreach ( $parsed as $k => $v ) {
-                    if ( str_starts_with( $k, '_' ) ) continue; // skip meta keys
-                    if ( is_array( $v ) ) {
-                        $data[ $k ] = implode( ', ', $v );
-                    } else {
-                        $data[ $k ] = (string) $v;
-                    }
-                }
+                $data = atp_cand_flatten_v3_data( $parsed );
                 $cache = $data;
                 return $cache;
             }
@@ -78,6 +107,160 @@ function atp_cand_get_data() {
 
     $cache = [];
     return $cache;
+}
+
+/**
+ * Flatten nested V3 JSON into the legacy flat keys used by token templates and
+ * PHP renderers. The intake form now stores contract-shaped V3 JSON, while
+ * older shortcodes still expect keys like display_name, issue_positions,
+ * twitter_x, and paidfor_text.
+ */
+function atp_cand_flatten_v3_data( $input ) {
+    $flat = [];
+    atp_cand_flatten_v3_walk( $input, '', $flat );
+    atp_cand_apply_v3_aliases( $input, $flat );
+    return $flat;
+}
+
+function atp_cand_flatten_v3_walk( $value, $prefix, &$flat ) {
+    if ( is_array( $value ) ) {
+        if ( array_is_list( $value ) ) {
+            $items = [];
+            foreach ( $value as $item ) {
+                if ( is_array( $item ) ) {
+                    $items[] = atp_cand_stringify_v3_value( $item );
+                } else {
+                    $items[] = (string) $item;
+                }
+            }
+            if ( $prefix !== '' ) {
+                $flat[ $prefix ] = implode( ', ', array_filter( array_map( 'trim', $items ) ) );
+            }
+            return;
+        }
+
+        foreach ( $value as $key => $child ) {
+            if ( str_starts_with( (string) $key, '_' ) ) continue;
+            $child_key = sanitize_key( $key );
+            $path = $prefix === '' ? $child_key : $prefix . '_' . $child_key;
+            atp_cand_flatten_v3_walk( $child, $path, $flat );
+            if ( ! is_array( $child ) && ! array_key_exists( $child_key, $flat ) ) {
+                $flat[ $child_key ] = (string) $child;
+            }
+        }
+        return;
+    }
+
+    if ( $prefix !== '' ) {
+        $flat[ $prefix ] = (string) $value;
+    }
+}
+
+function atp_cand_stringify_v3_value( $value ) {
+    if ( ! is_array( $value ) ) return (string) $value;
+
+    if ( isset( $value['name'], $value['position'] ) ) {
+        return trim( $value['name'] . ': ' . $value['position'] );
+    }
+
+    if ( isset( $value['title'], $value['description'] ) ) {
+        return trim( $value['title'] . ': ' . $value['description'] );
+    }
+
+    $parts = [];
+    foreach ( $value as $child ) {
+        if ( is_array( $child ) ) {
+            $parts[] = atp_cand_stringify_v3_value( $child );
+        } elseif ( $child !== '' && $child !== null ) {
+            $parts[] = (string) $child;
+        }
+    }
+    return implode( ' — ', array_filter( array_map( 'trim', $parts ) ) );
+}
+
+function atp_cand_apply_v3_aliases( $v3, &$flat ) {
+    $aliases = [
+        'bio_messaging' => [
+            'full_bio'          => 'bio_full',
+            'endorsements_list' => 'endorsements',
+        ],
+        'platform_issues' => [
+            'positions' => 'issue_positions',
+        ],
+        'background' => [
+            'current_profession' => 'profession',
+            'current_role_title' => 'current_role',
+        ],
+        'visual_branding' => [
+            'primary_color'          => 'color_primary',
+            'secondary_color'        => 'color_secondary',
+            'accent_color'           => 'color_accent',
+            'additional_photos_link' => 'additional_photos',
+        ],
+        'social_media' => [
+            'x_twitter' => 'twitter_x',
+        ],
+        'fundraising' => [
+            'donation_page_url' => 'donation_url',
+            'custom_button_label' => 'donation_button_label',
+        ],
+        'legal_compliance' => [
+            'paid_for_by'                 => 'paidfor_text',
+            'committee_mailing_address'   => 'mailing_address',
+            'campaign_phone_legal'        => 'campaign_phone',
+            'campaign_email_legal'        => 'campaign_email',
+            'privacy_contact_email'       => 'contact_email',
+            'privacy_contact_phone'       => 'contact_phone',
+            'privacy_contact_address'     => 'contact_address',
+        ],
+        'contacts' => [
+            'primary_contact_email'     => 'contact_email',
+            'primary_contact_phone'     => 'contact_phone',
+            'campaign_mailing_address'  => 'mailing_address',
+        ],
+        'survey' => [
+            'existing_survey_link' => 'survey_link',
+        ],
+        'domain_setup' => [
+            'primary_domain'   => 'website_url',
+            'preferred_domain' => 'preferred_domain',
+        ],
+        'source_check' => [
+            'existing_website' => 'existing_website',
+        ],
+    ];
+
+    foreach ( $aliases as $section => $map ) {
+        foreach ( $map as $source_key => $target_key ) {
+            if ( ! isset( $v3[ $section ][ $source_key ] ) || $v3[ $section ][ $source_key ] === '' ) {
+                continue;
+            }
+            $value = $v3[ $section ][ $source_key ];
+            $flat[ $target_key ] = is_array( $value )
+                ? atp_cand_stringify_v3_value( $value )
+                : (string) $value;
+        }
+    }
+
+    if ( empty( $flat['donation_button_label'] ) ) {
+        $flat['donation_button_label'] = $flat['button_label'] ?? 'Donate';
+    }
+}
+
+function atp_cand_render_imported_override( $tag, $atts = [] ) {
+    $atts = shortcode_atts( [ 'source' => '' ], (array) $atts, $tag );
+    if ( $atts['source'] === 'core' || ! function_exists( 'atp_demo_option_exists' ) ) {
+        return null;
+    }
+
+    if ( ! atp_demo_option_exists( 'atp_sc_' . $tag ) ) {
+        return null;
+    }
+
+    $html = atp_demo_resolve_template( $tag, $atts['source'] );
+    $html = str_replace( '{ATP_PLUGIN_URL}', ATP_DEMO_URL, $html );
+    $patch = function_exists( 'atp_demo_get_data_patch' ) ? atp_demo_get_data_patch( $tag ) : [];
+    return atp_cand_replace_tokens( $html, $patch );
 }
 
 /**
@@ -119,6 +302,9 @@ function atp_cand_replace_tokens( $html, $patch = [] ) {
  * (structured text with "Category: description" format) into individual cards.
  */
 function atp_cand_render_issues( $atts = [] ) {
+    $override = atp_cand_render_imported_override( 'atp_cand_issues', $atts );
+    if ( $override !== null ) return $override;
+
     $data = atp_cand_get_data();
 
     // Parse issue_positions into structured array
@@ -201,6 +387,9 @@ function atp_cand_render_issues( $atts = [] ) {
  *   Organization name (no quote)
  */
 function atp_cand_render_endorsements( $atts = [] ) {
+    $override = atp_cand_render_imported_override( 'atp_cand_endorsements', $atts );
+    if ( $override !== null ) return $override;
+
     $data = atp_cand_get_data();
 
     // No V3 endorsements? Render nothing instead of the example
@@ -275,6 +464,9 @@ function atp_cand_render_endorsements( $atts = [] ) {
  * Skips empty social profiles instead of rendering dead links.
  */
 function atp_cand_render_social( $atts = [] ) {
+    $override = atp_cand_render_imported_override( 'atp_cand_social', $atts );
+    if ( $override !== null ) return $override;
+
     $data = atp_cand_get_data();
 
     $platforms = [
@@ -346,19 +538,36 @@ function atp_cand_admin_render() {
         $parsed = json_decode( $raw, true );
 
         if ( is_array( $parsed ) ) {
+            $expected = atp_cand_page_json_tags();
             $imported = 0;
             $tags     = [];
-            foreach ( $parsed as $key => $html ) {
-                if ( str_starts_with( $key, '_' ) ) continue; // skip metadata keys
-                if ( $key === 'atp_cand_styles' ) continue;   // don't overwrite styles
-                if ( ! is_string( $html ) ) continue;
+            $unknown  = [];
 
-                update_option( 'atp_sc_' . $key, $html, false );
-                $imported++;
-                $tags[] = $key;
+            foreach ( $expected as $tag ) {
+                if ( array_key_exists( $tag, $parsed ) && is_string( $parsed[ $tag ] ) ) {
+                    update_option( 'atp_sc_' . $tag, $parsed[ $tag ], false );
+                    $imported++;
+                    $tags[] = $tag;
+                } else {
+                    delete_option( 'atp_sc_' . $tag );
+                }
             }
+
+            foreach ( $parsed as $key => $html ) {
+                if ( str_starts_with( $key, '_' ) || $key === 'atp_cand_styles' ) continue;
+                if ( ! in_array( $key, $expected, true ) ) $unknown[] = $key;
+            }
+
+            $missing = array_values( array_diff( $expected, $tags ) );
             $cand = $parsed['_candidate'] ?? 'Unknown candidate';
-            $notice = '<div class="notice notice-success is-dismissible"><p><strong>' . $imported . ' shortcodes imported</strong> for ' . esc_html( $cand ) . ':<br><code>' . esc_html( implode( '</code> <code>', $tags ) ) . '</code></p></div>';
+            $notice = '<div class="notice notice-success is-dismissible"><p><strong>' . $imported . '/' . count( $expected ) . ' shortcodes imported</strong> for ' . esc_html( $cand ) . ':<br><code>' . esc_html( implode( '</code> <code>', $tags ) ) . '</code></p>';
+            if ( ! empty( $missing ) ) {
+                $notice .= '<p><strong>Missing expected keys cleared:</strong> <code>' . esc_html( implode( '</code> <code>', $missing ) ) . '</code></p>';
+            }
+            if ( ! empty( $unknown ) ) {
+                $notice .= '<p><strong>Unknown keys skipped:</strong> <code>' . esc_html( implode( '</code> <code>', $unknown ) ) . '</code></p>';
+            }
+            $notice .= '</div>';
         } else {
             $notice = '<div class="notice notice-error is-dismissible"><p>Invalid JSON. Make sure you paste the AI-generated Page JSON, not the intake form JSON.</p></div>';
         }
@@ -376,16 +585,14 @@ function atp_cand_admin_render() {
                     update_option( 'atp_sc_' . $key, $html, false );
                     $imported++;
                 }
-                $notice = '<div class="notice notice-success is-dismissible"><p><strong>' . $imported . ' shortcodes imported</strong> from example Page JSON (John Stacy for County Commissioner).</p></div>';
+                $notice = '<div class="notice notice-success is-dismissible"><p><strong>' . $imported . ' shortcodes imported</strong> from the bundled example Page JSON.</p></div>';
             }
         }
     }
 
     // ── Handle reset all candidate shortcodes ────────────────────────────────
     if ( isset( $_POST['atp_cand_reset_all'] ) && check_admin_referer( 'atp_cand_settings' ) ) {
-        $cand_tags = [ 'atp_cand_nav', 'atp_cand_hero', 'atp_cand_about', 'atp_cand_issues',
-                       'atp_cand_endorsements', 'atp_cand_donate', 'atp_cand_social', 'atp_cand_footer' ];
-        foreach ( $cand_tags as $tag ) {
+        foreach ( atp_cand_page_json_tags() as $tag ) {
             delete_option( 'atp_sc_' . $tag );
         }
         // Also clear intake data source
@@ -422,8 +629,7 @@ function atp_cand_admin_render() {
     }
 
     // Current state
-    $cand_tags = [ 'atp_cand_nav', 'atp_cand_hero', 'atp_cand_about', 'atp_cand_issues',
-                   'atp_cand_endorsements', 'atp_cand_donate', 'atp_cand_social', 'atp_cand_footer' ];
+    $cand_tags = atp_cand_page_json_tags();
     $imported_count = 0;
     foreach ( $cand_tags as $tag ) {
         if ( get_option( 'atp_sc_' . $tag ) !== false ) $imported_count++;
@@ -494,7 +700,7 @@ function atp_cand_admin_render() {
                         Import Page JSON
                     </button>
                     <button type="submit" name="atp_cand_load_example_page" class="button" style="font-size:13px">
-                        Load Example (John Stacy)
+                        Load Example Page JSON
                     </button>
                     <?php if ( $has_page_json ) : ?>
                     <button type="submit" name="atp_cand_reset_all" class="button" style="font-size:13px;color:#b00;border-color:#b00"
