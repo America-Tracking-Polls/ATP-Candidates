@@ -7,6 +7,13 @@ Version numbering follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.6.8] - 2026-05-16
+
+### Fixed
+- Hardened the GitHub updater post-install path handling so WordPress does not try to move the plugin directory onto itself when the extracted folder already matches the installed plugin folder.
+
+---
+
 ## [3.2.0] - 2026-05-05
 
 ### Changed — Drive integration switched to OAuth user flow

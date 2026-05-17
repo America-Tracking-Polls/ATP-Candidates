@@ -372,12 +372,16 @@ class ATP_Demo_GitHub_Updater {
 
 		global $wp_filesystem;
 
-		$install_dir = $result['destination'];
-		$proper_dir  = trailingslashit( WP_PLUGIN_DIR ) . $this->plugin_dir_name;
+		$install_dir = untrailingslashit( $result['destination'] );
+		$proper_dir  = untrailingslashit( trailingslashit( WP_PLUGIN_DIR ) . $this->plugin_dir_name );
 
 		// If the extracted directory is not already named correctly, rename it.
-		if ( $install_dir !== $proper_dir ) {
+		if ( wp_normalize_path( $install_dir ) !== wp_normalize_path( $proper_dir ) ) {
 			$wp_filesystem->move( $install_dir, $proper_dir, true );
+			$result['destination']      = $proper_dir;
+			$result['destination_name'] = $this->plugin_dir_name;
+			$result['remote_destination'] = $proper_dir;
+		} else {
 			$result['destination']      = $proper_dir;
 			$result['destination_name'] = $this->plugin_dir_name;
 			$result['remote_destination'] = $proper_dir;
